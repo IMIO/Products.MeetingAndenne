@@ -1,0 +1,33 @@
+<configure xmlns="http://namespaces.zope.org/zope"
+           xmlns:browser="http://namespaces.zope.org/browser"
+           xmlns:five="http://namespaces.zope.org/five"
+           xmlns:i18n="http://namespaces.zope.org/i18n"
+           i18n_domain="MeetingAndenne">
+
+  <!-- ##code-section configure.zcml.header -->
+  <include package="Products.CMFPlacefulWorkflow"/>
+  <include package="Products.PloneMeeting"/>
+
+  <!-- add the blob field to CourrierFile -->
+  <adapter
+    name="plone.app.blob.subtypes.file"
+    for="Products.MeetingAndenne.interfaces.ICourrierFile"
+    factory="plone.app.blob.subtypes.file.SchemaExtender" />
+
+  <!-- makes the CourrierFile implements IFileContent so every views of collective.documentviewer are also available... -->
+  <class class="Products.MeetingAndenne.CourrierFile.CourrierFile">
+    <implements interface="Products.ATContentTypes.interfaces.file.IFileContent" />
+  </class>
+
+  <five:deprecatedManageAddDelete class=".CourrierFile.CourrierFile" />
+
+  <!-- ##/code-section configure.zcml.header -->
+
+
+  <include file="profiles.zcml" />
+
+
+  <!-- ##code-section configure.zcml.core -->
+  <!-- ##/code-section configure.zcml.core -->
+
+</configure>

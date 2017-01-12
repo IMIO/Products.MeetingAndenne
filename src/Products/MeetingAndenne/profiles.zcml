@@ -1,0 +1,45 @@
+<configure
+    xmlns="http://namespaces.zope.org/zope"
+    xmlns:genericsetup="http://namespaces.zope.org/genericsetup"
+    i18n_domain="MeetingAndenne">
+
+  <include package="Products.GenericSetup" file="meta.zcml" />
+
+  <!-- ##code-section profiles.zcml-top #fill in your manual code here -->
+  <!-- ##/code-section profiles.zcml-top -->
+
+  <genericsetup:registerProfile
+      name="default"
+      title="MeetingAndenne"
+      directory="profiles/default"
+      description="Extension profile for MeetingAndenne."
+      provides="Products.GenericSetup.interfaces.EXTENSION"
+      />
+
+  <!-- ##code-section profiles.zcml-bottom #fill in your manual code here -->
+
+  <genericsetup:registerProfile
+   name="andenne"
+   title="PloneMeeting / For Andenne"
+   description="PloneMeeting for City College and Council of Andenne"
+   provides="Products.GenericSetup.interfaces.EXTENSION"
+   for="Products.CMFPlone.interfaces.IPloneSiteRoot"/>
+
+  <genericsetup:registerProfile
+   name="courrierFake"
+   title="MeetingAndenne / With CourrierFake"
+   description="Extension profile for MeetingAndenne"
+   provides="Products.GenericSetup.interfaces.EXTENSION"
+   for="Products.CMFPlone.interfaces.IPloneSiteRoot"/>
+
+  <genericsetup:upgradeStep
+   title="Migrate to MeetingAndenne 3.3"
+   description="Performs migration from MeetingAndenne 1.9 to MeetingAndenne 3.3"
+   source="*"
+   destination="3.3"
+   handler="Products.MeetingAndenne.migrations.migrate_to_3_3.migrate"
+   profile="Products.MeetingAndenne:default" />
+
+  <!-- ##/code-section profiles.zcml-bottom -->
+
+</configure>
