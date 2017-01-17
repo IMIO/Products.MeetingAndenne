@@ -3,7 +3,7 @@
 # File: __init__.py
 #
 # Copyright (c) 2017 by CommunesPlone
-# Generator: ArchGenXML Version 2.6
+# Generator: ArchGenXML Version 2.7
 #            http://plone.org/products/archgenxml
 #
 # GNU General Public License (GPL)
@@ -57,7 +57,7 @@ DirectoryView.registerDirectory('skins', product_globals)
 
 
 ##code-section custom-init-head #fill in your manual code here
-#import model.pm_updates
+import model.pm_updates
 #import adapters
 ##/code-section custom-init-head
 
