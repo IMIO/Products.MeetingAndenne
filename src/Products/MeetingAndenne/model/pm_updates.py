@@ -1,8 +1,26 @@
 # -*- coding: utf-8 -*-
 # ------------------------------------------------------------------------------
-from Products.Archetypes.atapi import *
-# Schema updates related to MeetingItem ----------------------------------------)
+from Products.Archetypes.atapi import Schema
+from Products.Archetypes.atapi import BooleanField
+from Products.Archetypes.atapi import BooleanWidget
+from Products.Archetypes.atapi import DateTimeField
+from Products.Archetypes.atapi import LinesField
+from Products.Archetypes.atapi import MultiSelectionWidget
+from Products.Archetypes.atapi import RichWidget
+from Products.Archetypes.atapi import SelectionWidget
+from Products.Archetypes.atapi import StringField
+from Products.Archetypes.atapi import StringWidget
+from Products.Archetypes.atapi import TextAreaWidget
+from Products.Archetypes.atapi import TextField
+from Products.PloneMeeting.config import WriteRiskyConfig
+from Products.PloneMeeting.Meeting import Meeting
+from Products.PloneMeeting.MeetingConfig import MeetingConfig
+from Products.PloneMeeting.MeetingFile import MeetingFile
+from Products.PloneMeeting.MeetingItem import MeetingItem
+from Products.PloneMeeting.MeetingUser import MeetingUser
 
+
+# Schema updates related to MeetingItem ----------------------------------------)
 def update_item_schema(baseSchema):
     specificSchema = Schema((
 
@@ -373,7 +391,7 @@ def update_meeting_schema(baseSchema):
 
     completeMeetingSchema = baseSchema + specificSchema.copy()
     completeMeetingSchema['date'].optional=True
-    completeMeetingSchema['allItemsAtOnce'].widget.visible=False
+#    completeMeetingSchema['allItemsAtOnce'].widget.visible=False      A VERIFIER #
     completeMeetingSchema.moveField('postObservations', after='preMeetingDate')
 
     return completeMeetingSchema
