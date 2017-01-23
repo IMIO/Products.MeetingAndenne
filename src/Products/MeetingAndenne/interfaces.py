@@ -25,6 +25,7 @@ __docformat__ = 'plaintext'
 
 # ------------------------------------------------------------------------------
 from zope.interface import Interface
+from zope.publisher.interfaces.browser import IBrowserRequest
 from Products.PloneMeeting.interfaces import \
     IMeetingItemWorkflowConditions, IMeetingItemWorkflowActions, \
     IMeetingWorkflowActions, IMeetingWorkflowConditions
@@ -129,5 +130,11 @@ class IMeetingCollegeAndenneWorkflowConditions(IMeetingWorkflowConditions):
 class ICourrierFile(Interface):
     '''Marker interface for .MeetingAndenne.CourrierFile
     '''
+
+class IMeetingAndenneLayer(IBrowserRequest):
+    """
+      Define a layer so some elements are only added for it
+    """
+    pass
 
 # ------------------------------------------------------------------------------
