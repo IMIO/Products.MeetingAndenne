@@ -1,0 +1,56 @@
+<html xmlns:tal="http://xml.zope.org/namespaces/tal"
+      xmlns:metal="http://xml.zope.org/namespaces/metal"
+      xmlns:i18n="http://xml.zope.org/namespaces/i18n"
+      i18n:domain="PloneMeeting">
+<body>
+
+<div metal:define-macro="portlet">
+<metal:block metal:use-macro="here/global_defines/macros/defines" />
+<tal:portlet define="tool view/getPloneMeetingTool;
+                     meetingConfig python:tool.adapted().getCourrierfakeConfig();
+                     meetingFolder python:tool.adapted().getCourrierfakeFolder();
+                     isArchiveSite tool/isArchiveSite;
+                     member context/portal_membership/getAuthenticatedMember;
+                     userIsCourrierManager python:member.has_role('CourrierManager');
+                     ploneDiskAware tool/getPloneDiskAware">
+
+<table cellpadding="0" cellspacing="0" class="portlet portletHs" width="100%">
+  <tal:comment replace="nothing">Header</tal:comment>
+  <tr class="portletHeader">
+    <td class="portletSection" i18n:translate="mail_portlet_title"></td>
+  </tr>
+
+  <tal:comment replace="nothing">Topics</tal:comment>
+  <tal:topics condition="python: True">
+  <tr>
+    <td>
+      <table width="100%" cellspacing="0" cellpadding="0">
+        <tr>
+          <td class="portletSection" i18n:translate="mails"></td>
+          <td align="right">
+            <tal:comment replace="nothing">Create a new mail</tal:comment>
+            <img style="cursor:pointer" tal:condition="python: userIsCourrierManager and not ploneDiskAware"
+                 tal:attributes="onClick python: 'href: window.location=\'%s/courrierall/createObject?type_name=CourrierFile\'' % meetingFolder;
+                                 src string: $portal_url/new.png"
+                 title="create_courrier_file" i18n:attributes="title"/>
+          </td>
+        </tr>
+        <tal:comment replace="nothing">Mail-related topics</tal:comment>
+        <tr tal:condition="python: hasattr(meetingConfig, 'topics') and not isArchiveSite"
+            tal:repeat="topic python: meetingConfig.getTopics('CourrierFile')">
+          <td tal:condition="python: member.has_permission('View', topic)"
+              tal:attributes="class python: topic.getId() == context.REQUEST.form.get('search', '') and 'portletCell portletSelected' or 'portletCell'">
+            <a tal:attributes="href python: meetingFolder + '/courrier_topic_view?search=%s' % topic.getId()"
+               i18n:translate="" tal:content="python: topic.Title() or topic.getId()"></a>
+          </td>
+        </tr>
+      </table>
+    </td>
+  </tr>
+  </tal:topics>
+</table>
+
+</tal:portlet>
+</div>
+</body>
+</html>

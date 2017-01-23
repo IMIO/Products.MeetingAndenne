@@ -1,0 +1,35 @@
+<configure
+    xmlns="http://namespaces.zope.org/zope"
+    xmlns:browser="http://namespaces.zope.org/browser"
+    xmlns:plone="http://namespaces.plone.org/plone"
+    >
+
+    <!-- PloneMeeting-specific viewlets -->
+
+    <!-- Overriden Plone viewlets -->
+
+    <!-- Overriden PloneMeeting viewlets -->
+
+    <!-- Macros -->
+    <browser:page
+        name="plonemeeting-topic-result-macros"
+        for="*"
+        class=".macros.MeetingAndenneTopicResultMacros"
+        template="templates/plonemeeting_topic_result.pt"
+        layer="Products.MeetingAndenne.interfaces.IMeetingAndenneLayer"
+        permission="zope2.View"/>
+
+    <!-- MeetingAndenne-specific portlets -->
+    <include package="plone.app.portlets" />
+
+    <plone:portlet
+       name="meetingandenne.portlets.mail"
+       interface=".portlet_mail.IMailPortlet"
+       view_permission="zope2.View"
+       edit_permission="cmf.ManagePortal"
+       assignment=".portlet_mail.Assignment"
+       renderer=".portlet_mail.Renderer"
+       addview=".portlet_mail.AddForm"
+       editview=".portlet_mail.EditForm"/>
+   
+</configure>
