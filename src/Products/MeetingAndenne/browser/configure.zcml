@@ -12,6 +12,13 @@
 
     <!-- Macros -->
     <browser:page
+        name="meetingitemslist-macros"
+        for="*"
+        class=".macros.MeetingAndenneItemsListMacros"
+        template="templates/meetingitems_list.pt"
+        layer="Products.MeetingAndenne.interfaces.IMeetingAndenneLayer"
+        permission="zope2.View"/>
+    <browser:page
         name="plonemeeting-topic-result-macros"
         for="*"
         class=".macros.MeetingAndenneTopicResultMacros"
