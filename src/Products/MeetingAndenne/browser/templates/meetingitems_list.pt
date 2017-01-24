@@ -67,8 +67,8 @@
         <span i18n:translate="listingheader_item_title"></span>
       </th>
 
-      <tal:comment replace="nothing">Creator</tal:comment>
-      <th class="pm_meeting_listing_th_creator" tal:condition="python: 'creator' in visibleColumns" i18n:translate="pm_creator"></th>
+      <tal:comment replace="nothing">XXX - we replace Creator with Treatuser</tal:comment>
+      <th class="pm_meeting_listing_th_creator" tal:condition="python: 'creator' in visibleColumns" i18n:translate="pm_treatuser"></th>
 
       <tal:comment replace="nothing">Creation date</tal:comment>
       <th class="pm_meeting_listing_th_creationDate" tal:condition="python: 'creationDate' in visibleColumns"
@@ -275,9 +275,9 @@
            </tr>
           </table>
         </td>
-        <tal:comment replace="nothing">Creator</tal:comment>
+        <tal:comment replace="nothing">XXX - we replace Creator with Treatuser</tal:comment>
         <td tal:condition="python: 'creator' in visibleColumns"
-            tal:content="python: tool.getUserName(meetingItem.Creator())"></td>
+            tal:content="python: tool.getUserName(meetingItem.getTreatUser())"></td>
 
         <tal:comment replace="nothing">Creation date</tal:comment>
         <td tal:condition="python: 'creationDate' in visibleColumns"
