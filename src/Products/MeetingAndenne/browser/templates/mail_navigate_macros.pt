@@ -1,0 +1,77 @@
+<tal:comment replace="nothing">
+    Macro that shows the navigation within query results (topic or advanced search)
+</tal:comment>
+<div metal:define-macro="search" i18n:domain="PloneMeeting" align="right" tal:condition="batch/sequence_length">
+
+  <table cellspacing="0" cellpadding="0" class="itemsNavigation"
+         tal:define="startNumber python: int(request.get('b_start', 0))+1;
+                     batchSize batch/length;
+                     wholeSize batch/sequence_length;
+                     jsParams python: '\'%s\', \'%s\', \'%s\', \'%%d\', \'%s\', \'%s\', \'%s\'' % (request['hookId'], context.absolute_url(), topic.id, request.get('sortKey', ''), request.get('sortOrder', ''), request.get('filterKey', ''));
+                     _ python: context.translate">
+    <tr>
+      <tal:comment replace="nothing">Go to the first page</tal:comment>
+      <td tal:condition="python: (startNumber != 1) and (startNumber != 1+batchSize)">
+        <img style="cursor:pointer" title="goto_first" i18n:attributes="title"
+             tal:attributes="src string: $portal_url/arrowLeftDouble.png;
+                             onClick python: 'askSearchResult(%s)' % (jsParams % 1)"/></td>
+      <tal:comment replace="nothing">Go to the previous page</tal:comment>
+      <td tal:condition="python: startNumber != 1">
+        <img tal:define="previousNumber python: startNumber - batchSize;
+                         label python: _('goto_previous', {'number': batchSize}, domain='PloneMeeting')"
+             tal:attributes="src string: $portal_url/arrowLeftSimple.png;
+                             onClick python: 'askSearchResult(%s)' % (jsParams % previousNumber);
+                             title label" style="cursor:pointer"/></td>
+      <tal:comment replace="nothing">Explain which items are currently shown</tal:comment>
+      <td class="discreet">&nbsp;
+        <span tal:replace="python: startNumber"/>
+        <img tal:attributes="src string: $portal_url/to.png"/>
+        <span tal:replace="python: min(wholeSize, startNumber+batchSize-1)"/>&nbsp;<b>//</b>
+        <span tal:replace="wholeSize"/>&nbsp;
+      </td>
+      <tal:comment replace="nothing">Go to the next page</tal:comment>
+      <td tal:define="nextNumber python: min(startNumber + batchSize, wholeSize + 1);
+                      nbOfNextItems python: wholeSize - nextNumber + 1;
+                      nextBatchSize python: min(batchSize, nbOfNextItems)"
+          tal:condition="python: nbOfNextItems">
+        <img tal:define="label python: _('goto_next', {'number': nextBatchSize}, domain='PloneMeeting')"
+            tal:attributes="src string: $portal_url/arrowRightSimple.png;
+                            onClick python: 'askSearchResult(%s)' % (jsParams % nextNumber);
+                            title label" style="cursor:pointer"/></td>
+      <tal:comment replace="nothing">Go to the last page</tal:comment>
+      <td tal:define="lastPageIsIncomplete python: wholeSize % batchSize;
+                      nbOfCompletePages python: wholeSize/batchSize;
+                      nbOfCountedPages python: lastPageIsIncomplete and nbOfCompletePages or nbOfCompletePages-1;
+                      lastNumber python: (nbOfCountedPages*batchSize)+1"
+          tal:condition="python: (startNumber != lastNumber) and (startNumber != lastNumber-batchSize)">
+        <img tal:attributes="src string: $portal_url/arrowRightDouble.png;
+                             onClick python: 'askSearchResult(%s)' % (jsParams % lastNumber)"
+             style="cursor:pointer" title="goto_last" i18n:attributes="title" /></td>
+    </tr>
+  </table>
+</div>
+
+<tal:comment replace="nothing">
+   This macro displays up/down arrows in a table header column for sorting a given column.
+   It requires variable "fieldIndex" which is the catalog index that corresponds to data in
+   the column.
+</tal:comment>
+<metal:sortAndFilter define-macro="sortAndFilter" i18n:domain="PloneMeeting"
+    tal:define="jsParams python: '\'%s\', \'%s\', \'%s\', 1' % (request['hookId'], context.absolute_url(), topic.id)">
+  <img tal:attributes="src string: $portal_url/arrowDown.gif;
+                       onClick python: 'askSearchResult(%s, \'%s\', \'asc\', \'%s\')' % (jsParams, fieldIndex, request.get('filterKey', ''))"
+       tal:condition="python: (sortKey != fieldIndex) or (sortOrder == 'desc')"
+       style="cursor:pointer" title="arrow_down" i18n:attributes="title" />
+  <img tal:attributes="src string: $portal_url/arrowUp.gif;
+                       onClick python: 'askSearchResult(%s, \'%s\', \'desc\', \'%s\')' % (jsParams, fieldIndex, request.get('filterKey', ''))"
+       tal:condition="python: (sortKey != fieldIndex) or (sortOrder == 'asc')"
+       style="cursor:pointer" title="arrow_up" i18n:attributes="title" />
+  <tal:filter define="filterIndex filterIndex | nothing" condition="filterIndex">
+    <input type="text" size="10"
+           tal:attributes="id python: '%s_%s' % (request['hookId'], filterIndex);
+                           value python: request.get('filterKey', '')==filterIndex and request.get('filterValue', '') or ''"/>
+    <img tal:attributes="src string: $portal_url/funnel.png;
+                         onClick python: 'askSearchResult(%s, \'%s\', \'%s\', \'%s\')' % (jsParams, request.get('sortKey', ''), request.get('sortOrder', ''), filterIndex)"
+         title="filter_by_a_key" i18n:attributes="title" style="cursor:pointer"/>
+  </tal:filter>
+</metal:sortAndFilter>

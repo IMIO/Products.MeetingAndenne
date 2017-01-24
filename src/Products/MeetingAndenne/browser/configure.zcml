@@ -4,11 +4,27 @@
     xmlns:plone="http://namespaces.plone.org/plone"
     >
 
-    <!-- PloneMeeting-specific viewlets -->
+    <!-- MeetingAndenne-specific viewlets -->
 
     <!-- Overriden Plone viewlets -->
 
     <!-- Overriden PloneMeeting viewlets -->
+
+    <!-- the mail_topic_view used to display list of mail items -->
+    <browser:page
+        name="mail_topic_view"
+        for="Products.ATContentTypes.interfaces.folder.IATFolder"
+        class=".views.MeetingAndenneMailTopicView"
+        template="templates/mail_topic_view.pt"
+        layer="Products.MeetingAndenne.interfaces.IMeetingAndenneLayer"
+        permission="zope2.View" />
+    <browser:page
+        name="mail_topic_view"
+        for="Products.ATContentTypes.interfaces.folder.IATBTreeFolder"
+        class=".views.MeetingAndenneMailTopicView"
+        template="templates/mail_topic_view.pt"
+        layer="Products.MeetingAndenne.interfaces.IMeetingAndenneLayer"
+        permission="zope2.View" />
 
     <!-- Macros -->
     <browser:page
@@ -23,6 +39,20 @@
         for="*"
         class=".macros.MeetingAndenneTopicResultMacros"
         template="templates/plonemeeting_topic_result.pt"
+        layer="Products.MeetingAndenne.interfaces.IMeetingAndenneLayer"
+        permission="zope2.View"/>
+    <browser:page
+        name="mail-topic-result-macros"
+        for="*"
+        class=".macros.MailTopicResultMacros"
+        template="templates/mail_topic_result.pt"
+        layer="Products.MeetingAndenne.interfaces.IMeetingAndenneLayer"
+        permission="zope2.View"/>
+    <browser:page
+        name="mail-navigate-macros"
+        for="*"
+        class=".macros.MailNavigateMacros"
+        template="templates/mail_navigate_macros.pt"
         layer="Products.MeetingAndenne.interfaces.IMeetingAndenneLayer"
         permission="zope2.View"/>
 

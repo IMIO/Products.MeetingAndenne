@@ -1,0 +1,119 @@
+<tal:comment replace="nothing">
+  This macro displays a list of items, meetings or meeting files as a result
+  of a topic call or custom search. It requires REQUEST parameters "topicId" and "isFake".
+</tal:comment>
+<metal:result define-macro="topicResult" i18n:domain="PloneMeeting"
+     tal:define="tool           python: context.portal_plonemeeting;
+                 meetingConfig  python: tool.adapted().getCourrierfakeConfig();
+                 topic          python: request.get('topicId', '') and meetingConfig.topics.get(request['topicId']) or portal.events;
+                 isFake         python: request.get('isFake', 'False') == 'True';
+                 showColors     python: meetingConfig.getParentNode().showColorsForUser();
+                 resultMetaType python: topic.getProperty('meeting_topic_type', 'CourrierFile');
+                 searchResults  python: meetingConfig.getTopicResults(topic, isFake);
+                 batch searchResults;">
+
+  <tal:comment replace="nothing">This macro is normally used to display the
+    results of a topic (="here"). But we also reuse it to display a custom
+    item- or meeting-related search in the catalog. In this case, this macro
+    receives a "fakeTopic" (which is one of the predefined topics of the
+    meeting configuration); query results in the portal_catalog are already
+    given in searchResults.</tal:comment>
+  <tal:comment replace="nothing">Show the result.</tal:comment>
+  <div onmouseover="javascript:initializePMOverlays()" class="ajax-pm-frame" tal:condition="searchResults">
+
+    <div metal:use-macro="context/@@mail-navigate-macros/search"/>
+    <tal:comment replace="nothing">The table containing the result</tal:comment>
+    <table class="listing nosort" cellpadding="0" cellspacing="0" width="100%"
+      tal:define="toLocalizedTime     nocall: tool/@@plone/toLocalizedTime;
+                  descrsStyle         python: tool.readCookie('pmShowDescriptions') == 'false' and 'none' or 'inline';
+                  visibleColumns      python: meetingConfig.getQueryColumns(resultMetaType);
+                  sortKey             request/sortKey | python:'getRefcourrierFake';
+                  sortOrder           request/sortOrder | python:'desc';
+                  showActions         python: member.has_role('CourrierManager');">
+      <tr>
+        <tal:comment replace="nothing">Title</tal:comment>
+        <th class="pm_listing_th_title" tal:define="fieldIndex string:sortable_title; filterIndex string:SearchableText">
+          <span i18n:translate="listingheader_item_title"></span>
+          <metal:sortAndFilter use-macro="context/@@mail-navigate-macros/sortAndFilter"/>
+        </th>
+
+        <tal:comment replace="nothing">Creation date</tal:comment>
+        <th class="pm_listing_th_creationDate" tal:condition="python: 'creationDate' in visibleColumns"
+            tal:define="fieldIndex string:created">
+          <span i18n:translate="pm_creation_date"></span>
+          <metal:sortAndFilter use-macro="context/@@mail-navigate-macros/sortAndFilter"/>
+        </th>
+
+        <tal:comment replace="nothing">Columns specific to mails</tal:comment>
+
+        <tal:comment replace="nothing">Reference</tal:comment>
+        <th class="ma_listing_th_reference" tal:condition="python: 'refCourrier' in visibleColumns"
+            tal:define="fieldIndex string:getRefcourrier">
+          <span i18n:translate="MeetingAndenne_label_refCourrier"></span>
+          <metal:sortAndFilter use-macro="context/@@mail-navigate-macros/sortAndFilter"/>
+        </th>
+
+        <tal:comment replace="nothing">Sender</tal:comment>
+        <th class="ma_listing_th_sender" tal:condition="python: 'destOrigin' in visibleColumns"
+            tal:define="fieldIndex string:getDestOrigin">
+          <span i18n:translate="MeetingAndenne_label_destOrigin"></span>
+          <metal:sortAndFilter use-macro="context/@@mail-navigate-macros/sortAndFilter"/>
+        </th>
+
+        <tal:comment replace="nothing">Receiver</tal:comment>
+        <th class="ma_listing_th_receiver" tal:condition="python: 'destUsers' in visibleColumns"
+            tal:define="fieldIndex string:getDestUsers">
+          <span i18n:translate="MeetingAndenne_label_destUsers"></span>
+          <metal:sortAndFilter use-macro="context/@@mail-navigate-macros/sortAndFilter"/>
+        </th>
+
+        <tal:comment replace="nothing">Actions</tal:comment>
+        <th class="pm_listing_th_actions" i18n:translate="heading_actions" tal:condition="showActions"></th>
+      </tr>
+
+      <tal:comment replace="nothing">The table content</tal:comment>
+      <tal:results tal:repeat="brain searchResults">
+        <tr tal:define="oddrow repeat/brain/odd;" valign="top"
+            tal:attributes="class python: oddrow and 'even' or 'odd'">
+
+          <tal:wakeUpObject define="obj brain/getObject">
+
+            <tal:comment replace="nothing">Title</tal:comment>
+            <td class="pmLinks">
+              <a id="pmNoNewContent" tal:content="brain/pretty_title_or_id" tal:attributes="href brain/getURL"></a>
+            </td>
+
+            <tal:comment replace="nothing">Creation date</tal:comment>
+            <td tal:condition="python: 'creationDate' in visibleColumns"
+                tal:content="python: toLocalizedTime(brain.created, long_format=True)"></td>
+
+            <tal:comment replace="nothing">Reference</tal:comment>
+            <td tal:condition="python: 'refCourrier' in visibleColumns"
+                tal:content="python: obj.getRefcourrier()"></td>
+
+            <tal:comment replace="nothing">Sender</tal:comment>
+            <td tal:condition="python: 'destOrigin' in visibleColumns"
+                tal:content="python: obj.getDestOrigin()"></td>
+
+            <tal:comment replace="nothing">Destination</tal:comment>
+            <td tal:condition="python: 'destUsers' in visibleColumns"
+                tal:content="python: obj.getDisplayableDestUsers()"></td>
+
+            <tal:comment replace="nothing">Actions</tal:comment>
+            <td align="center" tal:condition="python: member.has_role('MailManager')">
+              <tal:actions replace="structure python: obj.restrictedTraverse('@@actions_panel')(showHistory=True)" />
+            </td>
+          </tal:wakeUpObject>
+        </tr>
+      </tal:results>
+    </table>
+  </div>
+  <div class="discreet pm_search_no_result_info"
+        tal:condition="python: not searchResults"
+        tal:content="python: tool.translate('search_%s_empty' % resultMetaType, domain='PloneMeeting')">
+    No elements found.
+  </div>
+
+  <metal:sortAndFilter use-macro="context/@@mail-navigate-macros/search"/>
+
+</metal:result>
