@@ -275,7 +275,7 @@
            </tr>
           </table>
         </td>
-        <tal:comment replace="nothing">XXX - we replace Creator with Treatuser</tal:comment>
+        <tal:comment replace="nothing">XXX - we replace Creator with TreatUser</tal:comment>
         <td tal:condition="python: 'creator' in visibleColumns"
             tal:content="python: tool.getUserName(meetingItem.getTreatUser())"></td>
 
