@@ -33,11 +33,11 @@
    for="Products.CMFPlone.interfaces.IPloneSiteRoot"/>
 
   <genericsetup:upgradeStep
-   title="Migrate to MeetingAndenne 3.3"
-   description="Performs migration from MeetingAndenne 1.9 to MeetingAndenne 3.3"
+   title="Migrate to MeetingAndenne 3.0"
+   description="Performs migration from MeetingAndenne 1.9 to MeetingAndenne 3.0"
    source="*"
-   destination="3.3"
-   handler="Products.MeetingAndenne.migrations.migrate_to_3_3.migrate"
+   destination="3000"
+   handler="Products.MeetingAndenne.migrations.migrate_to_3_0.migrate"
    profile="Products.MeetingAndenne:default" />
 
   <!-- ##/code-section profiles.zcml-bottom -->
