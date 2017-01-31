@@ -60,8 +60,8 @@
           <metal:sortAndFilter use-macro="context/@@mail-navigate-macros/sortAndFilter"/>
         </th>
 
-        <tal:comment replace="nothing">Receiver</tal:comment>
-        <th class="ma_listing_th_receiver" tal:condition="python: 'destUsers' in visibleColumns"
+        <tal:comment replace="nothing">Addressee</tal:comment>
+        <th class="ma_listing_th_addressee" tal:condition="python: 'destUsers' in visibleColumns"
             tal:define="fieldIndex string:getDestUsers">
           <span i18n:translate="MeetingAndenne_label_destUsers"></span>
           <metal:sortAndFilter use-macro="context/@@mail-navigate-macros/sortAndFilter"/>
@@ -95,7 +95,7 @@
             <td tal:condition="python: 'destOrigin' in visibleColumns"
                 tal:content="python: obj.getDestOrigin()"></td>
 
-            <tal:comment replace="nothing">Destination</tal:comment>
+            <tal:comment replace="nothing">Addressee</tal:comment>
             <td tal:condition="python: 'destUsers' in visibleColumns"
                 tal:content="python: obj.getDisplayableDestUsers()"></td>
 
