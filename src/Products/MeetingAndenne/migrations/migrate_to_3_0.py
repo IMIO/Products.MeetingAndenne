@@ -99,7 +99,7 @@ class Migrate_To_3_0(Migrator):
 
         # reinstall so things overwritten by PloneMeeting profile are restored
 #        self.reinstall(profiles=[u'profile-Products.MeetingAndenne:default', ])
-#        self.finish()
+        self.finish()
 
 
 # The migration function -------------------------------------------------------
