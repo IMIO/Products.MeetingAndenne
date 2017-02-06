@@ -4,7 +4,7 @@ import logging
 logger = logging.getLogger('MeetingAndenne')
 
 from Products.CMFCore.utils import getToolByName
-from Products.PloneMeeting.config import TOPIC_SEARCH_SCRIPT, POWEROBSERVERS_GROUP_SUFFIX
+from Products.PloneMeeting.config import POWEROBSERVERS_GROUP_SUFFIX
 from Products.PloneMeeting.migrations import Migrator
 
 
@@ -47,21 +47,7 @@ class Migrate_To_3_0(Migrator):
 
         logger.info('Done.')
 
-    def _adaptItemsToValidateTopic(portal):
-        ''' Old versions of the searchitemstovalidate topic did not use a search script, correct this!'''
-        logger.info("Adding a searchScript to the 'searchitemstovalidate' topic...")
-
-        for cfg in portal.portal_plonemeeting.objectValues('MeetingConfig'):
-            topic = getattr(cfg.topics, 'searchitemstovalidate', None)
-            if topic:
-                if not topic.hasProperty(TOPIC_SEARCH_SCRIPT):
-                    topic.manage_addProperty(TOPIC_SEARCH_SCRIPT, 'searchItemsToValidate', 'string')
-                else:
-                    topic.manage_changeProperties(topic_search_script='searchItemsToValidate')
-
-        logger.info('Done.')
-
-    def _removeGlobalPowerObservers(portal):
+    def _removeGlobalPowerObservers(self):
         ''' Before, PowerObservers where global to every meetingConfig. Now
             that PowerObservers are locally defined for each meetingConfig,
             remove the useless 'MeetingPowerObserver' role, remove the useless
@@ -69,6 +55,7 @@ class Migrate_To_3_0(Migrator):
             '_powerobservers' suffixed groups for active meetingConfigs.'''
         logger.info('Migrating from global PowerObservers to local PowerObservers...')
 
+        portal = self.portal
         # remove the 'meetingpowerobservers' group
         # put every users of this group to '_powerobservers' suffixed groups of active meetingConfigs
         # generate a list of groups to transfer users to
@@ -108,12 +95,11 @@ class Migrate_To_3_0(Migrator):
         logger.info('Migrating to MeetingAndenne 3.0...')
         self._removeIconExprObjectsOnTypes()
         self._migrateCourrierFilesToBlobs()
-        self._adaptItemsToValidateTopic()
         self._removeGlobalPowerObservers()
 
         # reinstall so things overwritten by PloneMeeting profile are restored
-        self.reinstall(profiles=[u'profile-Products.MeetingAndenne:default', ])
-        self.finish()
+#        self.reinstall(profiles=[u'profile-Products.MeetingAndenne:default', ])
+#        self.finish()
 
 
 # The migration function -------------------------------------------------------
@@ -122,8 +108,7 @@ def migrate(context):
 
        1) Remove icon_expr_object on portal_types relative to MeetingAndenne
        2) Migrate CourrierFiles to Blobs
-       3) Add a searchScript to the 'searchitemstovalidate' topic
-       4) Migrate from global PowerObservers to local PowerObservers
+       3) Migrate from global PowerObservers to local PowerObservers
     '''
     Migrate_To_3_0(context).run()
 # ------------------------------------------------------------------------------
