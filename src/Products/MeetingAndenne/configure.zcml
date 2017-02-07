@@ -5,9 +5,52 @@
            i18n_domain="MeetingAndenne">
 
   <!-- ##code-section configure.zcml.header -->
+  <!-- registerTranslations before including package Products.PloneMeeting
+       so Products.MeetingAndenne can overrides Products.PloneMeeting translations -->
+  <!-- <i18n:registerTranslations directory="locales" /> -->
+
   <include package="Products.CMFPlacefulWorkflow"/>
   <include package="Products.PloneMeeting"/>
   <include package=".browser" />
+
+  <!-- WF actions and conditions for Meeting and MeetingItem for College -->
+  <adapter for="Products.PloneMeeting.interfaces.IMeetingItem"
+           factory="Products.MeetingAndenne.adapters.MeetingItemCollegeAndenneWorkflowActions"
+           provides="Products.MeetingAndenne.interfaces.IMeetingItemCollegeAndenneWorkflowActions"/>
+
+  <adapter for="Products.PloneMeeting.interfaces.IMeetingItem"
+           factory="Products.MeetingAndenne.adapters.MeetingItemCollegeAndenneWorkflowConditions"
+           provides="Products.MeetingAndenne.interfaces.IMeetingItemCollegeAndenneWorkflowConditions"/>
+
+  <adapter for="Products.PloneMeeting.interfaces.IMeeting"
+           factory="Products.MeetingAndenne.adapters.MeetingCollegeAndenneWorkflowActions"
+           provides="Products.MeetingAndenne.interfaces.IMeetingCollegeAndenneWorkflowActions"/>
+
+  <adapter for="Products.PloneMeeting.interfaces.IMeeting"
+           factory="Products.MeetingAndenne.adapters.MeetingCollegeAndenneWorkflowConditions"
+           provides="Products.MeetingAndenne.interfaces.IMeetingCollegeAndenneWorkflowConditions"/>
+
+  <!-- Adapters for Meeting, MeetingItem, MeetingConfig, MeetingFile and ToolPloneMeeting -->
+  <adapter for="Products.PloneMeeting.interfaces.IMeeting"
+           factory="Products.MeetingAndenne.adapters.CustomMeetingAndenne"
+           provides="Products.PloneMeeting.interfaces.IMeetingCustom"/>
+
+  <adapter for="Products.PloneMeeting.interfaces.IMeetingItem"
+           factory="Products.MeetingAndenne.adapters.CustomMeetingItemAndenne"
+           provides="Products.PloneMeeting.interfaces.IMeetingItemCustom"/>
+
+  <adapter for="Products.PloneMeeting.interfaces.IMeetingConfig"
+           factory="Products.MeetingAndenne.adapters.CustomMeetingConfigAndenne"
+           provides="Products.PloneMeeting.interfaces.IMeetingConfigCustom"/>
+
+  <adapter for="Products.PloneMeeting.interfaces.IMeetingFile"
+           factory="Products.MeetingAndenne.adapters.CustomMeetingFileAndenne"
+           provides="Products.PloneMeeting.interfaces.IMeetingFileCustom"/>
+
+  <adapter for="Products.PloneMeeting.interfaces.IToolPloneMeeting"
+           factory="Products.MeetingAndenne.adapters.CustomToolMeetingAndenne"
+           provides="Products.PloneMeeting.interfaces.IToolPloneMeetingCustom"/>
+
 
   <!-- add the blob field to CourrierFile -->
   <adapter
@@ -20,7 +63,9 @@
     <implements interface="Products.ATContentTypes.interfaces.file.IFileContent" />
   </class>
 
+
   <five:deprecatedManageAddDelete class=".CourrierFile.CourrierFile" />
+
 
   <!-- ##/code-section configure.zcml.header -->
 
