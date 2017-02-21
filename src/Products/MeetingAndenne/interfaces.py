@@ -34,18 +34,6 @@ from Products.PloneMeeting.interfaces import \
 class IMeetingItemCollegeAndenneWorkflowActions(IMeetingItemWorkflowActions):
     '''This interface represents a meeting item as viewed by the specific meeting
        item workflow that is defined in this MeetingCommunes product.'''
-    def doDelay():
-        """
-          Triggered while doing the 'delay' transition
-        """
-    def doItemFreeze():
-        """
-          Triggered while doing the 'freeze' transition on Meeting objects
-        """
-    def doValidate():
-        """
-          Triggered while doing the 'validate' transition
-        """
     def doPre_accept():
         """
           Triggered while doing the 'pre_accept' transition
@@ -53,14 +41,6 @@ class IMeetingItemCollegeAndenneWorkflowActions(IMeetingItemWorkflowActions):
     def doAccept_but_modify():
         """
           Triggered while doing the 'accept_but_modify' transition
-        """
-    def doAccept_but_modify_and_close():
-        """
-          Triggered while doing the 'accept_but_modify_and_close' transition
-        """
-    def doRefuse_and_close():
-        """
-          Triggered while doing the 'refuse_and_close' transition
         """
 
 class IMeetingItemCollegeAndenneWorkflowConditions(IMeetingItemWorkflowConditions):
@@ -70,37 +50,21 @@ class IMeetingItemCollegeAndenneWorkflowConditions(IMeetingItemWorkflowCondition
         """
           Guard for the 'decide' transition
         """
-    def isLateFor():
+    def mayPrevalidate():
         """
-          is the MeetingItem considered as late
+          Guard for the 'prevalidate' transition
         """
-    def mayFreeze():
-        """
-          Guard for the 'freeze' transition
-        """
-    def mayCorrect():
-        """
-          Guard for the 'backToXXX' transitions
-        """
-    def mayValidate():
-        """
-          Guard for the 'validate' transition
-        """
+#    def mayValidate():
+#        """
+#          Guard for the 'validate' transition
+#        """
 
 class IMeetingCollegeAndenneWorkflowActions(IMeetingWorkflowActions):
     '''This interface represents a meeting as viewed by the specific meeting
        workflow that is defined in this MeetingCommunes product.'''
-    def doClose():
-        """
-          Triggered while doing the 'close' transition
-        """
     def doDecide():
         """
           Triggered while doing the 'decide' transition
-        """
-    def doBackToCreated():
-        """
-          Triggered while doing the 'doBackToCreated' transition
         """
 
 class IMeetingCollegeAndenneWorkflowConditions(IMeetingWorkflowConditions):
@@ -118,20 +82,12 @@ class IMeetingCollegeAndenneWorkflowConditions(IMeetingWorkflowConditions):
         """
           Guard for the 'decide' transition
         """
-    def mayChangeItemsOrder():
-        """
-          Check if the user may or not changes the order of the items on the meeting
-        """
-    def mayCorrect():
-        """
-          Guard for the 'backToXXX' transitions
-        """
 
 class ICourrierFile(Interface):
     '''Marker interface for .MeetingAndenne.CourrierFile
     '''
 
-class IMeetingAndenneLayer(IBrowserRequest):
+class IMeetingAndenneLayer(IDefaultBrowserLayer):
     """
       Define a layer so some elements are only added for it
     """

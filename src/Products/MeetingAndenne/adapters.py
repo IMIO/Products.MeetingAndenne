@@ -2046,26 +2046,6 @@ class MeetingCollegeAndenneWorkflowActions(MeetingWorkflowActions):
     implements(IMeetingCollegeAndenneWorkflowActions)
     security = ClassSecurityInfo()
 
-#    security.declarePrivate('doClose')
-#    def doClose(self, stateChange):
-#        # Every item that is "presented" will be automatically set to "accepted"
-#        for item in self.context.getAllItems():
-#            if item.queryState() == 'presented':
-#                self.context.portal_workflow.doActionFor(item, 'itemfreeze')
-#            if item.queryState() in ['itemfrozen', 'pre_accepted', ]:
-#                self.context.portal_workflow.doActionFor(item, 'accept')
-#        meetingConfig = self.context.portal_plonemeeting.getMeetingConfig(self.context)
-#
-#        self.context.setFirstItemNumber(meetingConfig.getLastItemNumber()+1)
-#        # Update the item counter which is global to the meeting config
-#        meetingConfig.setLastItemNumber(meetingConfig.getLastItemNumber() +\
-#                                        len(self.context.getItems()) + \
-#                                        len(self.context.getLateItems()))
-#        if self.context.getMeetingNumber() == -1:
-#            meetingNumber = meetingConfig.getLastMeetingNumber()+1
-#            self.context.setMeetingNumber(meetingNumber)
-#            meetingConfig.setLastMeetingNumber(meetingNumber)
-
     def doDecide(self, stateChange):
         '''We pass every item that is 'presented' in the 'itemfrozen'
            state.  It is the case for late items. Moreover, if
@@ -2080,22 +2060,6 @@ class MeetingCollegeAndenneWorkflowActions(MeetingWorkflowActions):
                 # If deliberation (motivation+decision) is empty,
                 # initialize it the decision field
                 item._initDecisionFieldIfEmpty()
-
-#    security.declarePrivate('doBackToCreated')
-#    def doBackToCreated(self, stateChange):
-#        '''When a meeting go back to the "created" state, for example the
-#           meeting manager wants to add an item, we do not do anything.'''
-#        pass
-#
-#    security.declarePrivate('doPublish')
-#    def doPublish(self, stateChange):
-#        '''When publishing the meeting, I must set automatically all no-decided
-#           items to "accepted", too.'''
-#        for item in self.context.getAllItems():
-#            if item.queryState() == 'presented':
-#                self.context.portal_workflow.doActionFor(item, 'itemfreeze')
-#            if item.queryState() in ['itemfrozen', 'pre_accepted', ]:
-#                self.context.portal_workflow.doActionFor(item, 'accept') 
 
 
 # ------------------------------------------------------------------------------
@@ -2131,29 +2095,6 @@ class MeetingCollegeAndenneWorkflowConditions(MeetingWorkflowConditions):
             res = True
         return res
 
-#    security.declarePublic('mayChangeItemsOrder')
-#    def mayChangeItemsOrder(self):
-#        '''We can change the order if :
-#           - the meeting state is in ('created', 'frozen', 'decided', )'''
-#        res = False
-#        if checkPermission(ModifyPortalContent, self.context) and \
-#           self.context.queryState() in ('created', 'frozen', 'decided'):
-#            res = True
-#        return res
-#
-#    def mayCorrect(self):
-#        '''Take the default behaviour except if the meeting is frozen
-#           we still have the permission to correct it.'''
-#        from Products.PloneMeeting.Meeting import MeetingWorkflowConditions
-#        res = MeetingWorkflowConditions.mayCorrect(self)
-#        currentState = self.context.queryState()
-#        if not res and currentState == "frozen":
-#            # Change the behaviour for being able to correct a frozen meeting
-#            # back to created.
-#            if checkPermission(ReviewPortalContent, self.context):
-#                return True
-#        return res
-
 
 # ------------------------------------------------------------------------------
 class MeetingItemCollegeAndenneWorkflowActions(MeetingItemWorkflowActions):
@@ -2163,87 +2104,13 @@ class MeetingItemCollegeAndenneWorkflowActions(MeetingItemWorkflowActions):
     implements(IMeetingItemCollegeAndenneWorkflowActions)
     security = ClassSecurityInfo()
 
+    security.declarePrivate('doPre_accept')
+    def doPre_accept(self, stateChange):
+        pass
 
-#    security.declarePrivate('doDelay')
-#    def doDelay(self, stateChange):
-#        '''When an item is delayed, we will duplicate it: the copy is back to
-#           the initial state and will be linked to this one.'''
-#        creator = self.context.Creator()
-#        member = self.context.portal_membership.getMemberById(creator)
-#
-#        # We create a copy in the initial item state, in the folder of creator.
-#        clonedItem = self.context.clone(copyAnnexes=True, newOwnerId=creator)
-#        clonedItem.setPredecessor(self.context)
-#
-#        wf_def = self.context.portal_workflow.getWorkflowsFor(clonedItem)[0]
-#        wf_id= wf_def.getId()
-#        wf_state = {
-#                 'action': None,
-#                 'actor': None,
-#                 'comments': "Setting state to proposed",
-#                 'review_state': "proposed"
-#                 }
-#        self.context.portal_workflow.setStatusOf(wf_id, clonedItem, wf_state)
-#        wf_def.updateRoleMappingsFor(clonedItem)
-#
-#        clonedItem.setPreferredMeeting('whatever')
-#        clonedItem.itemPresents = ()
-#        clonedItem.itemSignatories = ()
-#        clonedItem.itemAbsents = ()
-#        clonedItem.reindexObject(idxs=['allowedRolesAndUsers', 'review_state'])
-#        clonedItem.updateMeetingItem()
-#        #duplicate security settings of annexe from parent item
-#        for annexGroup in (clonedItem.getAnnexes(),
-#                           clonedItem.getAnnexesDecision()):
-#            for annex in annexGroup:
-#                annex.updateAnnexSecurity()
-#
-#        # Send, if configured, a mail to the person who created the item
-#        clonedItem.sendMailIfRelevant('itemDelayed', 'Owner', isRole=True)
-#
-#    security.declarePrivate('doAccept_but_modify')
-#    def doAccept_but_modify(self, stateChange):
-#        pass
-#
-#    security.declarePrivate('doPre_accept')
-#    def doPre_accept(self, stateChange):
-#        pass
-#
-#    security.declarePrivate('doItemFreeze')
-#    def doItemFreeze (self, stateChange):
-#        from Products.PloneMeeting.MeetingItem import MeetingItemWorkflowActions
-#        MeetingItemWorkflowActions.doItemFreeze (self, stateChange)
-#        #copy the content of decision in pv for later use
-#        member = self.context.portal_membership.getAuthenticatedMember()
-#        if (member.has_permission('MeetingAndenne: Write pv', self.context)):
-#            self.context.setPv(self.context.getProjetpv())
-#            self.context.setTextpv(self.context.getDecision())
-#
-#    security.declarePrivate('doValidate')
-#    def doValidate(self, stateChange):
-#        from Products.PloneMeeting.MeetingItem import MeetingItemWorkflowActions
-#        MeetingItemWorkflowActions.doValidate(self, stateChange)
-#        self.context.setVerifUser(self.context.adapted().getUserofAction())
-#
-#    security.declarePublic('doPre_accept')
-#    def doPre_accept(self, stateChange):
-#        pass
-#
-#    security.declarePublic('doAccept_but_modify')
-#    def doAccept_but_modify(self, stateChange):
-#        pass
-#
-#    security.declarePublic('doAccept_but_modify_and_close')
-#    def doAccept_but_modify_and_close(self, stateChange):
-#        pass
-#
-#    security.declarePublic('doAccept_and_close')
-#    def doAccept_and_close(self, stateChange):
-#        pass
-#
-#    security.declarePublic('doRefuse_and_close')
-#    def doRefuse_and_close(self, stateChange):
-#        pass
+    security.declarePrivate('doAccept_but_modify')
+    def doAccept_but_modify(self, stateChange):
+        pass
 
 
 # ------------------------------------------------------------------------------
@@ -2259,7 +2126,7 @@ class MeetingItemCollegeAndenneWorkflowConditions(MeetingItemWorkflowConditions)
 
     security.declarePublic('mayDecide')
     def mayDecide(self):
-        '''We may decide an item if the linked meeting is in relevant state.'''
+        '''We may decide an item if the linked meeting is in relevant state'''
         res = False
         meeting = self.context.getMeeting()
         if checkPermission(ReviewPortalContent, self.context) and \
@@ -2267,57 +2134,14 @@ class MeetingItemCollegeAndenneWorkflowConditions(MeetingItemWorkflowConditions)
             res = True
         return res
 
-#    security.declarePublic('isLateFor')
-#    def isLateFor(self, meeting):
-#        res = False
-#        if meeting and (meeting.queryState() in ['frozen', 'decided']) and \
-#           (meeting.UID() == self.context.getPreferredMeeting()):
-#            itemValidationDate = self._getDateOfAction(self.context, 'validate')
-#            meetingFreezingDate = self._getDateOfAction(meeting, 'freeze')
-#            if itemValidationDate and meetingFreezingDate:
-#                if itemValidationDate > meetingFreezingDate:
-#                    res = True
-#                    return res
-#
-#    security.declarePublic('mayFreeze')
-#    def mayFreeze(self):
-#        res = False
-#        if checkPermission(ReviewPortalContent, self.context):
-#            if self.context.hasMeeting() and \
-#               (self.context.getMeeting().queryState() in ('frozen', 'decided', 'published','closed')):
-#                res = True
-#        return res
-#
-#    security.declarePublic('mayCorrect')
-#    def mayCorrect(self):
-#        # Check with the default PloneMeeting method and our test if res is
-#        # False. The diffence here is when we correct an item from itemfrozen to
-#        # presented, we have to check if the Meeting is in the "created" state
-#        # and not "published".
-#        res = MeetingItemWorkflowConditions.mayCorrect(self)
-#        # Item state
-#        currentState = self.context.queryState()
-#        # Manage our own behaviour now when the item is linked to a meeting,
-#        # a MeetingManager can correct anything except if the meeting is closed
-#        if not res and currentState in ['presented', 'itemfrozen', \
-#            'delayed', 'refused', 'accepted', 'accepted_but_modified', \
-#            'pre_accepted']:
-#            if checkPermission(ReviewPortalContent, self.context):
-#                # Get the meeting
-#                meeting = self.context.getMeeting()
-#                if meeting:
-#                    # Meeting can be None if there was a wf problem leading
-#                    # an item to be in a "presented" state with no linked
-#                    # meeting.
-#                    meetingState = meeting.queryState()
-#                    # A user having ReviewPortalContent permission can correct
-#                    # an item in any case except if the meeting is closed.
-#                    if meetingState != 'closed':
-#                        res = True
-#        return res
-#
+    security.declarePublic('mayPrevalidate')
+    def mayPrevalidate(self):
+        '''We'll see who can prevalidate later'''
+        pass
+
 #    security.declarePublic('mayValidate')
 #    def mayValidate(self):
+#        '''We'll see what to do with Personnel category'''
 #        from Products.PloneMeeting.MeetingItem import MeetingItemWorkflowConditions
 #        res=MeetingItemWorkflowConditions.mayValidate(self)
 #        #if res:
@@ -2325,24 +2149,6 @@ class MeetingItemCollegeAndenneWorkflowConditions(MeetingItemWorkflowConditions)
 #        #  if self.context.getCategory() == "66-personnel" and (not user.has_role('MeetingManager')):
 #        #          res = False
 #        return res
-#
-#    # user for associated group , to avoid proposing an item when you are not the creator but if user is jm mathieu , he must may propose an item created by anyone.
-#    # NOT USE SINCE 20-03-2014  MAY BE REUSE LATER
-#    #security.declarePublic('mayPropose')
-#    #def mayPropose(self):
-#    #    from Products.PloneMeeting.MeetingItem import MeetingItemWorkflowConditions
-#    #    res=MeetingItemWorkflowConditions.mayPropose(self)
-#    #    if res:
-#    #        user = self.context.portal_membership.getAuthenticatedMember()
-#    #        member = self.context.portal_membership.getMemberById(str(user))
-#    #        grp_tool = self.context.acl_users.source_groups
-#    #        if member:
-#    #           groups = grp_tool.getGroupsForPrincipal(member)
-#    #            if self.context.getProposingGroup()=='cpas':
-#    #                if 'cpas_reviewers' not in groups:
-#    #                    if str(user) != 'marmat':
-#    #                        res = False
-#    #    return res
 
 
 # ------------------------------------------------------------------------------
