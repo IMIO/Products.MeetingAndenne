@@ -25,7 +25,7 @@ __docformat__ = 'plaintext'
 
 # ------------------------------------------------------------------------------
 from zope.interface import Interface
-from zope.publisher.interfaces.browser import IBrowserRequest
+from zope.publisher.interfaces.browser import IDefaultBrowserLayer
 from Products.PloneMeeting.interfaces import \
     IMeetingItemWorkflowConditions, IMeetingItemWorkflowActions, \
     IMeetingWorkflowActions, IMeetingWorkflowConditions
