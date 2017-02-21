@@ -34,7 +34,6 @@ def update_item_schema(baseSchema):
                     i18n_domain='PloneMeeting',
                 ),
                 searchable=True,
-                index="FieldIndex"
             ),
             StringField(
                 name='verifUser',
@@ -47,7 +46,6 @@ def update_item_schema(baseSchema):
                     i18n_domain='PloneMeeting',
                 ),
                 searchable=True,
-                index="FieldIndex"
             ),
             StringField(
                 name='yourrefdoc',
@@ -248,11 +246,9 @@ def update_item_schema(baseSchema):
                 ),
                 vocabulary='listUserGroup',
                 searchable=True,
-                index="FieldIndex"
             ),
             TextField(
                 name='projetpv',
-                index="ZCTextIndex,lexicon_id=plone_lexicon, index_type=Okapi BM25 Rank",
                 widget=RichWidget(
                     label='Projetpv',
                     condition="python: not here.adapted().isformation()",
@@ -268,7 +264,6 @@ def update_item_schema(baseSchema):
             ),
             TextField(
                 name='pv',
-                index="ZCTextIndex,lexicon_id=plone_lexicon, index_type=Okapi BM25 Rank",
                 widget=RichWidget(
                     label='Pv',
                     label_msgid='MeetingAndenne_label_pv',
@@ -283,7 +278,6 @@ def update_item_schema(baseSchema):
             ),
             TextField(
                 name='textpv',
-                index="ZCTextIndex",
                 widget=RichWidget(
                     label='Textpv',
                     label_msgid='MeetingAndenne_label_textpv',
@@ -309,15 +303,13 @@ def update_item_schema(baseSchema):
             LinesField(
                 name='itemPresents',
                 widget=MultiSelectionWidget(
-                    condition="python: (member.has_role('MeetingManager') or member.has_role('Manager')) and here.hasMeeting() and here.getMeeting().attributeIsUsed('attendees')",
+                    visible=False
                     format="checkbox",
                     label='Itempresents',
                     label_msgid='MeetingAndenne_label_itemPresents',
                     i18n_domain='PloneMeeting',
                 ),
-                enforceVocabulary=True,
                 multiValued=1,
-                vocabulary='listItemPresents',
             ),
             BooleanField(
                 name='towritepv',
@@ -334,14 +326,10 @@ def update_item_schema(baseSchema):
     )
 
     completeItemSchema = baseSchema + specificSchema.copy()
-    completeItemSchema['category'].index='FieldIndex:brains'
     completeItemSchema['title'].widget.condition='python: not here.adapted().isformation()'
     completeItemSchema['decision'].widget.condition='python: not here.adapted().isformation()'
     completeItemSchema['description'].widget.condition='python: not here.adapted().isformation()'
-    completeItemSchema['associatedGroups'].widget.format='select'
-    completeItemSchema['associatedGroups'].widget.size=10
 #    completeItemSchema['proposingGroup'].default_method='getDefaultProposingGroup'
-#    completeItemSchema['proposingGroup'].index='FieldIndex:brains'
     completeItemSchema['copyGroups'].write_permission="MeetingAndenne: Write copygroup"
     completeItemSchema['description'].widget.label_method='getLabelForDescription'
 
@@ -352,18 +340,6 @@ def update_item_schema(baseSchema):
     completeItemSchema.moveField('pv', pos=25)
     completeItemSchema.moveField('textpv', pos=24)
     completeItemSchema.moveField('isconfidential', pos='top')
-
-    completeItemSchema['budgetInfos'].default_content_type="text/html"
-    completeItemSchema['budgetInfos'].default_output_type="text/x-html-safe"
-    completeItemSchema['budgetInfos'].allowable_content_types=('text/html',)
-    completeItemSchema['budgetInfos'].widget=RichWidget(
-        condition="python: here.attributeIsUsed('budgetInfos')",
-        description="BudgetInfos",
-        description_msgid="item_budgetinfos_descr",
-        label='Budgetinfos',
-        label_msgid='PloneMeeting_label_budgetInfos',
-        i18n_domain='PloneMeeting',
-        )
 
     return completeItemSchema
 MeetingItem.schema = update_item_schema(MeetingItem.schema)
@@ -378,21 +354,20 @@ def update_meeting_schema(baseSchema):
             allowable_content_types=('text/html',),
             widget=RichWidget(
                 condition="python: here.showObs('postObservations')",
+                rows=15,
                 label='Postobservations',
                 label_msgid='MeetingAndenne_label_postObservations',
                 i18n_domain='PloneMeeting',
             ),
             default_content_type="text/html",
-            default_output_type="text/html",
+            default_output_type="text/x-html-safe",
             optional=True,
         ),
     ),
     )
 
     completeMeetingSchema = baseSchema + specificSchema.copy()
-    completeMeetingSchema['date'].optional=True
-#    completeMeetingSchema['allItemsAtOnce'].widget.visible=False      A VERIFIER #
-    completeMeetingSchema.moveField('postObservations', after='preMeetingDate')
+    completeMeetingSchema.moveField('postObservations', after='observations')
 
     return completeMeetingSchema
 Meeting.schema = update_meeting_schema(Meeting.schema)
@@ -400,21 +375,23 @@ Meeting.schema = update_meeting_schema(Meeting.schema)
 
 # Schema updates related to MeetingFile ----------------------------------------
 def update_file_schema(baseSchema):
-    specificSchema = Schema((
-
-            BooleanField(
-                name='toPrint',
-                widget=BooleanField._properties['widget'](
-                    label='Printannexe',
-                    label_msgid='Meetingandenne_label_Printannexe',
-                    i18n_domain='PloneMeeting',
-                ),
-                default=True
-            ),
-        ),
-    )
-
-    completeFileSchema = baseSchema + specificSchema.copy()
+#    specificSchema = Schema((
+#
+#            BooleanField(
+#                name='toPrint',
+#                widget=BooleanField._properties['widget'](
+#                    label='Printannexe',
+#                    label_msgid='Meetingandenne_label_Printannexe',
+#                    i18n_domain='PloneMeeting',
+#                ),
+#                default=True
+#            ),
+#        ),
+#    )
+#
+#    completeFileSchema = baseSchema + specificSchema.copy()
+    completeFileSchema = baseSchema
+    completeFileSchema['toPrint'].default=True
 
     return completeFileSchema
 MeetingFile.schema = update_file_schema(MeetingFile.schema)
