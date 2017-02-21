@@ -303,7 +303,7 @@ def update_item_schema(baseSchema):
             LinesField(
                 name='itemPresents',
                 widget=MultiSelectionWidget(
-                    visible=False
+                    visible=False,
                     format="checkbox",
                     label='Itempresents',
                     label_msgid='MeetingAndenne_label_itemPresents',
