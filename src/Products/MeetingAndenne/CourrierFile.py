@@ -37,7 +37,6 @@ from Products.CMFCore.utils import getToolByName
 from Products.CMFPlone.CatalogTool import getObjSize
 from Products.MimetypesRegistry.common import MimeTypeException
 from collective.documentviewer.async import asyncInstalled
-from Products.PloneMeeting.interfaces import IAnnexable
 from Products.PloneMeeting.utils import getCustomAdapter, sendMailIfRelevant
 
 from Products.MeetingAndenne.config import *
