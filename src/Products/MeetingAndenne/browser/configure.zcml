@@ -28,6 +28,14 @@
 
     <!-- Macros -->
     <browser:page
+        name="ma-macros"
+        for="*"
+        class=".macros.MeetingAndenneMacros"
+        template="templates/macros.pt"
+        layer="Products.MeetingAndenne.interfaces.IMeetingAndenneLayer"
+        permission="zope2.View"/>
+        allowed_attributes="callMacro"/>
+    <browser:page
         name="meetingitemslist-macros"
         for="*"
         class=".macros.MeetingAndenneItemsListMacros"

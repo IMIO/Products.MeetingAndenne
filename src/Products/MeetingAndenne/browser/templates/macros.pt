@@ -1,0 +1,261 @@
+<tal:comment replace="nothing">
+  This macro returns the edit view of an Archetypes field.
+  It requires a REQUEST with key "fieldName".
+</tal:comment>
+
+
+<div id="meeting_users_"
+     metal:define-macro="itemPeople" i18n:domain="PloneMeeting"
+     onmouseover="javascript:initializePMOverlays()"
+     class="ajax-pm-frame"
+     tal:define="usedAttrs usedAttrs|meetingConfig/getUsedItemAttributes;
+                 meeting context/getMeeting;
+                 usedMeetingAttributes usedMeetingAttributes|meetingConfig/getUsedMeetingAttributes"
+     tal:condition="python: meeting and ('attendees' in usedMeetingAttributes)"
+     tal:attributes="style python: (request.get('showPersons', 'true')=='true') and 'display:table' or 'display:none'">
+<form id="itemPeopleForm" name="itemPeopleForm" method="post">
+<table tal:define="meetingAttendees python: meeting.getAttendees(True);
+                   meetingAll python: meeting.getAttendees(True)+meeting.getExcused(True)+meeting.getAbsents(True);
+                   meetingAbsents python: meeting.getExcused()+meeting.getAbsents();
+                   itemPresents context/getItemPresents;
+                   lateAttendees meeting/getLateAttendees;
+                   departees python: meeting.getDepartures(context, when='after', alsoEarlier=True);
+                   showQuestioners python: 'questioners' in usedAttrs;
+                   showAnswerers python: 'answerers' in usedAttrs;
+                   questioners context/getQuestioners;
+                   answerers context/getAnswerers;
+                   mayEditQAs context/mayEditQAs;
+                   showVotes context/showVotes;
+                   usedVoteValues meetingConfig/getUsedVoteValues;
+                   itemAbsents context/getItemAbsents;
+                   itemSigners context/getItemSignatories;
+                   voters python: context.getAttendees(item=context,usage='voter');
+                   global showSave python:False;
+                   global showRefresh python: False;
+                   error request/error | python:'';
+                   secret context/getVotesAreSecret;
+                   isManager python: tool.isManager(context);
+                   mayEditItem python: member.has_permission('Modify portal content', context);"
+       id="meeting_users" class="listing discreet" cellspacing="0" cellpadding="0">
+  <tal:comment replace="nothing">Column headers</tal:comment>
+  <thead>
+  <tr valign="top">
+    <th class="nosort" i18n:translate="item_specific"></th>
+    <th class="nosort" i18n:translate="is_attendee"></th>
+    <th class="nosort" tal:condition="python: 'signatories' in usedMeetingAttributes"
+        i18n:translate="is_signer"></th>
+    <th class="nosort" tal:condition="showQuestioners" i18n:translate="PloneMeeting_label_questioners"></th>
+    <th class="nosort" tal:condition="showAnswerers" i18n:translate="PloneMeeting_label_answerers"></th>
+    <th class="nosort" tal:condition="showVotes" i18n:translate="is_voter"></th>
+    <th class="nosort" tal:condition="python: showVotes and not secret" i18n:translate="vote_value"></th>
+    <th class="nosort" tal:condition="python: showVotes and secret" align="left">
+      <i style="color:blue">
+      <span i18n:translate="voter_count">
+        <span i18n:name="numberOfVoters" tal:content="python:len(voters)"></span>
+      </span> (<span i18n:translate="PloneMeeting_label_votesAreSecret"></span>)
+      </i><br/>
+      <tal:secret define="global showSave context/mayEditVotes;
+                          mayEditVotes showSave;
+                          mayConsultVotes context/mayConsultVotes"
+                  repeat="voteValue usedVoteValues">
+        <span i18n:translate="" tal:content="python: 'vote_value_%s' % voteValue"></span>:
+        <span tal:define="voteCount python: context.getVoteCount(voteValue);
+                          widgetName python: 'vote_count_%s' % voteValue">
+          <tal:comment replace="nothing">Display an editable number of votes</tal:comment>
+          <input tal:condition="mayEditVotes" type="text" size="2"
+                 tal:attributes="name widgetName;
+                                 value python: error and request.get(widgetName,0) or voteCount"/>
+
+          <tal:comment replace="nothing">Display the number of votes</tal:comment>
+          <span tal:condition="python: mayConsultVotes and not mayEditVotes" tal:content="voteCount"></span>
+
+          <tal:comment replace="nothing">Display nothing</tal:comment>
+          <span tal:condition="python: not mayConsultVotes and not mayEditVotes"
+                i18n:translate="vote_value_not_consultable"></span>
+        </span>
+      </tal:secret>
+    </th>
+  </tr>
+  </thead>
+  <tbody>
+  <tr tal:repeat="attendee meetingAll">
+    <tal:attendee define="aId attendee/getId;
+                          isPresent python: attendee.isPresent(context, meeting) and aId not in meetingAbsents;
+                          isAbsent python: aId not in itemPresents and aId in meetingAbsents">
+    <td><b tal:content="attendee/Title"></b></td>
+    <td align="center"
+        tal:attributes="onmouseover python: 'setByeByeButton(\'%s\', \'visible\')' % aId;
+                        onmouseout python: 'setByeByeButton(\'%s\', \'hidden\')' % aId">
+      <tal:comment replace="nothing">The user is present</tal:comment>
+      <img tal:condition="isPresent" tal:attributes="src string: $portal_url/checked.gif"/>
+
+      <tal:comment replace="nothing">Show entrance number if user is an arrived late attendee</tal:comment>
+      <tal:entered condition="python: aId in lateAttendees and isPresent">
+       <img tal:attributes="src string: $portal_url/entrance.gif"
+            title="present_since" i18n:attributes="title"/><span style="color:black"
+            tal:content="python: meeting.getEntranceItem(aId)"></span>
+       <tal:comment replace="nothing">Remove info about user entrance into the meeting</tal:comment>
+       <img tal:condition="python: mayEditItem and isManager" style="cursor:pointer" title="remove_info" i18n:attributes="title"
+            tal:attributes="src string: $portal_url/delete_small.png;
+                            onClick python:'welcomeUserAndenne(\'%s\', \'%s\', \'delete\')' % (context.absolute_url(), aId)"/>
+      </tal:entered>
+
+      <tal:comment replace="nothing">Show depart number if user has left (or will do after this item)</tal:comment>
+      <tal:left condition="python: aId in departees">
+      <img tal:attributes="src string: $portal_url/departure.gif"
+           title="left_after" i18n:attributes="title"/><span style="color:black"
+           tal:content="python: meeting.getDepartureItem(aId)-1"></span>
+      <tal:comment replace="nothing">Remove info about user departure from the meeting</tal:comment>
+      <img tal:condition="python: mayEditItem and isManager" style="cursor:pointer" title="remove_info" i18n:attributes="title"
+           tal:attributes="src string: $portal_url/delete_small.png;
+                           onClick python:'confirmByebyeUserAndenne(\'%s\', \'%s\', \'delete\', \'leaves_after\')' % (context.absolute_url(), aId)"/>
+      </tal:left>
+
+      <tal:comment replace="nothing">Show "absent" icon if the user has left only for this item (=item absent)</tal:comment>
+      <tal:left condition="python: aId in context.getItemAbsents()">
+      <img tal:attributes="src string: $portal_url/leaving.gif"
+           title="left_now" i18n:attributes="title"/>
+      <tal:comment replace="nothing">Remove info user being an item absent</tal:comment>
+      <img tal:condition="python: mayEditItem and isManager" style="cursor:pointer" title="remove_info" i18n:attributes="title"
+           tal:attributes="src string: $portal_url/delete_small.png;
+                           onClick python:'confirmByebyeUserAndenne(\'%s\', \'%s\', \'delete\', \'leaves_now\')' % (context.absolute_url(), aId)"/>
+      </tal:left>
+      
+      <tal:comment replace="nothing">Show "present" icon if the user join this item only (=item present) (added by fabmar)</tal:comment>
+      <tal:left condition="python: aId in context.getItemPresents()">
+      <img tal:attributes="src string: $portal_url/entrance.gif"
+           title="welcome_now" i18n:attributes="title"/>
+      <tal:comment replace="nothing">Remove info user being an item present</tal:comment>
+      <img tal:condition="python: mayEditItem and isManager" style="cursor:pointer" title="remove_info" i18n:attributes="title"
+           tal:attributes="src string: $portal_url/delete_small.png;
+                           onClick python:'welcomeNowUser(\'%s\', \'%s\', \'delete\')' % (context.absolute_url(), aId)"/>
+      </tal:left>
+
+      <tal:comment replace="nothing">Button for welcoming a late attendee not yet in the meeting</tal:comment>
+      <img title="person_welcome" i18n:attributes="title" style="cursor: pointer"
+           tal:condition="python: isManager and (aId in lateAttendees) and not isPresent and not meeting.getEntranceItem(aId)"
+           tal:attributes="src string: $portal_url/entrance.gif;
+                           onClick python:'welcomeUserAndenne(\'%s\', \'%s\', \'do\')' % (context.absolute_url(), aId)"/>
+
+      <tal:comment replace="nothing">Button for byebying a user</tal:comment>
+      <a href="#" class="link-overlay-pm byebye-overlay" tal:attributes="href string:byebyeuser?userId=${aId}"
+         tal:condition="python: isManager and mayEditItem and isPresent and not meeting.getDepartureItem(aId)">
+       <img title="person_byebye" i18n:attributes="title" style="cursor: pointer; visibility: hidden"
+           tal:attributes="src string: $portal_url/departure.gif;
+                           id python: 'byebye_%s' % aId;
+                           name  python: 'byebye_%s' % aId;" />
+      </a>
+      
+      <tal:comment replace="nothing">Button for welcoming for an item, a user (added by fabmar)</tal:comment>
+      <a href="#" tal:attributes="onClick python:'welcomeNowUser(\'%s\', \'%s\', \'do\')' % (context.absolute_url(), aId)"
+         tal:condition="python: isManager and mayEditItem and isAbsent and not meeting.getDepartureItem(aId)">
+       <img title="person_welcome" i18n:attributes="title" style="cursor: pointer; visibility: hidden"
+           tal:attributes="src string: $portal_url/entrance.gif;
+                           id python: 'byebye_%s' % aId;
+                           name  python: 'byebye_%s' % aId;" />
+      </a>
+
+    </td>
+    <td align="center" tal:condition="python: 'signatories' in usedMeetingAttributes">
+      <img tal:attributes="src string: $portal_url/checked.gif"
+           tal:condition="python: attendee.getId() in itemSigners"/>
+    </td>
+    <td align="center" tal:condition="showQuestioners">
+      <tal:comment replace="nothing">Show check image for people that can't edit</tal:comment>
+      <img tal:condition="python: not mayEditQAs and (aId in questioners)"
+           tal:attributes="src string: $portal_url/checked.gif"/>
+      <tal:comment replace="nothing">Show checkbox for editors</tal:comment>
+      <input type="checkbox" id="questioner"
+             tal:define="cbId python: 'questioner_%s' % aId"
+             tal:condition="python: mayEditQAs and isPresent"
+             tal:attributes="id cbId; name cbId;
+                             checked python: aId in questioners"/>
+    </td>
+    <td align="center" tal:condition="showAnswerers">
+      <tal:comment replace="nothing">Show check image for people that can't edit</tal:comment>
+      <img tal:condition="python: not mayEditQAs and (aId in answerers)"
+           tal:attributes="src string: $portal_url/checked.gif"/>
+      <tal:comment replace="nothing">Show checkbox for editors</tal:comment>
+      <input type="checkbox"
+             tal:define="cbId python: 'answerer_%s' % aId"
+             tal:condition="python: mayEditQAs and isPresent"
+             tal:attributes="id cbId; name cbId;
+                             checked python: aId in answerers"/>
+    </td>
+    <td align="center" tal:condition="showVotes">
+      <img tal:attributes="src string: $portal_url/checked.gif"
+           tal:condition="python: attendee in voters"/>
+    </td>
+    <td align="center" tal:condition="python: showVotes and not secret">
+    <tal:showVote condition="python: (attendee in voters) and isPresent">
+    <tal:votes define="mayConsultVote python: attendee.adapted().mayConsultVote(member, context);
+                       mayEditVote python: attendee.adapted().mayEditVote(member, context);
+                       voterId attendee/getId;
+                       voteValue python: context.getVoteValue(voterId);
+                       global showSave python: mayEditVote and True or showSave;
+                       global showRefresh python: not mayEditVote and (mayConsultVote and True or showRefresh) or False">
+
+      <tal:comment replace="nothing">For users that can't consult neither edit the vote value</tal:comment>
+      <span id="vote-not_consultable" tal:condition="python: not mayConsultVote and not mayEditVote"
+            i18n:translate="vote_value_not_consultable"></span>
+      <tal:comment replace="nothing">For users that can consult the vote value but not edit it.</tal:comment>
+      <span tal:condition="python: mayConsultVote and not mayEditVote" i18n:translate=""
+            tal:content="python: 'vote_value_%s' % voteValue"></span>
+      <tal:comment replace="nothing">For users that can consult and edit the vote.</tal:comment>
+      <tal:editField condition="python: mayConsultVote and mayEditVote"
+                     define="widgetName python: 'vote_value_%s' % voterId">
+        <tal:radio repeat="usedVoteValue usedVoteValues">
+          <tal:input define="widgetId python:'vote_value_%s_%s' % (usedVoteValue, voterId)">
+          <input type="radio" class="noborder" value="not_yet"
+                 tal:attributes="name widgetName; id widgetId; value usedVoteValue;
+                                 checked python: voteValue == usedVoteValue"/>
+          <label tal:define="used_vote_value python: usedVoteValue.replace('-', '_')"
+                 tal:attributes="for widgetId;
+                                 id python: 'vote-%s' % used_vote_value"
+                 tal:content="python: 'vote_value_%s' % used_vote_value"
+                 i18n:translate=""></label>&nbsp;&nbsp;
+          </tal:input>
+        </tal:radio>
+      </tal:editField>
+    </tal:votes>
+    </tal:showVote>
+    </td>
+    <td align="center" tal:condition="python: showVotes and secret">-
+    </td>
+    </tal:attendee>
+  </tr>
+  <tr>
+    <th colspan="7" tal:define="maySwitchVotes context/maySwitchVotes">
+      <tal:comment replace="nothing">Switch mode (secret / not secret)</tal:comment>
+      <img style="cursor:pointer;" title="switch_votes" i18n:attributes="title" align="right"
+           tal:condition="python: showVotes and isManager and maySwitchVotes"
+           tal:attributes="src string: $portal_url/switch.gif;
+                           onClick python:'switchVotes(\'%s\', \'%s\')' % (context.absolute_url(), secret)"/>
+      <img style="cursor:help;" title="switch_votes_why_cannot" i18n:attributes="title" align="right"
+           tal:condition="python: showVotes and isManager and not maySwitchVotes"
+           tal:attributes="src string: $portal_url/switch_not_allowed.gif;"/>
+      <tal:comment replace="nothing">Set 'yes' for everybody</tal:comment>
+      <img style="cursor:pointer;" title="update_votes_yes" i18n:attributes="title"
+           tal:condition="python: showVotes and showSave" align="right"
+           tal:attributes="src string:$portal_url/yes.gif;
+                           onClick python:'saveItemPeopleInfos(\'%s\', true)' % context.absolute_url()"/>
+      <tal:comment replace="nothing">Save votes</tal:comment>
+      <img style="cursor:pointer" title="save" i18n:attributes="title"
+           tal:condition="python: showVotes and (showSave or mayEditQAs)" align="right"
+           tal:attributes="src string:$portal_url/save.gif;
+                           onClick python:'saveItemPeopleInfos(\'%s\')' % context.absolute_url()"/>
+      <tal:comment replace="nothing">Refresh votes</tal:comment>
+      <img style="cursor:pointer;" title="refresh_votes" i18n:attributes="title"
+           tal:condition="showRefresh" align="right"
+           tal:attributes="src string:$portal_url/refresh.gif;
+                           onClick python:'refreshVotes(\'%s\')' % context.absolute_url()"/>
+      <i tal:condition="error" tal:content="request/peopleMsg"
+         style="color:red; margin-right: 1em;"></i>
+    </th>
+  </tr>
+  <tbody>
+</table>
+</form>
+</div>
+
+ 
