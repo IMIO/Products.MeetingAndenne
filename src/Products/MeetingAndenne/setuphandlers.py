@@ -29,6 +29,17 @@ def isNotMeetingAndenneProfile(context):
 
 
 
+def run_after(context):
+    '''Called after the profile-Products.MeetingAndenne:default profile
+       is fully imported'''
+    profileId = 'profile-Products.MeetingAndenne:default'
+    stepContext = context._getImportContext(profileId)
+
+    updateRoleMappings(stepContext)
+    postInstall(stepContext)
+
+
+
 def updateRoleMappings(context):
     """after workflow changed update the roles mapping. this is like pressing
     the button 'Update Security Setting' and portal_workflow"""
@@ -58,13 +69,9 @@ def logStep(method, context):
     logger.info("Applying '%s' in profile '%s'" % (method, '/'.join(context._profile_path.split(os.sep)[-3:])))
 
 
-def isNotMeetingSeraingSeraingProfile(context):
-    return context.readDataFile("MeetingSeraing_seraing_marker.txt") is None
-
-
 def installMeetingAndenne(context):
     """ Run the default profile before bing able to run the Andenne profile"""
-    if isNotMeetingSeraingSeraingProfile(context):
+    if isNotMeetingAndenneProfile(context):
         return
 
     logStep("installMeetingAndenne", context)
@@ -94,7 +101,7 @@ def _installPloneMeeting(context):
 def initializeTool(context):
     '''Initialises the PloneMeeting tool based on information from the current
        profile.'''
-    if isNotMeetingSeraingSeraingProfile(context):
+    if isNotMeetingAndenneProfile(context):
         return
 
     logStep("initializeTool", context)
@@ -106,7 +113,7 @@ def showHomeTab(context, site):
     """
        Make sure the 'home' tab is shown...
     """
-    if isNotMeetingSeraingProfile(context):
+    if isNotMeetingAndenneProfile(context):
         return
 
     logStep("showHomeTab", context)
@@ -120,7 +127,7 @@ def showHomeTab(context, site):
 
 def reinstallPloneMeetingSkin(context, site):
     """
-       Reinstall Products.plonemeetingskin as the reinstallation of MeetingSeraing
+       Reinstall Products.plonemeetingskin as the reinstallation of MeetingAndenne
        change the portal_skins layers order
     """
     if isNotMeetingAndenneProfile(context):
@@ -138,10 +145,10 @@ def reinstallPloneMeetingSkin(context, site):
 
 def reorderSkinsLayers(context, site):
     """
-       Reinstall Products.plonemeetingskin and re-apply MeetingSeraing skins.xml step
-       as the reinstallation of MeetingSeraing and PloneMeeting changes the portal_skins layers order
+       Reinstall Products.plonemeetingskin and re-apply MeetingAndenne skins.xml step
+       as the reinstallation of MeetingAndenne and PloneMeeting changes the portal_skins layers order
     """
-    if isNotMeetingSeraingProfile(context) and isNotMeetingSeraingSeraingProfile(context):
+    if isNotMeetingAndenneProfile(context):
         return
 
     logStep("reorderSkinsLayers", context)
@@ -168,7 +175,7 @@ def reorderCss(context):
        Make sure CSS are correctly reordered in portal_css so things
        work as expected...
     """
-    if isNotMeetingAndenneProfile(context) and isNotMeetingSeraingSeraingProfile(context):
+    if isNotMeetingAndenneProfile(context):
         return
 
     site = context.getSite()

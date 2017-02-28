@@ -14,6 +14,7 @@
       directory="profiles/default"
       description="Extension profile for MeetingAndenne."
       provides="Products.GenericSetup.interfaces.EXTENSION"
+      post_handler="Products.MeetingAndenne.setuphandlers.run_after"
       />
 
   <!-- ##code-section profiles.zcml-bottom #fill in your manual code here -->
@@ -62,6 +63,14 @@
    source="3100"
    destination="3200"
    handler="Products.MeetingAndenne.migrations.migrate_to_3_2.migrate"
+   profile="Products.MeetingAndenne:default" />
+
+  <genericsetup:upgradeStep
+   title="Migrate to MeetingAndenne 3.3"
+   description="Performs migration from MeetingAndenne 3.2 to MeetingAndenne 3.3"
+   source="3200"
+   destination="3300"
+   handler="Products.MeetingAndenne.migrations.migrate_to_3_3.migrate"
    profile="Products.MeetingAndenne:default" />
 
   <!-- ##/code-section profiles.zcml-bottom -->

@@ -88,14 +88,16 @@ class Migrate_To_3_3(Migrator):
 
         site = self.portal
         for cfg in site.portal_plonemeeting.objectValues('MeetingConfig'):
+            if cfg.id != 'meeting-config-college':
+                continue
             cfg.createTopics(topicsInfo)
         logger.info('Done.')
 
     def run(self):
         logger.info('Migrating to MeetingAndenne 3.3...')
-#        self._migrateItemDecisionReportTextAttributeOnConfigs()
-#        self._updateOnMeetingTransitionItemTransitionToTrigger()
-#        self._addCDLDTopics()
+        self._migrateItemDecisionReportTextAttributeOnConfigs()
+        self._updateOnMeetingTransitionItemTransitionToTrigger()
+        self._addCDLDTopics()
         # reinstall so skins and so on are correct
         self.reinstall(profiles=[u'profile-Products.MeetingAndenne:default', ])
         self.finish()
@@ -105,8 +107,10 @@ class Migrate_To_3_3(Migrator):
 def migrate(context):
     '''This migration function:
 
-       1) Remove obsolete attribut 'itemDecisionReportText' from every meetingConfigs;
-       2) Reinstall Products.MeetingCommunes so skin and so on are correct.
+       1) Remove obsolete attribute 'itemDecisionReportText' from every meetingConfigs.
+       2) Migrate onMeetingTransitionItemTransitionToTrigger
+       3) Add topics for CDLD synthesis.
+       4) Reinstall Products.MeetingAndenne so skin and so on are correct.
     '''
     Migrate_To_3_3(context).run()
 # ------------------------------------------------------------------------------
