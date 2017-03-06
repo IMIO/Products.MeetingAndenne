@@ -1,0 +1,11 @@
+<?xml version="1.0"?>
+<portlets xmlns:i18n="http://xml.zope.org/namespaces/i18n" i18n:domain="plone">
+  <blacklist manager="plone.leftcolumn" category="context"
+             location="/gestion-courrier" status="block" />
+ 
+  <assignment name="portlet_mail" category="context" key="/gestion-courrier"
+              manager="plone.leftcolumn" type="meetingandenne.portlets.mail" >
+    <property name="macro">portlet</property>
+    <property name="template">portlet_mail</property>
+  </assignment>
+</portlets>

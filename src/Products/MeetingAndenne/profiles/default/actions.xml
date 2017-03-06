@@ -1,0 +1,12 @@
+<?xml version="1.0"?>
+<object name="portal_actions" meta_type="Plone Actions Tool"
+        xmlns:i18n="http://xml.zope.org/namespaces/i18n">
+  <action-provider name="portal_actions"/>
+
+  <!-- Manage portal_tabs actions. -->
+  <object name="portal_tabs" meta_type="CMF Action Category">
+   <object name="comite-de-direction_action" meta_type="CMF Action" remove="true"/>
+   <object name="courrierfake_action" meta_type="CMF Action" remove="true"/>
+  </object>
+
+</object>
