@@ -65,46 +65,51 @@
             <div class="discreet">
                 <span class="item_attribute_label"
                       i18n:translate="PloneMeeting_label_creationDate"></span>:&nbsp;&nbsp;
-                <span tal:content="python: context.restrictedTraverse('@@plone').toLocalizedTime(context.CreationDate(),long_format=1);"></span>
+                <span tal:content="python: context.restrictedTraverse('@@plone').toLocalizedTime(context.CreationDate(), long_format=1)"></span>
             </div>
 
             <tal:comment replace="nothing">Treating User</tal:comment>
-            <div class="discreet">
+            <div class="discreet"
+                 tal:define="treatUser context/getTreatUser">
                 <span class="item_attribute_label"
                       i18n:translate="MeetingAndenne_label_treatUser"></span>:&nbsp;&nbsp;
-                <span tal:condition="treatUser" tal:content="python: context.portal_membership.getMemberInfo(context.getTreatUser())['fullname']"></span>
+                <span tal:condition="treatUser" tal:content="python: context.portal_membership.getMemberInfo(treatUser)['fullname']"></span>
                 <span tal:condition="not: treatUser">-</span>
             </div>
 
             <tal:comment replace="nothing">Typing User</tal:comment>
-            <div class="discreet">
+            <div class="discreet"
+                 tal:define="creator context/Creator">
                 <span class="item_attribute_label"
                       i18n:translate="MeetingAndenne_label_typingUser"></span>:&nbsp;&nbsp;
-                <span tal:condition="creator" tal:content="python: context.portal_membership.getMemberInfo(context.Creator())['fullname']"></span>
+                <span tal:condition="creator" tal:content="python: context.portal_membership.getMemberInfo(creator)['fullname']"></span>
                 <span tal:condition="not: creator">-</span>
             </div>
 
             <tal:comment replace="nothing">Verifying User</tal:comment>
-            <div class="discreet">
+            <div class="discreet"
+                 tal:define="verifUser context/getVerifUser">
                 <span class="item_attribute_label"
                       i18n:translate="MeetingAndenne_label_verifUser"></span>:&nbsp;&nbsp;
-                <span tal:condition="verifUser" tal:content="python: context.portal_membership.getMemberInfo(context.getVerifUser())['fullname']"></span>
+                <span tal:condition="verifUser" tal:content="python: context.portal_membership.getMemberInfo(verifUser)['fullname']"></span>
                 <span tal:condition="not: verifUser">-</span>
             </div>
 
             <tal:comment replace="nothing">Reference</tal:comment>
-            <div class="discreet" tal:condition="python: not context.adapted().israpcolaucon()">
+            <div class="discreet" tal:condition="python: not context.adapted().israpcolaucon()"
+                 tal:define="refdoc context/getRefdoc">
                 <span class="item_attribute_label"
                       i18n:translate="MeetingAndenne_label_refDoc"></span>:&nbsp;&nbsp;
-                <span tal:condition="refdoc" tal:content="context/getRefdoc></span>
+                <span tal:condition="refdoc" tal:content="refdoc"></span>
                 <span tal:condition="not: refdoc">-</span>
             </div>
 
             <tal:comment replace="nothing">Your Reference</tal:comment>
-            <div class="discreet" tal:condition="python: not context.adapted().israpcolaucon()">
+            <div class="discreet" tal:condition="python: not context.adapted().israpcolaucon()"
+                 tal:define="yourrefdoc context/getYourrefdoc">
                 <span class="item_attribute_label"
                       i18n:translate="MeetingAndenne_label_yourrefDoc"></span>:&nbsp;&nbsp;
-                <span tal:condition="yourrefdoc" tal:content="context/getYourrefdoc></span>
+                <span tal:condition="yourrefdoc" tal:content="yourrefdoc"></span>
                 <span tal:condition="not: yourrefdoc">-</span>
             </div>
 
@@ -143,12 +148,17 @@
             <tal:comment replace="nothing">Copy groups for this item</tal:comment>
             <div class="discreet" tal:condition="python: context.isCopiesEnabled()"
                                   tal:define="copyGroups context/getCopyGroups;">
+                <tal:field define="fieldName python: 'copyGroups'; ajaxEdit python:True">
+                    <metal:f use-macro="context/@@ma-macros/viewMultiSelectField"/>
+                </tal:field>
+<!-- TO BE REMOVED 
                 <span class="item_attribute_label"
                       i18n:translate="PloneMeeting_label_copyGroups"></span>:&nbsp;&nbsp;
                 <tal:displayCopyGroups condition="copyGroups">
                     <span metal:use-macro="python: here.widget('copyGroups', mode='view')" />
                 </tal:displayCopyGroups>
                 <span tal:condition="not: copyGroups">-</span>
+-->
             </div>
 
             <tal:comment replace="nothing">Item assembly</tal:comment>
@@ -391,11 +401,11 @@
 
     <!-- XXX Text decision : Cannot be modified directly as it is the concatenation of two fields -->
     <tal:comment replace="nothing">Decision</tal:comment>
-    <div id="decision" tal:condition="python: not context.adapted().israpcolaucon() member.has_permission('PloneMeeting: Read decision', context) and (not context.fieldIsEmpty('decision') or not context.fieldIsEmpty('projetpv'))">
+    <div id="decision" tal:condition="python: not context.adapted().israpcolaucon() and member.has_permission('PloneMeeting: Read decision', context) and (not context.fieldIsEmpty('decision') or not context.fieldIsEmpty('projetpv'))">
       <fieldset>
         <legend>
           <span tal:condition="lang" class="pmLanguage" tal:content="lang"></span>
-          <span tal:replace="python: field.widget.Label(context)"></span>
+          <span class="item_attribute_label" i18n:translate="MeetingAndenne_label_proposition"></span>
         </legend>
         <span tal:replace="structure context/getDecision"></span>
         <span tal:replace="structure context/getProjetpv"></span>

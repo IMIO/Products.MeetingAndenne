@@ -329,7 +329,6 @@ def update_item_schema(baseSchema):
     completeItemSchema['title'].widget.condition='python: not here.adapted().isformation()'
     completeItemSchema['decision'].widget.condition='python: not here.adapted().isformation()'
     completeItemSchema['description'].widget.condition='python: not here.adapted().isformation()'
-#    completeItemSchema['proposingGroup'].default_method='getDefaultProposingGroup'
     completeItemSchema['copyGroups'].write_permission="MeetingAndenne: Write copygroup"
     completeItemSchema['description'].widget.label_method='getLabelForDescription'
 

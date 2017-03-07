@@ -551,126 +551,27 @@ class CustomMeetingItemAndenne(MeetingItem):
     def __init__(self, item):
         self.context = item
 
-#    security.declarePublic('getAttendeesForPrinting')
-#    def getAttendeesForPrinting(self):
-#        '''Get the attendees list to print in templates.'''
-#        return self.getMeeting().getAttendeesForPrinting()
-#
-#    MeetingItem.getAttendeesForPrinting=getAttendeesForPrinting
-#    #it'a a monkey patch because it's the only way to change the behaviour of the MeetingItem class
-#
-#    security.declarePublic('getSignatoriesForPrinting')
-#    def getSignatoriesForPrinting(self, pos=0, level=0, pv=False):
-#        '''Returns the signatories in html mode for printing'''
-#        return self.getMeeting().getSignatoriesForPrinting(pos=pos, level=level, pv=pv)
-#
-#    MeetingItem.getSignatoriesForPrinting=getSignatoriesForPrinting
-#    #it'a a monkey patch because it's the only way to change the behaviour of the MeetingItem class
-#
-#    ###### Begin Overrides MeetingCommunes MeetingItemCustom adapter ###########################
-#    #has we override the MeetingCommunes.MeetingItemCustomAdapter, we have to recover overrided methods...
-#    security.declarePublic('getMeetingsAcceptingItems')
-#    def getMeetingsAcceptingItems(self):
-#        """
-#            Override the default method so we only display meetings that are
-#            in the 'created' or 'frozen' state
-#        """
-#        pmtool = getToolByName(self.context, "portal_plonemeeting")
-#        catalogtool = getToolByName(self.context, "portal_catalog")
-#        meetingPortalType = pmtool.getMeetingConfig(\
-#                            self.context).getMeetingTypeName()
-#        # If the current user is a meetingManager (or a Manager),
-#        # he is able to add a meetingitem to a 'decided' meeting.
-#        review_state=['created', 'frozen', ]
-#        member = self.context.portal_membership.getAuthenticatedMember()
-#        if member.has_role('MeetingManager') or member.has_role('Manager'):
-#            review_state.append('decided')
-#        res = catalogtool.unrestrictedSearchResults(
-#            portal_type=meetingPortalType,
-#            review_state=review_state,
-#            sort_on='getDate')
-#        # Frozen meetings may still accept "late" items.
-#        return res
-#
-#    security.declarePublic('getAdvisers')
-#    def getAdvisers(self):
-#        ''' Implemented to surround strange bug with default_method '''
-#        res = MeetingItem.getAdvisers(self.context)
-#        return res
-#
-#    security.declarePublic('getAdvicesToGive')
-#    def getAdvicesToGive(self):
-#        '''This method returns 2 lists of groups in the name of which the
-#           currently logged user may, on this item:
-#           - add an advice;
-#           - edit or delete an advice.'''
-#        tool = self.portal_plonemeeting
-#        cfg = tool.getMeetingConfig(self)
-#        # Advices must be enabled
-#        if not cfg.getUseAdvices(): return (None, None)
-#        # Item state must be within the states allowing to add/edit an advice
-#        itemState = self.queryState()
-#        # Logged user must be an adviser
-#        # tool.getGroups consider currently authenticated member groups
-#        meetingGroups = tool.getGroups(suffix='advisers')
-#        if not meetingGroups: return (None, None)
-#        # Item must have the advices variable
-#        if not hasattr(self, 'advices'): return (None, None)
-#
-#
-#        # Produce the lists of groups to which the user belongs and for which,
-#        # - no advice has been given yet (list of advices to add)
-#        # - an advice has already been given (list of advices to edit/delete).
-#        toAdd = []
-#        toEdit = []
-#        for group in meetingGroups:
-#            if group.id not in self.advices: continue
-#            adviceType = self.advices[group.id]['type']
-#            if (adviceType == 'not_given') and \
-#               (itemState in group.getItemAdviceStates(cfg)):
-#                toAdd.append((group.id, self.advices[group.id]['name']))
-#            if (adviceType != 'not_given') and \
-#               (itemState in group.getItemAdviceEditStates(cfg)):
-#                toEdit.append(group.id)
-#        return (toAdd, toEdit)
-#
-#    MeetingItem.getAdvicesToGive=getAdvicesToGive
-#    #it'a a monkey patch because it's the only way to change the behaviour of the MeetingItem class
-#
-#    security.declarePublic('getAdvicesByType')
-#    def getAdvicesByType(self):
-#        '''Returns the list of advices, grouped by type.'''
-#        res = {}
-#        try:
-#            for groupId, advice in self.advices.iteritems():
-#                # Create the entry for this type of advice if not yet created.
-#                if advice['type'] not in res:
-#                    res[advice['type']] = advices = []
-#                else:
-#                    advices = res[advice['type']]
-#                advices.append(advice.__dict__['data'])
-#        except AttributeError:
-#            return False
-#        return res
-#
-#    MeetingItem.getAdvicesByType=getAdvicesByType
-#    #it'a a monkey patch because it's the only way to change the behaviour of the MeetingItem class
-#
-#    security.declarePublic('mayBeLinkedToTasks')
-#    def mayBeLinkedToTasks(self):
-#        '''See doc in interfaces.py.'''
-#        item = self.getSelf()
-#        res = False
-#        if (item.queryState() in ('accepted', 'refused', 'delayed')):
-#            res = True
-#        return res
+    ###### Begin Overrides MeetingCommunes MeetingItemCustom adapter ###########################
+
+    def getIcons(self, inMeeting, meeting):
+        '''Check docstring in PloneMeeting interfaces.py.'''
+        item = self.getSelf()
+        # Default PM item icons
+        res = MeetingItem.getIcons(item, inMeeting, meeting)
+        # Add our icons for accepted_but_modified and pre_accepted
+        itemState = item.queryState()
+        if itemState == 'accepted_but_modified':
+            res.append(('accepted_but_modified.png', 'icon_help_accepted_but_modified'))
+        elif itemState == 'pre_accepted':
+            res.append(('pre_accepted.png', 'icon_help_pre_accepted'))
+        return res
+
 #    ###### End Overrides MeetingCommunes MeetingItemCustom adapter #############################
-#
+
 #    security.declarePublic('getExtraFieldsToCopyWhenCloning')
 #    def getExtraFieldsToCopyWhenCloning(self):
 #        '''Lists the fields to keep when cloning an item'''
 #        return ['formation_desc', 'formation_compte', 'template_flag']
-#
 #
 #    security.declarePublic('showclosewritepvAction')
 #    def showclosewritepvAction(self):
@@ -901,32 +802,6 @@ class CustomMeetingItemAndenne(MeetingItem):
 #    MeetingItem.updateMeetingItem=updateMeetingItem
 #    #it'a a monkey patch because it's the only way to change the behaviour of the MeetingItem class
 #
-#    security.declarePublic('extractBudget')
-#    def extractBudget(self):
-#        if (not self.context.budgetRelated):
-#            return ['','']
-#
-#        returnValue=['XXXX','YYYY']
-#        budget_array=self.context.budgetInfos().replace(';',' ').replace('>',' ').replace('&',' ').replace('<',' ').split()
-#        for element in budget_array:
-#            price=element.replace('.','').replace(',','.')
-#            if (self.adapted().isFloat(price)):
-#                returnValue[0]=element
-#                break
-#        for element in budget_array:
-#            article=element.replace('.','').replace('/','').replace('-','')
-#            if (self.adapted().isFloat(article) and element.count('/')== 1):
-#                returnValue[1]=element
-#                break
-#        return returnValue
-#
-#    security.declarePublic('isFloat')
-#    def isFloat(self,string):
-#        try:
-#            float(string)
-#            return True
-#        except ValueError:
-#            return False
 #
 #    security.declarePublic('onEdit')
 #    def onEdit(self,isCreated):
@@ -1177,36 +1052,36 @@ class CustomMeetingItemAndenne(MeetingItem):
 #        from  DateTime import now
 #        return now().strftime("%d/%m/%Y")
 #
-#    security.declarePublic('getDocReference')
-#    def getDocReference(self):
-#        '''Return a too complicated item reference to be defined as a TAL Expression
-#            (field MeetingConfig.itemReferenceFormat.'''
-#        from  DateTime import DateTime
-#
-#        member = self.portal_membership.getAuthenticatedMember()
-#        grp_tool = self.acl_users.source_groups
-#        groups = grp_tool.getGroupsForPrincipal(member)
-#        g='NOK'
-#        for group in groups:
-#            i = []
-#            i=group.split('_')
-#            if i[1]=='advisers':
-#                g=i[0]
-#                break
-#
-#        userMeetingGroups = self.portal_plonemeeting.getGroups()
-#        ref= 'XXXX'+'/XX.XX/'+str(DateTime(self.CreationDate()).strftime('%Y.%m')) + '/'
-#
-#        proposingGroup = None
-#        for proposingGroup in userMeetingGroups:
-#            if proposingGroup.getId() == g:
-#                ref=proposingGroup.getAcronym() + '/XX.XX/' + str(DateTime(self.CreationDate()).strftime('%Y.%m')) + '/'
-#        if g=='NOK' and proposingGroup:
-#            ref=proposingGroup.getAcronym() + '/XX.XX/' + str(DateTime(self.CreationDate()).strftime('%Y.%m')) + '/'
-#        return ref
-#
-#    MeetingItem.getDocReference=getDocReference
-#    #it'a a monkey patch because it's the only way to have a default method in the schema
+    security.declarePublic('getDocReference')
+    def getDocReference(self):
+        '''Return a too complicated item reference to be defined as a TAL Expression
+           (field MeetingConfig.itemReferenceFormat.'''
+        userMeetingGroups = self.portal_plonemeeting.getGroupsForUser(suffix="creators")
+        if len(userMeetingGroups) >= 1:
+            ref = userMeetingGroups[-1].getAcronym()
+        else:
+            ref = 'XXXX'
+        return ref + '/XX.XX/' + DateTime(self.CreationDate()).strftime('%Y.%m') + '/'
+
+    MeetingItem.getDocReference=getDocReference
+    #it'a a monkey patch because it's the only way to have a default method in the schema
+
+    security.declarePublic('listUserGroup')
+    def listUserGroup(self):
+        '''Lists the Users that are associated to the proposing group(s) of the authenticated user.'''
+        userCreatorGroups = self.portal_plonemeeting.getGroupsForUser(suffix="creators", zope=True)
+
+        res = set()
+        for group in userCreatorGroups:
+            for user in group.getMemberIds():
+                res.add( (user, self.portal_membership.getMemberById(user).getProperty('fullname')) )
+
+        return DisplayList( tuple(res) )
+
+    MeetingItem.listUserGroup=listUserGroup
+    #it'a a monkey patch because it's the only way to have a default method in the schema
+
+
 #
 #    def listItemPresents(self):
 #        '''Returns the list of attendees selectable as presents.'''
@@ -1225,7 +1100,7 @@ class CustomMeetingItemAndenne(MeetingItem):
 #    # it'a a monkey patch
 #
 #    security.declarePublic('getAttendees')
-#    def getAttendees(self, usage=None, includeDeleted=False,includeAbsents=False):
+#    def getAttendees(self, usage=None, includeDeleted=False, includeAbsents=False, includeReplacements=False):
 #        '''Returns the attendees for this item. Takes into account
 #           self.itemAbsents, excepted if p_includeAbsents is True. If a given
 #           p_usage is defined, the method returns only users having this
@@ -1252,6 +1127,22 @@ class CustomMeetingItemAndenne(MeetingItem):
 #
 #    MeetingItem.getAttendees=getAttendees
 #    # it'a a monkey patch
+#
+#    security.declarePublic('getAttendeesForPrinting')
+#    def getAttendeesForPrinting(self):
+#        '''Get the attendees list to print in templates.'''
+#        return self.getMeeting().getAttendeesForPrinting()
+#
+#    MeetingItem.getAttendeesForPrinting=getAttendeesForPrinting
+#    #it'a a monkey patch because it's the only way to change the behaviour of the MeetingItem class
+#
+#    security.declarePublic('getSignatoriesForPrinting')
+#    def getSignatoriesForPrinting(self, pos=0, level=0, pv=False):
+#        '''Returns the signatories in html mode for printing'''
+#        return self.getMeeting().getSignatoriesForPrinting(pos=pos, level=level, pv=pv)
+#
+#    MeetingItem.getSignatoriesForPrinting=getSignatoriesForPrinting
+#    #it'a a monkey patch because it's the only way to change the behaviour of the MeetingItem class
 #
 #    security.declarePublic('onDuplicate')
 #    def onDuplicate(self):
@@ -1320,55 +1211,124 @@ class CustomMeetingItemAndenne(MeetingItem):
 #    MeetingItem.showDuplicateItemAction=showDuplicateItemAction
 #    #it'a a monkey patch because it's the only way to have a default method in the schema
 #
-#    security.declarePublic('israpcolaucon')
-#    def israpcolaucon(self):
-#        """
-#        """
-#        meetingconfig = self.context.portal_plonemeeting.getMeetingConfig(self.context)
-#        if  meetingconfig.id == 'rapport-col-au-con':
-#            return True
-#        else :
-#            return False
+    security.declarePublic('israpcolaucon')
+    def israpcolaucon(self):
+        """
+        """
+        meetingconfig = self.context.portal_plonemeeting.getMeetingConfig(self.context)
+        if  meetingconfig.id == 'rapport-col-au-con':
+            return True
+        else :
+            return False
 #    MeetingItem.israpcolaucon=israpcolaucon
-#
-#    security.declarePublic('isformation')
-#    def isformation(self):
-#        if self.context.getTemplate_flag()=='formation' and (self.context.queryState()=='active' or self.context.queryState()=='itemcreated'):
-#            return True
-#        else :
-#            return False
-#
-#    security.declarePublic('getTrainingDate')
-#    def getTrainingDate(self):
-#        '''Sets training date default value to now'''
-#        from DateTime import now
-#        return now()
-#
-#    MeetingItem.getTrainingDate=getTrainingDate
-#    #it'a a monkey patch because it's the only way to change the behaviour of the MeetingItem class
-#
-#    security.declarePublic('getLabelForDescription')
-#    def getLabelForDescription(self):
-#        """
-#          If we are in the rapcolaucon meetingConfig, we change the label of the 'description' field
-#        """
-#        if self.adapted().israpcolaucon():
-#            return "Corps du texte"
-#        else:
-#            return self.utranslate("meeting_item_description", domain="PloneMeeting", context=self)
-#
-#    security.declarePublic('getLabelForIncludebudget')
-#    def getLabelForIncludebudget(self):
-#        """
-#          If we are in the formation template, we change the label of the 'includebudget' field
-#        """
-#        if self.adapted().isformation():
-#            return "La formation est payante - Je remplis les champs suivants (si la formation est gratuite, il y a lieu de décocher et ne rien remplir ci-dessous)"
-#        else:
-#            return self.utranslate("MeetingAndenne_label_IncludeBudget", domain="MeetingAndenne", context=self)
-#
-#    MeetingItem.getLabelForDescription=getLabelForDescription
-#
+
+
+
+
+
+
+
+    ### FORMATION : TO BE REMOVED LATER ###
+    security.declarePublic('isformation')
+    def isformation(self):
+        if self.context.getTemplate_flag()=='formation' and (self.context.queryState()=='active' or self.context.queryState()=='itemcreated'):
+            return True
+        else :
+            return False
+
+    ### FORMATION : TO BE REMOVED LATER ###
+    security.declarePublic('getTrainingDate')
+    def getTrainingDate(self):
+        '''Sets training date default value to now'''
+        return DateTime()
+
+    MeetingItem.getTrainingDate=getTrainingDate
+    #it'a a monkey patch because it's the only way to change the behaviour of the MeetingItem class
+
+    ### FORMATION : TO BE REMOVED LATER ###
+    security.declarePublic('listDestUsers') 
+    def listDestUsers(self):
+        '''Lists the users that will be selectable to be in destination (view only) for this
+            item.'''
+        pgp = self.portal_membership
+        res = []
+        for user in pgp.listMembers():
+            res.append((user.getId(),user.getProperty('fullname')))
+        res = sorted(res, key=lambda student: student[1])
+        return DisplayList(tuple(res))
+
+    MeetingItem.listDestUsers=listDestUsers
+    #it'a a monkey patch because it's the only way to have a default method in the schema
+
+    ### FORMATION : TO BE REMOVED LATER ###
+    security.declarePublic('listFormationMod') 
+    def listFormationMod(self,displaylist=True):
+        res = []
+        res.append((1,self.translate('MeetingAndenne_label_formation_mod1', domain='PloneMeeting').encode('utf-8')))
+        res.append((2,self.translate('MeetingAndenne_label_formation_mod2', domain='PloneMeeting').encode('utf-8')))
+        if (displaylist):
+            return DisplayList(tuple(res))
+        else:
+            return tuple(res)
+
+    MeetingItem.listFormationMod=listFormationMod
+    #it'a a monkey patch because it's the only way to have a default method in the schema
+
+    ### FORMATION : TO BE REMOVED LATER ###
+    security.declarePublic('getLabelForIncludebudget')
+    def getLabelForIncludebudget(self):
+        """
+          If we are in the formation template, we change the label of the 'includebudget' field
+        """
+        if self.adapted().isformation():
+            return "La formation est payante - Je remplis les champs suivants (si la formation est gratuite, il y a lieu de décocher et ne rien remplir ci-dessous)"
+        else:
+            return self.utranslate("MeetingAndenne_label_IncludeBudget", domain="MeetingAndenne", context=self)
+
+    ### FORMATION : TO BE REMOVED LATER ###
+    security.declarePublic('extractBudget')
+    def extractBudget(self):
+        if (not self.context.budgetRelated):
+            return ['','']
+
+        returnValue=['XXXX','YYYY']
+        budget_array=self.context.budgetInfos().replace(';',' ').replace('>',' ').replace('&',' ').replace('<',' ').split()
+        for element in budget_array:
+            price=element.replace('.','').replace(',','.')
+            if (self.adapted().isFloat(price)):
+                returnValue[0]=element
+                break
+        for element in budget_array:
+            article=element.replace('.','').replace('/','').replace('-','')
+            if (self.adapted().isFloat(article) and element.count('/')== 1):
+                returnValue[1]=element
+                break
+        return returnValue
+
+    ### FORMATION : TO BE REMOVED LATER ###
+    security.declarePublic('isFloat')
+    def isFloat(self,string):
+        try:
+            float(string)
+            return True
+        except ValueError:
+            return False
+
+
+    ### RAPCOLAUCON ###
+    security.declarePublic('getLabelForDescription')
+    def getLabelForDescription(self):
+        """
+          If we are in the rapcolaucon meetingConfig, we change the label of the 'description' field
+        """
+        if self.adapted().israpcolaucon():
+            return "Corps du texte"
+        else:
+            return self.utranslate("meeting_item_description", domain="PloneMeeting", context=self)
+
+    MeetingItem.getLabelForDescription=getLabelForDescription
+    #it'a a monkey patch because it's the only way to have a default method in the schema
+
 #    security.declarePublic('getUserofAction')
 #    def getUserofAction(self):
 #            '''Returns the user of the last validate action that
@@ -1383,53 +1343,6 @@ class CustomMeetingItemAndenne(MeetingItem):
 #                    if (step['action'] == 'validate'):
 #                        res = step['actor']
 #            return res
-#
-#    security.declarePublic('listDestUsers') 
-#    def listDestUsers(self):
-#        '''Lists the users that will be selectable to be in destination (view only) for this
-#            item.'''
-#        pgp = self.portal_membership
-#        res = []
-#        for user in pgp.listMembers():
-#            res.append((user.getId(),user.getProperty('fullname')))
-#        res = sorted(res, key=lambda student: student[1])
-#        return DisplayList(tuple(res))
-#
-#    MeetingItem.listDestUsers=listDestUsers
-#    #it'a a monkey patch because it's the only way to have a default method in the schema
-#
-#    security.declarePublic('listFormationMod') 
-#    def listFormationMod(self,displaylist=True):
-#        res = []
-#        res.append((1,self.translate('MeetingAndenne_label_formation_mod1', domain='PloneMeeting').encode('utf-8')))
-#        res.append((2,self.translate('MeetingAndenne_label_formation_mod2', domain='PloneMeeting').encode('utf-8')))
-#        if (displaylist):
-#            return DisplayList(tuple(res))
-#        else:
-#            return tuple(res)
-#
-#    MeetingItem.listFormationMod=listFormationMod
-#
-#    security.declarePublic('listUserGroup')
-#    def listUserGroup(self):
-#        '''Lists the Users that are associated to the proposing group(s) of the authenticated user.'''
-#        from Products.Archetypes.utils import DisplayList
-#        #member = self.portal_membership.getAuthenticatedMember()
-#        member = self.portal_membership.getMemberById(self.Creator())
-#        grp_tool = self.acl_users.source_groups
-#        res= []
-#        if member:
-#         groups = grp_tool.getGroupsForPrincipal(member)
-#         for group in groups:
-#            i = []
-#            i=group.split('_')
-#            if i[1] == 'creators':
-#                grp_obj = grp_tool.getGroupById(group)
-#                for user in grp_obj.getMemberIds():
-#                    if user:
-#                        if ( (user,self.portal_membership.getMemberById(user).getProperty('fullname')) in res ) == False:
-#                            res.append( (user,self.portal_membership.getMemberById(user).getProperty('fullname')) )
-#        return DisplayList( tuple(res) )
 #
 #    security.declarePublic('printUserGroup')
 #    def printUserGroup(self):
@@ -1459,6 +1372,9 @@ class CustomMeetingItemAndenne(MeetingItem):
 #                res=res+"</p>"
 #        return res
 #
+#    MeetingItem.printUserGroup=printUserGroup
+#    #it'a a monkey patch because it's the only way to have a default method in the schema
+#
 #    security.declarePublic('getUsersofGroup')
 #    def getUsersofGroup(self,member):
 #        '''Lists the Users that are associated to the proposing group(s) of the m_ user.'''
@@ -1479,12 +1395,6 @@ class CustomMeetingItemAndenne(MeetingItem):
 #                '''if ( (user,self.portal_membership.getMemberById(user).getProperty('fullname')) in res ) == False:'''
 #                res.append(user)
 #        return res
-#
-#    MeetingItem.listUserGroup=listUserGroup
-#    #it'a a monkey patch because it's the only way to have a default method in the schema
-#
-#    MeetingItem.printUserGroup=printUserGroup
-#    #it'a a monkey patch because it's the only way to have a default method in the schema
 #
 #    security.declarePublic('listAnnexes')
 #    def listAnnexes(self,decision=False,toprint=True):

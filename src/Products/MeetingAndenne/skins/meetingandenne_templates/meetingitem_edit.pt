@@ -23,15 +23,17 @@
         <dt i18n:translate="" i18n:domain="plone">Warning</dt><dd i18n:translate="warning_invalidate_advices" i18n:domain="PloneMeeting"></dd>
     </dl><br />
     </tal:showWarningWillInvalidateAdvices>
-     <!-- XXX ajout des 3 champs suivant -->
+
+    <tal:comment replace="nothing">Custom reference fields</tal:comment>
     <metal:field use-macro="python:here.widget('isconfidential', mode='edit')"/>
     <metal:field use-macro="python:here.widget('refdoc', mode='edit')"/>
     <metal:field use-macro="python:here.widget('yourrefdoc', mode='edit')"/>
+
     <tal:comment replace="nothing">Title and description(s), mono- or bilingual</tal:comment>
     <tal:field define="fieldName python: 'title'">
       <metal:f use-macro="context/@@pm-macros/editContentField"/>
     </tal:field>
-    
+
     <tal:field define="fieldName python: 'description'">
       <metal:f use-macro="context/@@pm-macros/editContentField"/>
     </tal:field>
@@ -40,13 +42,18 @@
                condition="python: 'detailedDescription' in usedAttrs">
       <metal:f use-macro="context/@@pm-macros/editContentField"/>
     </tal:field>
-    <tal:comment replace="nothing">Proposing group, category, classifier, toDiscuss</tal:comment>
+    <tal:comment replace="nothing">Treat user, Proposing group, category</tal:comment>
     <table cellpadding="0" cellspacing="0">
       <tr valign="top">
         <td><metal:field use-macro="python:here.widget('treatUser', mode='edit')"/></td>
         <td><metal:field use-macro="python:here.widget('proposingGroup', mode='edit')"/></td>
-        <td><metal:field use-macro="python:here.widget('classifier', mode='edit')"/></td>
         <td><metal:field use-macro="python:here.widget('category', mode='edit')"/></td>
+      </tr>
+    </table>
+    <tal:comment replace="nothing">Classifier, toDiscuss</tal:comment>
+    <table cellpadding="0" cellspacing="0">
+      <tr valign="top">
+        <td><metal:field use-macro="python:here.widget('classifier', mode='edit')"/></td>
         <tal:comment replace="nothing">Custom display of field "toDiscuss"</tal:comment>
         <td tal:condition="context/showToDiscuss">
           <div id="archetypes-fieldname-toDiscuss" class="field"
@@ -131,7 +138,7 @@
       <br/>
     </div>
     </tal:budget>
-    
+
     <metal:field use-macro="python:here.widget('oralQuestion', mode='edit')"/>
     <metal:field use-macro="python:here.widget('itemInitiator', mode='edit')"/>
 
@@ -141,7 +148,8 @@
     <tal:field define="fieldName python: 'decision'">
       <metal:f use-macro="context/@@pm-macros/editContentField"/>
     </tal:field>
-    <!-- XXX ajout des 3 champs suivant -->
+
+    <tal:comment replace="nothing">Project PV, text PV, PV</tal:comment>
     <tal:field define="fieldName python: 'projetpv'">
       <metal:f use-macro="context/@@pm-macros/editContentField"/>
     </tal:field>
