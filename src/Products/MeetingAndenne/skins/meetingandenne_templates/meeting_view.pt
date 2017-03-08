@@ -292,6 +292,12 @@
   </form>
 
   <div class="discreet">
+  <tal:comment replace="nothing">Date.  Backward compatibility for the time we used this date only</tal:comment>
+  <tal:date condition="python: ('startDate' in usedAttrs) and not context.getStartDate()">
+    <b i18n:translate="PloneMeeting_label_date"></b>&nbsp;&nbsp;
+    <span tal:replace="python:toLocalizedTime(context.getDate(),long_format=1)"></span>&nbsp;&nbsp;
+  </tal:date>
+
   <tal:comment replace="nothing">Place</tal:comment>
   <tal:place condition="python: ('place' in usedAttrs) and context.getPlace()">
     <b i18n:translate="PloneMeeting_label_place"></b>&nbsp;&nbsp;
@@ -339,7 +345,7 @@
 
   <tal:comment replace="nothing">Assembly and signatures.  Backward compatibility for people that used the 'assembly' or 'signatures'
    field before and the 'attendees' now, if the field is not empty, we display it</tal:comment>
-  <tal:assemblyFields condition="python: 'assembly' in usedAttrs or 'signatures' in usedAttrs">
+  <tal:assemblyFields condition="python: 'assembly' in usedAttrs or 'signatures' in usedAttrs or context.getAssembly()">
   <table class="no-style-table discreet"
          style="width: auto;"
          tal:define="usedAssemblyFields python: ((context.getAssembly() and True) or 'assembly' in usedAttrs,
