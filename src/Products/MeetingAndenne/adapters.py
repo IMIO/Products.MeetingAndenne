@@ -1264,8 +1264,8 @@ class CustomMeetingItemAndenne(MeetingItem):
     security.declarePublic('listFormationMod') 
     def listFormationMod(self,displaylist=True):
         res = []
-        res.append((1,self.translate('MeetingAndenne_label_formation_mod1', domain='PloneMeeting').encode('utf-8')))
-        res.append((2,self.translate('MeetingAndenne_label_formation_mod2', domain='PloneMeeting').encode('utf-8')))
+        res.append(('1',self.translate('MeetingAndenne_label_formation_mod1', domain='PloneMeeting').encode('utf-8')))
+        res.append(('2',self.translate('MeetingAndenne_label_formation_mod2', domain='PloneMeeting').encode('utf-8')))
         if (displaylist):
             return DisplayList(tuple(res))
         else:
