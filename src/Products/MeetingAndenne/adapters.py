@@ -70,6 +70,114 @@ class CustomMeetingAndenne(Meeting):
     def __init__(self, item):
         self.context = item
 
+### Functions used for template generation ###
+
+    security.declarePublic('getDisplayableName')
+    def getDisplayableName(self):
+        '''Check doc in interfaces.py.'''
+        meeting = self.getSelf()
+        return meeting.portal_plonemeeting.formatMeetingDate(meeting=meeting, withHour=True)
+
+    Meeting.getDisplayableName=getDisplayableName
+    #it'a a monkey patch because it's the only way to add a behaviour to the Meeting class
+
+    security.declarePublic('getPrintableItemsByNumCategory')
+    def getPrintableItemsByNumCategory(self, late=False, uids=[],
+                                       catstoexclude=[], exclude=True, allItems=False):
+        '''Returns a list of items ordered by category number. If there are many
+           items by category, there is always only one category, even if the
+           user have chosen a different order. If exclude=True , catstoexclude
+           represents the category number that we don't want to print and if
+           exclude=False, catsexclude represents the category number that we
+           only want to print. This is useful when we want for exemple to
+           exclude a personnal category from the meeting an realize a separate
+           meeeting for this personal category. If allItems=True, we return
+           late items AND items in order.'''
+        def getPrintableNumCategory(current_cat):
+            '''Method used here above.'''
+            current_cat_id = current_cat.getId()
+            current_cat_name = current_cat.Title()
+            current_cat_name = current_cat_name[0:2]
+            try:
+                catNum = int(current_cat_name)
+            except ValueError:
+                current_cat_name = current_cat_name[0:1]
+                try:
+                    catNum = int(current_cat_name)
+                except ValueError:
+                    catNum = current_cat_id
+            return catNum
+
+        itemsGetter = self.context.getItems
+        if late:
+            itemsGetter = self.context.getLateItems
+        items = itemsGetter()
+        if allItems:
+            items = self.context.getItems() + self.context.getLateItems()
+        # res contains all items by category, the key of res is the category
+        # number. Pay attention that the category number is obtain by extracting
+        # the 2 first caracters of the categoryname, thus the categoryname must
+        # be for exemple ' 2.travaux' or '10.Urbanisme. If not, the catnum takes
+        # the value of the id + 1000 to be sure to place those categories at the
+        # end.
+        res = {}
+        # First, we create the category and for each category, we create a
+        # dictionary that must contain the list of item in in res[catnum][1]
+        for item in items:
+            if uids:
+                if (item.UID() in uids):
+                    inuid = "ok"
+                else:
+                    inuid = "ko"
+            else:
+                inuid = "ok"
+            if (inuid == "ok"):
+                current_cat = item.getCategory(theObject=True)
+                catNum = getPrintableNumCategory(current_cat)
+                if catNum in res:
+                    res[catNum][1][item.getItemNumber()] = item
+                else:
+                    res[catNum] = {}
+                    #first value of the list is the category object
+                    res[catNum][0] = item.getCategory(True)
+                    #second value of the list is a list of items
+                    res[catNum][1] = {}
+                    res[catNum][1][item.getItemNumber()] = item
+
+        # Now we must sort the res dictionary with the key (containing catnum)
+        # and copy it in the returned array.
+        reskey = res.keys()
+        reskey.sort()
+        ressort = []
+        for i in reskey:
+            if catstoexclude:
+                if (i in catstoexclude):
+                    if exclude is False:
+                        guard = True
+                    else:
+                        guard = False
+                else:
+                    if exclude is False:
+                        guard = False
+                    else:
+                        guard = True
+            else:
+                guard = True
+
+            if guard is True:
+                k = 0
+                ressorti = []
+                ressorti.append(res[i][0])
+                resitemkey = res[i][1].keys()
+                resitemkey.sort()
+                ressorti1 = []
+                for j in resitemkey:
+                    k = k+1
+                    ressorti1.append([res[i][1][j], k])
+                ressorti.append(ressorti1)
+                ressort.append(ressorti)
+        return ressort
+
 #    security.declarePublic('getAttendeesForPrinting')
 #    def getAttendeesForPrinting(self, meeting=False):
 #        '''Check doc in interfaces.py.'''
@@ -272,24 +380,6 @@ class CustomMeetingAndenne(Meeting):
 #    Meeting.getSignatoriesForPrinting=getSignatoriesForPrinting
 #    #it'a a monkey patch because it's the only way to change the behaviour of the Meeting class
 #
-#    security.declarePublic('getDisplayableName')
-#    def getDisplayableName(self, short=False, withHour=True, likeTitle=False):
-#        '''Check doc in interfaces.py.'''
-#        meeting = self.getSelf()
-#        if likeTitle:
-#            res = meeting.Title()
-#        else:
-#            if withHour: hour = ' (%H:%M)'
-#            else:        hour = ''
-#            if short:
-#                res = meeting.getDate().strftime('%d/%m/%Y' + hour)
-#            else:
-#                res = meeting.portal_plonemeeting.getFormattedDate(
-#                    meeting.getDate()) + meeting.getDate().strftime(hour)
-#        return res
-#
-#    Meeting.getDisplayableName=getDisplayableName
-#    #it'a a monkey patch because it's the only way to change the behaviour of the Meeting class
 #
 #    security.declarePublic('getPrintableItems')
 #    def getPrintableItems(self, itemUids, late=False, ignore_review_states=[],
@@ -347,103 +437,6 @@ class CustomMeetingAndenne(Meeting):
 #                    i = i + 1
 #                items = res
 #            return items
-#
-#    security.declarePublic('getPrintableItemsByNumCategory')
-#    def getPrintableItemsByNumCategory(self, late=False, uids=[],
-#        catstoexclude=[], exclude=True, allItems=False):
-#        '''Returns a list of items ordered by category number. If there are many
-#           items by category, there is always only one category, even if the
-#           user have chosen a different order. If exclude=True , catstoexclude
-#           represents the category number that we don't want to print and if
-#           exclude=False, catsexclude represents the category number that we
-#           only want to print. This is useful when we want for exemple to
-#           exclude a personnal category from the meeting an realize a separate
-#           meeeting for this personal category. If allItems=True, we return
-#           late items AND items in order.'''
-#        def getPrintableNumCategory(current_cat):
-#            '''Method used here above.'''
-#            current_cat_id=current_cat.getId ()
-#            current_cat_name=current_cat.Title()
-#            current_cat_name=current_cat_name[0:2]
-#            try :
-#                catNum=int(current_cat_name)
-#            except ValueError :
-#                current_cat_name=current_cat_name[0:1]
-#                try :
-#                    catNum=int(current_cat_name)
-#                except ValueError :
-#                    catNum=current_cat_id
-#            return catNum
-#
-#        itemsGetter = self.context.getItems
-#        if late:
-#            itemsGetter = self.context.getLateItems
-#        items = itemsGetter()
-#        if allItems:
-#            items = self.context.getItems() + self.context.getLateItems()
-#        # res contains all items by category, the key of res is the category
-#        # number. Pay attention that the category number is obtain by extracting
-#        # the 2 first caracters of the categoryname, thus the categoryname must
-#        # be for exemple ' 2.travaux' or '10.Urbanisme. If not, the catnum takes
-#        # the value of the id + 1000 to be sure to place those categories at the
-#        # end.
-#        res = {}
-#        # First, we create the category and for each category, we create a
-#        # dictionary that must contain the list of item in in res[catnum][1]
-#        for item in items:
-#            if uids :
-#                if (item.UID() in uids) :
-#                    inuid="ok"
-#                else :
-#                    inuid="ko"
-#            else:
-#                inuid="ok"
-#            if (inuid=="ok") :
-#                current_cat = item.getCategory(theObject=True)
-#                catNum=getPrintableNumCategory(current_cat)
-#                if res.has_key(catNum) :
-#                    res[catNum][1][item.getItemNumber()] = item
-#                else :
-#                    res[catNum]={}
-#                    #first value of the list is the category object
-#                    res[catNum][0]=item.getCategory(True)
-#                    #second value of the list is a list of items
-#                    res[catNum][1]={}
-#                    res[catNum][1][item.getItemNumber()] = item
-#
-#        # Now we must sort the res dictionary with the key (containing catnum)
-#        # and copy it in the returned array.
-#        reskey=res.keys()
-#        reskey.sort()
-#        ressort = []
-#        for i in reskey:
-#            if catstoexclude :
-#                if (i in catstoexclude) :
-#                    if (exclude==False) :
-#                        guard=True
-#                    else:
-#                        guard=False
-#                else:
-#                    if (exclude==False) :
-#                        guard=False
-#                    else:
-#                        guard=True
-#            else :
-#                guard=True
-#
-#            if (guard==True) :
-#                k=0
-#                ressorti=[]
-#                ressorti.append(res[i][0])
-#                resitemkey=res[i][1].keys()
-#                resitemkey.sort()
-#                ressorti1=[]
-#                for j in resitemkey:
-#                    k=k+1
-#                    ressorti1.append([res[i][1][j],k])
-#                ressorti.append(ressorti1)
-#                ressort.append(ressorti)
-#        return ressort
 #
 #    security.declarePublic('listAllAssemblyMembers')
 #    def listAllAssemblyMembers(self):
@@ -566,7 +559,40 @@ class CustomMeetingItemAndenne(MeetingItem):
             res.append(('pre_accepted.png', 'icon_help_pre_accepted'))
         return res
 
-#    ###### End Overrides MeetingCommunes MeetingItemCustom adapter #############################
+    ###### End Overrides MeetingCommunes MeetingItemCustom adapter #############################
+
+### Functions used for template generation ###
+
+    security.declarePublic('getPrintableCopyTo')
+    def getPrintableCopyTo(self):
+        '''Formats the copyGroups field to print in the templates.'''
+        groupsCopyTo = self.context.getCopyGroups()
+        groupstr=''
+        if groupsCopyTo:
+            for group in groupsCopyTo:
+                ploneGroup = self.context.portal_groups.getGroupById(group)
+                groupstr += ploneGroup.getProperty('title').split('(')[0] + ','
+        if groupstr != '':
+            return 'Copie(s): ' + groupstr[0:-1]
+        else:
+            return ''
+
+    security.declarePublic('getPrintableCopyTo')
+    def getPrintableNumCategory(self):
+        '''Formats the category number to print in the templates.'''
+        current_cat = self.context.getCategory(theObject=True)
+        current_cat_id = current_cat.getId()
+        current_cat_name = current_cat.Title()
+        current_cat_name = current_cat_name[0:2]
+        try:
+            catNum = int(current_cat_name)
+        except ValueError:
+            current_cat_name = current_cat_name[0:1]
+            try:
+                catNum = int(current_cat_name)
+            except ValueError:
+                catNum = current_cat_id
+        return catNum
 
 #    security.declarePublic('getExtraFieldsToCopyWhenCloning')
 #    def getExtraFieldsToCopyWhenCloning(self):
@@ -979,43 +1005,10 @@ class CustomMeetingItemAndenne(MeetingItem):
 #    #it' a monkey patch
 #    MeetingItem.getDefaultBudgetInfo=getDefaultBudgetInfo
 #
-#    security.declarePublic('getPrintableCopyTo')
-#    def getPrintableCopyTo(self):
-#        """
-#           For template only : get the copy group
-#        """
-#        groupsCopyto = self.context.getCopyGroups()
-#        groupstr=''
-#        if groupsCopyto:
-#            for group in groupsCopyto:
-#                ploneGroup = self.context.portal_groups.getGroupById(group)
-#                # If the corresponding Plone group does not exist anymore,
-#                # recreate it.
-#                groupstr=groupstr + (ploneGroup.getProperty('title')).split('(')[0] + ','
-#        if groupstr != '':
-#            return 'Copie(s): ' + groupstr[0:-1]
-#        else:
-#            return ''
 #
 #    security.declarePublic('OnPaste')
 #    def OnPaste(self):
 #        self.context.at_post_create_script()
-#
-#    security.declarePublic('getPrintableNumCategory')
-#    def getPrintableNumCategory(self):
-#        current_cat = self.context.getCategory(theObject=True)
-#        current_cat_id =current_cat.getId()
-#        current_cat_name= current_cat.Title()
-#        current_cat_name=current_cat_name[0:2]
-#        try:
-#            catNum=int(current_cat_name)
-#        except ValueError:
-#            current_cat_name=current_cat_name[0:1]
-#            try:
-#                catNum=int(current_cat_name)
-#            except ValueError:
-#                catNum=current_cat_id
-#        return catNum
 #
 #    security.declarePublic('getPrintableTitleCategory')
 #    def getPrintableTitleCategory(self):
@@ -1081,8 +1074,6 @@ class CustomMeetingItemAndenne(MeetingItem):
     MeetingItem.listUserGroup=listUserGroup
     #it'a a monkey patch because it's the only way to have a default method in the schema
 
-
-#
 #    def listItemPresents(self):
 #        '''Returns the list of attendees selectable as presents.'''
 #        res = []
