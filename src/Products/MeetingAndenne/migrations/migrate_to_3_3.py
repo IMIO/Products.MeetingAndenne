@@ -3,9 +3,14 @@
 import logging
 logger = logging.getLogger('MeetingAndenne')
 
+import mimetypes
+from OFS.Image import File
 from Products.CMFCore.utils import getToolByName
 from Products.PloneMeeting.config import MEETING_GROUP_SUFFIXES
 from Products.PloneMeeting.migrations import Migrator
+from Products.PloneMeeting.profiles import PodTemplateDescriptor
+
+from Products.MeetingAndenne.profiles.default.import_data import collegeTemplates
 
 topicsToRemove = { 'meeting-config-college': ['searchallitemstovalidate', 'searchallitemsingroup'],
                    'courrierfake': ['searchmyitems', 'searchitemsofmygroups', 'searchmyitemstakenover',
@@ -104,26 +109,6 @@ class Migrate_To_3_3(Migrator):
             cfg.createTopics(topicsInfo)
         logger.info('Done.')
 
-    def _removeUselessFCKEditorProperties(self):
-        '''Remove useless fck_editor properties object'''
-        logger.info('Removing useless fck_editor properties objec...')
-
-        properties = self.portal.portal_properties
-        if 'fckeditor_properties' in properties:
-            properties.manage_delObjects(['fckeditor_properties', ])
-
-        logger.info('Done.')
-
-    def _removeUselessMailTopics(self):
-        '''Remove useless mail topics added by PloneMeeting migration'''
-        logger.info('Removing useless mail topics added by PloneMeeting migration...')
-
-        for cfg in self.portal.portal_plonemeeting.objectValues('MeetingConfig'):
-            if cfg.id in topicsToRemove:
-                cfg.topics.manage_delObjects(topicsToRemove[cfg.id])
-
-        logger.info('Done.')
-
     def _migrateMailRoles(self):
         '''Migrate mail roles'''
         logger.info('Migrating mail roles...')
@@ -148,6 +133,45 @@ class Migrate_To_3_3(Migrator):
 
         logger.info('Done.')
 
+    def _removeUselessMailTopics(self):
+        '''Remove useless mail topics added by PloneMeeting migration'''
+        logger.info('Removing useless mail topics added by PloneMeeting migration...')
+
+        for cfg in self.portal.portal_plonemeeting.objectValues('MeetingConfig'):
+            if cfg.id in topicsToRemove:
+                cfg.topics.manage_delObjects(topicsToRemove[cfg.id])
+
+        logger.info('Done.')
+
+    def _removeUselessFCKEditorProperties(self):
+        '''Remove useless fck_editor properties object'''
+        logger.info('Removing useless fck_editor properties objec...')
+
+        properties = self.portal.portal_properties
+        if 'fckeditor_properties' in properties:
+            properties.manage_delObjects(['fckeditor_properties', ])
+
+        logger.info('Done.')
+
+    def _createPODTemplates(self):
+        '''Recreate the used POD templates'''
+        logger.info('Recreating the used POD templates...')
+
+        # find the templates path so we can read and store them in the PodTemplate objects
+        mcProfilePath = [profile for profile in self.context.listProfileInfo() if 'id' in profile
+                         and profile['id'] == u'Products.MeetingAndenne:default'][0]['path']
+        for cfg in self.portal.portal_plonemeeting.objectValues('MeetingConfig'):
+            if cfg.id == 'meeting-config-college':
+                templatesIds = cfg.podtemplates.keys()
+                if len(templatesIds) > 0:
+                    ids = list(templatesIds)
+                    cfg.podtemplates.manage_delObjects(ids)
+
+                for template in collegeTemplates:
+                    cfg.addPodTemplate(template, mcProfilePath)
+
+        logger.info('Done.')
+
     def _updatePloneGroupsTitle(self):
         '''Make sure Plone groups linked to a MeetingGroup have a consistent title'''
         logger.info('Making sure Plone groups linked to a MeetingGroup have a consistent title...')
@@ -163,9 +187,10 @@ class Migrate_To_3_3(Migrator):
         self._migrateItemDecisionReportTextAttributeOnConfigs()
         self._updateOnMeetingTransitionItemTransitionToTrigger()
         self._addCDLDTopics()
+        self._migrateMailRoles()
         self._removeUselessMailTopics()
         self._removeUselessFCKEditorProperties()
-        self._migrateMailRoles()
+        self._createPODTemplates()
         self._updatePloneGroupsTitle()
         # reinstall so skins and so on are correct
 #        self.reinstall(profiles=[u'profile-Products.MeetingAndenne:default', ])
@@ -179,11 +204,12 @@ def migrate(context):
        1) Remove obsolete attribute 'itemDecisionReportText' from every meetingConfigs
        2) Migrate onMeetingTransitionItemTransitionToTrigger
        3) Add topics for CDLD synthesis
-       4) Remove useless mail topics added by PloneMeeting migration
-       5) Remove useless fck_editor properties object
-       6) Migrate mail roles
-       7) Make sure Plone groups linked to a MeetingGroup have a consistent title
-       8) Reinstall Products.MeetingAndenne so skin and so on are correct
+       4) Migrate mail roles
+       5) Remove useless mail topics added by PloneMeeting migration
+       6) Remove useless fck_editor properties object
+       7) Recreate the used POD templates
+       8) Make sure Plone groups linked to a MeetingGroup have a consistent title
+       9) Reinstall Products.MeetingAndenne so skin and so on are correct
     '''
     Migrate_To_3_3(context).run()
 # ------------------------------------------------------------------------------

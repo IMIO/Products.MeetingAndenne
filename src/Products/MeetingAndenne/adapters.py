@@ -178,209 +178,129 @@ class CustomMeetingAndenne(Meeting):
                 ressort.append(ressorti)
         return ressort
 
-#    security.declarePublic('getAttendeesForPrinting')
-#    def getAttendeesForPrinting(self, meeting=False):
-#        '''Check doc in interfaces.py.'''
-#        attendees = self.getAttendees(theObjects=True)
-#        absents = self.getAbsents(theObjects=True)
-#        excused = self.getExcused(theObjects=True)
-#        attendeesIds = list(self.getAttendees())
-#        absentsIds = list(self.getAbsents())
-#        absentsItemIds = []
-#        presentsItemIds = list(self.getAttendees())
-#        excusedIds = list(self.getExcused())
-#
-#        lastduty = ""
-#        morethanone = 0
-#        toprint = ""
-#        toprint2 = ""
-#        todelete = False
-#        toStrike = False
-#        morethan = False
-#
-#        assemblyMembers = self.listAllAssemblyMembers()
-#        potentialAssemblyMembers = assemblyMembers
-#        everyone = attendeesIds + absentsIds + excusedIds
-#        meetingDate = self.getDate()
-#
-#        for attendeeId in potentialAssemblyMembers:
-#            attendee = getattr(self.portal_plonemeeting.getMeetingConfig(self).meetingusers, attendeeId)
-#            currentDuty = attendee.getDuty()
-#            currentTitle = attendee.Title()
-#            currentId = attendee.getId()
-#            currentStartdate=attendee.getStart_date_function()
-#            currentEnddate=attendee.getEnd_date_function()
-#            enfonction='ok'
-#            enfonction2='ok'
-#            if not currentStartdate:
-#                enfonction='ok'
-#            else:
-#                if currentStartdate > meetingDate:
-#                    enfonction='ko'
-#            if not currentEnddate:
-#                enfonction2='ok'
-#            else:
-#                if currentEnddate < meetingDate:
-#                    enfonction2='ko'
-#            if enfonction=='ok' and enfonction2=='ok':
-#                if lastduty == "":
-#                    lastduty=currentDuty
-#                    toprint2 = "<p>"
-#
-#            if lastduty != currentDuty:
-#                if morethan:
-#                    toprint2 = toprint2 + "MM. "+toprint + "%ss</p><p>" % lastduty
-#                else:
-#                    if todelete == False:
-#                        if tostrike == True:
-#                            toprint2 = toprint2 + "<strike>M. "+toprint + "%s</strike></p><p>" % lastduty
-#                        else:
-#                            toprint2 = toprint2 + "M. "+toprint + "%s</p><p>" % lastduty
-#                toprint=""
-#                morethanone = 0
-#                morethan = False
-#                lastduty = currentDuty
-#
-#            if lastduty == currentDuty:
-#                morethanone = morethanone + 1
-#                if morethanone > 1:
-#                    morethan = True
-#                if (currentId not in attendeesIds and currentId not in presentsItemIds) or currentId in absentsItemIds:
-#                    if currentDuty == "Echevin" or currentDuty.count("sociale") == 1 or currentDuty.count("Bourgmestre") == 1 or currentDuty == "Membre":
-#                        toprint = toprint + "<strike>%s</strike>, " % currentTitle
-#                        tostrike = True
-#                        todelete = False
-#                    else:
-#                        todelete = True
-#                else:
-#                    toprint = toprint + "%s, " % currentTitle
-#                    tostrike = False
-#                    todelete = False
-#                    lastduty = currentDuty
-#
-#        if toprint != "":
-#            return toprint2+"M. "+toprint+ "%s</p>" % lastduty
-#        else:
-#            return toprint2+"</p>"
-#
-#    Meeting.getAttendeesForPrinting=getAttendeesForPrinting
-#    #it'a a monkey patch because it's the only way to change the behaviour of the Meeting class
-#
-#    security.declarePublic('getItemAbsentForPrinting')
-#    def getItemAbsentForPrinting(self):
-#        absentsItemIds=list(self.getItemAbsents())
-#        lastduty = ""
-#        morethanone = 0
-#        toprint = ""
-#        toprint2 = ""
-#        morethan = False
-#        count = 0
-#
-#        for attendeeId in absentsItemIds:
-#            count = count +1
-#            attendee = getattr(self.portal_plonemeeting.getMeetingConfig(self).meetingusers, attendeeId)
-#            currentDuty = attendee.getDuty()
-#            currentTitle = attendee.Title()
-#            currrentId = attendee.getId()
-#
-#            if lastduty == "":
-#                lastduty=currentDuty
-#                toprint2 = "["
-#
-#            if lastduty != currentDuty:
-#                #print duty
-#                if morethan:
-#                    toprint2 = toprint2 + "MM. "+toprint + "%ss " % lastduty
-#                else:
-#                    toprint2 = toprint2 + "M. "+toprint + "%s " % lastduty
-#                toprint=""
-#                morethanone = 0
-#                morethan = False
-#                lastduty = currentDuty
-#
-#            if lastduty == currentDuty:
-#                morethanone = morethanone + 1
-#                if morethanone > 1:
-#                    morethan = True
-#                toprint = toprint + "%s, " % currentTitle
-#                lastduty = currentDuty
-#
-#        if morethan:
-#            toprint2 = toprint2 + "MM. "+ toprint + "%ss" % lastduty
-#        else:
-#            toprint2 = toprint2 + "M. "+ toprint + "%s" % lastduty
-#        if count > 1:
-#            toprint2 = toprint2 +" sont absents pour l'examen de ce point]"
-#        else:
-#            toprint2 = toprint2 + "est absent pour l'examen de ce point]"
-#        return toprint2
-#
-#    security.declarePublic('getSignatoriesForPrinting')
-#    def getSignatoriesForPrinting(self, pos=0, level=0, pv=False, meeting=False):
-#        '''Returns the attendees in html mode for printing'''
-#        attendees = self.getAttendees(theObjects=True)
-#        absents = self.getAbsents(theObjects=True)
-#        excused = self.getExcused(theObjects=True)
-#        attendeesIds = list(self.getAttendees())
-#        absentsIds = list(self.getAbsents())
-#        absentsItemIds = []
-#        excusedIds = list(self.getExcused())
-#
-#        lastduty = ""
-#        morethanone = 0
-#        toprint = ""
-#        toprint2 = ""
-#        todelete = False
-#        toStrike = False
-#        morethan = False
-#
-#        if pv==True:
-#            assemblyMembers = self.listAssemblyMembers()
-#            potentialAssemblyMembers = assemblyMembers
-#            i=0
-#            for attendeeId in potentialAssemblyMembers:
-#                attendee = getattr(self.portal_plonemeeting.getMeetingConfig(self).meetingusers, attendeeId)
-#                currentDuty = attendee.getDuty()
-#                currentTitle = attendee.Title()
-#                currentId = attendee.getId()
-#                if currentId in attendeesIds and currentId not in absentsItemIds:
-#                    if i==0:
-#                        firstDuty = "Président" 
-#                        firstTitle= currentTitle
-#                    else:
-#                        lastDuty=currentDuty
-#                        lastTitle = currentTitle
-#                    i=i+1
-#
-#        duty=self.getSignatories(theObjects=True)[pos].getDuty()
-#        title=self.getSignatories(theObjects=True)[pos].Title()
-#
-#        if pos==0:
-#            if pv==False:
-#                if duty=="Bourgmestre-Président": 
-#                    duty="Bourgmestre"
-#                else:
-#                    duty="Bourgmestre f.f."
-#            else:
-#                duty=firstDuty
-#                title="(s) "+firstTitle
-#
-#        if pos==1:
-#            if pv==True:
-#                title="(s) "+lastTitle
-#                duty=lastDuty
-#            if duty!="Directeur général":  
-#                duty="Directeur g&eacute;n&eacute;ral f.f."
-#
-#        if level==0:
-#            return "Le "+duty+","
-#        else:
-#            return title+"."
-#
-#    Meeting.getSignatoriesForPrinting=getSignatoriesForPrinting
-#    #it'a a monkey patch because it's the only way to change the behaviour of the Meeting class
-#
-#
+    security.declarePublic('getSignatoriesForPrinting') 
+    def getSignatoriesForPrinting (self, pos = 0, level = 0, useforpv = False, userepl = True):
+        '''To be changed'''
+        # new from plonemeeting 3.3 :print sigantories in template relative to position ans level. pos 0 and level 0 is the first sigantory (bg) and function. 
+        # pos 0 and level 1 is the first signatory (bg) with Name
+        res = []
+        meeting = self.getSelf()
+        res = meeting.getSignatories(theObjects = True, includeDeleted = False, includeReplacements = userepl)
+        if level == 1:
+            return res[pos].Title()
+        else:
+            # specialement utilisé pour l'affichae avant migration ou apres migration si la personne remplacante a été oubliée 
+            # Si c'est un echevin on remplace par bg ff, si c'est un secretaire en general on a deja un dg f.f dans la fonction  principale de celui qui remplace)
+            # le getduty revoit la fonction remplacé si includereplacement=true et qu'il y a vraiment un remplaçant inscrit (grace au fakemeetinguser revoyer à la place)
+            duty = res[pos].getDuty()
+            if duty=="Echevin":
+                return "Bourgmestre f.f"
+            else:
+                return duty
+
+    security.declarePublic('reformAssembly')
+    def reformAssembly(self, assembly, strikefirst = True, strikemidle = True, strikelast = False, userepl = True):
+        '''To be changed'''
+        # new from plonemeeting 3.3 : used for template only in the header of pv and other. use the return of getstrikeassembly (and item) function to add the replacement user
+        # pour une personne absente, soit on la barre (strike=true) , soit on la supprime (strike=false)
+        # on peut decider de barrer ou supprimer la premiere ligne (bg) , les lignes du milieu (echevin) ou la derniere ligne (directeur)
+        # le comportement par defaut est celui que l'on veur pour la note d'execution
+        # on tiendra compte du "remplacé par" si usereplace=true mais on ne tiendra pas compte du "remplacé par" si on barre ou si userplace=false  
+        res = []
+        meeting = self.getSelf()
+        repl = meeting.getUserReplacements()
+        repl2 = [repl[user] for user in repl]
+        UsedMeetingUsers = meeting.getAllUsedMeetingUsers()
+        # liste des gens remplaçant possible a faire correspondre avec la combo "remplacé par" sinon soucis !
+        UsedMeetingUsers2 = meeting.getAllUsedMeetingUsers(usages = ('assemblyMember', 'signer', ), includeAllActive = True )
+        lines = assembly.split('<br />')
+        #print UsedMeetingUsers
+        m = 0
+        for line in lines:
+            my_line = ''
+            fct = line.split(' - ')
+            fctline = fct[1]
+            minline = 0
+            members = fct[0].split(', ')
+            for member in members:
+                #print member
+                if userepl == True:
+                    ### ce members est-il a remplacer ?
+                    if UsedMeetingUsers[m].getId() in repl :
+                        # si on decide de barrer le membre, on ne va pas le faire remplacer, donc comportement par defaut, sinon, on essaye ou pas de trouver un remplaçant
+                        if( strikefirst == True and m == 0 ) or ( strikemidle == True and m > 0 and m < len(UsedMeetingUsers) - 1) or (strikelast == True and m == len(UsedMeetingUsers) - 1):
+                            my_line = "%s%s, " % (my_line,member)
+                        else:
+                            r = [mUser.Title() for mUser in UsedMeetingUsers2 if mUser.getId() == repl[UsedMeetingUsers[m].getId()]]
+                            #f=[mUser.getReplacementDuty() for mUser in UsedMeetingUsers2 if mUser.getId() == repl[UsedMeetingUsers[m].getId()]]
+                            f = UsedMeetingUsers[m].getReplacementDuty()               
+                            if m == 0:
+                                my_line = "%s%s, " % ("<p class='mltAssembly'>",r[0])
+                            else:
+                                my_line = "%s%s, " % (my_line,r[0])
+
+                            if m == len(UsedMeetingUsers) - 1:
+                                fctline= "%s%s" % (f,"</p>")
+                            else:
+                                fctline= f
+                    else:
+                        ### ce membre remplace t'il quelqu'un qui n'est pas barré ?
+                        if UsedMeetingUsers[m].getId() in repl2 and (strikefirst == False or UsedMeetingUsers[m].getId() <> repl[UsedMeetingUsers[0].getId()]) and (strikemidle == False or UsedMeetingUsers[m].getId() == repl[UsedMeetingUsers[0].getId()] or UsedMeetingUsers[m].getId() == repl[UsedMeetingUsers[len(UsedMeetingUsers) - 1].getId()]) and (strikelast == False or UsedMeetingUsers[m].getId() <> repl[UsedMeetingUsers[len(UsedMeetingUsers) - 1].getId()]):
+                            minline -= 1 
+                        else:
+                            if (strikefirst == True and m == 0) or (strikemidle == True and m > 0 and m < len(UsedMeetingUsers) - 1) or (strikelast == True and m == len(UsedMeetingUsers) - 1):
+                                my_line = "%s%s, " % (my_line,member)
+                            else:
+                                if member.find("<strike>") <> -1:
+                                    minline -= 1
+                                    if (m == 0):
+                                        my_line = "<p class='mltAssembly'>"
+                                    if (m == len(UsedMeetingUsers) - 1):
+                                        my_line = "%s%s" % (my_line,"</p>")
+                                else:
+                                    my_line = "%s%s, " % (my_line,member)
+                else:
+                    if (strikefirst == True and m == 0) or (strikemidle == True and m > 0 and m < len(UsedMeetingUsers) - 1) or (strikelast == True and m == len(UsedMeetingUsers) - 1):
+                        ### on  barre  et on ne remplace pas, on va donc simplement suivre le comportement par default 
+                        my_line = "%s%s, " % (my_line,member)
+                    else:
+                       if member.find("<strike>") <> -1:
+                           minline -= 1
+                           if (m == 0):
+                               my_line = "<p class='mltAssembly'>"
+                           if (m == len(UsedMeetingUsers) - 1):
+                               my_line = "%s%s" % (my_line,"</p>")
+                       else:
+                           my_line = "%s%s, " % (my_line,member)
+
+                m += 1
+                minline += 1
+
+            if minline > 0:
+                my_line = "%s%s<br />" % (my_line,fctline)
+            print my_line
+            res.append(my_line)
+
+        if len(res) > 1:
+            res[-1] = res[-1].replace('<br />', '')
+        else:
+            return ''
+        print ''.join(res)
+        return ''.join(res)
+
+    security.declarePublic('getAbsentsForPrinting') 
+    def getAbsentsForPrinting(self):
+        '''Generates a HTML version of absents in a Meeting.'''
+        meeting = self.getSelf()
+        res = ''
+        absents = meeting.getAbsents(theObjects = True) + meeting.getExcused(theObjects = True)
+        if absents:
+            res = "<p class='mltAssembly'>"
+            for user in absents:
+                res += "%s, %s<br />" % (user.Title(), user.getDuty())
+            res += "</p>"
+        return res
+
 #    security.declarePublic('getPrintableItems')
 #    def getPrintableItems(self, itemUids, late=False, ignore_review_states=[],
 #                          privacy='*', oralQuestion='both', toDiscuss='both', categories=[],
@@ -593,6 +513,57 @@ class CustomMeetingItemAndenne(MeetingItem):
             except ValueError:
                 catNum = current_cat_id
         return catNum
+
+    security.declarePublic('reformAssembly')
+    def reformAssembly(self, assembly, strikefirst=True, strikemiddle=True, strikelast=False, userepl=True ):
+        '''Formats the attendees to print in the templates.'''
+        item = self.getSelf()
+        meeting = item.getMeeting().adapted()
+        return meeting.reformAssembly(assembly, strikefirst, strikemiddle, strikelast, userepl)
+
+    security.declarePublic('getSignatoriesForPrinting') 
+    def getSignatoriesForPrinting (self, pos=0, level=0, useforpv=False, userepl=True):
+        # new from plonemeeting 3.3 :print sigantories in template relative to position ans level. pos 0 and level 0 is the first sigantory (bg) and function. 
+        # pos 0 and level 1 is the first signatory (bg) with Name
+        res = []
+        i = 0
+        item = self.getSelf()
+        res = item.getItemSignatories(theObjects = True, includeDeleted = False, includeReplacements = userepl)
+        resworepl = item.getItemSignatories(theObjects = True, includeDeleted = False, includeReplacements = False)
+        for attendee in item.getItemPresents():
+            i = 0
+            for mUser in resworepl:
+                if mUser.id == attendee:
+                    res[i] = resworepl[i]
+
+        if level == 1:
+            return res[pos].Title()
+        else:
+            # specialement utilisé pour l'affichae avant migration ou apres migration si la personne remplacante a été oubliée 
+            # Si c'est un echevin on remplace par bg ff, si c'est un secretaire en general on a deja un dg f.f dans la fonction  principale de celui qui remplace)
+            # le getduty revoit la fonction remplacé si includereplacement=true et qu'il y a vraiment un remplaçant inscrit (grace au fakemeetinguser revoyer à la place)
+            duty = res[pos].getDuty()
+            if duty == "Echevin":
+                return "Bourgmestre f.f"
+            else:
+                return duty
+
+    security.declarePublic('getItemAbsentsForPrinting') 
+    def getItemAbsentsForPrinting(self):
+        item = self.getSelf()
+        res = ''
+        absents = item.getItemAbsents(theObjects = True)
+        if absents:
+            res = "<p class='mltAssembly'>"
+            for user in absents:
+                res += "%s, %s<br />" % (user.Title(), user.getDuty())
+            res += "</p>"
+        return res
+
+    security.declarePublic('getCurrentDate')
+    def getCurrentDate(self):
+        '''Formats the current date to print in the templates.'''
+        return DateTime().strftime("%d/%m/%Y")
 
 #    security.declarePublic('getExtraFieldsToCopyWhenCloning')
 #    def getExtraFieldsToCopyWhenCloning(self):
@@ -1039,12 +1010,7 @@ class CustomMeetingItemAndenne(MeetingItem):
 #    def textpvFieldIsEmpty(self):
 #        '''Is the 'decision' field empty ? '''
 #        return kupuFieldIsEmpty(self.context.getTextpv())
-#
-#    security.declarePublic('getcurrentdate')
-#    def getcurrentdate(self):
-#        from  DateTime import now
-#        return now().strftime("%d/%m/%Y")
-#
+
     security.declarePublic('getDocReference')
     def getDocReference(self):
         '''Return a too complicated item reference to be defined as a TAL Expression
@@ -1119,22 +1085,6 @@ class CustomMeetingItemAndenne(MeetingItem):
 #    MeetingItem.getAttendees=getAttendees
 #    # it'a a monkey patch
 #
-#    security.declarePublic('getAttendeesForPrinting')
-#    def getAttendeesForPrinting(self):
-#        '''Get the attendees list to print in templates.'''
-#        return self.getMeeting().getAttendeesForPrinting()
-#
-#    MeetingItem.getAttendeesForPrinting=getAttendeesForPrinting
-#    #it'a a monkey patch because it's the only way to change the behaviour of the MeetingItem class
-#
-#    security.declarePublic('getSignatoriesForPrinting')
-#    def getSignatoriesForPrinting(self, pos=0, level=0, pv=False):
-#        '''Returns the signatories in html mode for printing'''
-#        return self.getMeeting().getSignatoriesForPrinting(pos=pos, level=level, pv=pv)
-#
-#    MeetingItem.getSignatoriesForPrinting=getSignatoriesForPrinting
-#    #it'a a monkey patch because it's the only way to change the behaviour of the MeetingItem class
-#
 #    security.declarePublic('onDuplicate')
 #    def onDuplicate(self):
 #        '''This method is triggered when the users clicks on
@@ -1185,7 +1135,6 @@ class CustomMeetingItemAndenne(MeetingItem):
 #
 #    MeetingItem.listAssociatedGroups=listAssociatedGroups
 #    #it'a a monkey patch because it's the only way to have a default method in the schema
-#
 #
 #    # cette fonction surgarge showduplicateItemAction dans meetingitem
 #    # de facon a donner le droit de dupliquer n'importe quel point au meetingmanager

@@ -43,7 +43,7 @@ class Migrate_To_3_2(Migrator):
                                               predefinedTitle='',
                                               relatedTo='advice',
                                               active=True))
-        # find theIcon path so we can give it to MeetingConfig.addFileType
+        # find the icon path so we can give it to MeetingConfig.addFileType
         mcProfilePath = [profile for profile in self.context.listProfileInfo() if 'id' in profile
                          and profile['id'] == u'Products.MeetingAndenne:default'][0]['path']
         for cfg in self.portal.portal_plonemeeting.objectValues('MeetingConfig'):
