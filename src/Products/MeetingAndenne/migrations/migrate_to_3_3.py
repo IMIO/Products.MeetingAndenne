@@ -12,6 +12,16 @@ from Products.PloneMeeting.profiles import PodTemplateDescriptor
 
 from Products.MeetingAndenne.profiles.default.import_data import collegeTemplates
 
+meetingConfigs = { 'meeting-config-college': {
+    'enableAnnexToPrint': True, 'annexToPrintDefault': True, 'annexDecisionToPrintDefault': True,
+    'usedItemAttributes': (u'budgetInfos', u'associatedGroups', u'observations', u'toDiscuss'),
+    'usedMeetingAttributes': (u'startDate', u'endDate', u'signatories', u'attendees', u'excused',
+                              u'absents', u'lateAttendees', u'place', u'observations', u'postObservations'),
+    'toDiscussShownForLateItems': False,
+    'useUserReplacements': True,
+    },
+}
+
 topicsToRemove = { 'meeting-config-college': ['searchallitemstovalidate', 'searchallitemsingroup'],
                    'courrierfake': ['searchmyitems', 'searchitemsofmygroups', 'searchmyitemstakenover',
                                     'searchallitems', 'searchallitemsincopy', 'searchitemstovalidate',
@@ -153,6 +163,17 @@ class Migrate_To_3_3(Migrator):
 
         logger.info('Done.')
 
+    def _adaptMeetingConfigs(self):
+        '''Change various meetingConfigs properties'''
+        logger.info('Changing various meetingConfigs properties...')
+
+        for mc in self.portal.portal_plonemeeting.objectValues('MeetingConfig'):
+            if mc.getId() in meetingConfigs:
+                for key, value in meetingConfigs[mc.getId()].iteritems():
+                    setattr(mc, key, value)
+
+        logger.info('Done.')
+
     def _createPODTemplates(self):
         '''Recreate the used POD templates'''
         logger.info('Recreating the used POD templates...')
@@ -190,6 +211,7 @@ class Migrate_To_3_3(Migrator):
         self._migrateMailRoles()
         self._removeUselessMailTopics()
         self._removeUselessFCKEditorProperties()
+        self._adaptMeetingConfigs()
         self._createPODTemplates()
         self._updatePloneGroupsTitle()
         # reinstall so skins and so on are correct
@@ -201,15 +223,16 @@ class Migrate_To_3_3(Migrator):
 def migrate(context):
     '''This migration function:
 
-       1) Remove obsolete attribute 'itemDecisionReportText' from every meetingConfigs
-       2) Migrate onMeetingTransitionItemTransitionToTrigger
-       3) Add topics for CDLD synthesis
-       4) Migrate mail roles
-       5) Remove useless mail topics added by PloneMeeting migration
-       6) Remove useless fck_editor properties object
-       7) Recreate the used POD templates
-       8) Make sure Plone groups linked to a MeetingGroup have a consistent title
-       9) Reinstall Products.MeetingAndenne so skin and so on are correct
+       1)  Remove obsolete attribute 'itemDecisionReportText' from every meetingConfigs
+       2)  Migrate onMeetingTransitionItemTransitionToTrigger
+       3)  Add topics for CDLD synthesis
+       4)  Migrate mail roles
+       5)  Remove useless mail topics added by PloneMeeting migration
+       6)  Remove useless fck_editor properties object
+       7)  Change various meetingConfigs properties
+       8)  Recreate the used POD templates
+       9)  Make sure Plone groups linked to a MeetingGroup have a consistent title
+       10) Reinstall Products.MeetingAndenne so skin and so on are correct
     '''
     Migrate_To_3_3(context).run()
 # ------------------------------------------------------------------------------
