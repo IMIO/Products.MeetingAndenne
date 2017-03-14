@@ -57,8 +57,8 @@
              needToRefreshPage python: context.meta_type=='MeetingItem' and context.willInvalidateAdvices();
              dummy python: context.setFieldFromAjax(fieldName, tuple(g for g in request.get('fieldContent')[1:-2].split(',')));
              dummy context/updateMeetingItem;
-             mayEdit python: member.has_permission(field.write_permission, context);">
- <metal:view use-macro="context/@ma-macros/viewMultiSelectField"/>
+             ajaxEdit python: True;">
+ <metal:view use-macro="context/@@ma-macros/viewMultiSelectField"/>
 </metal:save>
 
 <tal:comment replace="nothing">Displays changes performed on a field.</tal:comment>
@@ -67,7 +67,7 @@
              field python: context.getField(fieldName);
              lang python: request.get('lang', '');
              changes python: request.get('changes', 'False') == 'True';
-             mayEdit python: member.has_permission(field.write_permission, context)">
+             ajaxEdit python: True;">
  <metal:view use-macro="context/@@ma-macros/viewMultiSelectField"/>
 </metal:field>
 
@@ -77,8 +77,8 @@
              field python: context.getField(fieldName);
              lang python: request.get('lang', '');
              dummyNotifyEditCancelledEvent python: context.restrictedTraverse('@@pm-notify-event').notifyEditCancelledEvent();
-             mayEdit python: member.has_permission(field.write_permission, context)">
- <metal:view use-macro="context/@ma-macros/viewMultiSelectField"/>
+             ajaxEdit python: True;">
+ <metal:view use-macro="context/@@ma-macros/viewMultiSelectField"/>
 </metal:field>
 
 <tal:comment replace="nothing">
@@ -106,7 +106,6 @@ document.location.reload(true);
 }
 </script>
 
-    <span tal:condition="lang" class="pmLanguage" tal:content="lang"></span>
     <span class="item_attribute_label" tal:replace="python: field.widget.Label(context)"></span>:&nbsp;&nbsp;
     <tal:displayField condition="fieldContent">
       <img style="cursor:pointer" tal:condition="mayEdit"
