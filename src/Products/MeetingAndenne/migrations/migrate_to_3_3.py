@@ -143,6 +143,14 @@ class Migrate_To_3_3(Migrator):
 
         logger.info('Done.')
 
+    def _removeUnusedPloneUsers(self):
+        '''Remove unused users present in portal_membership'''
+        logger.info('Removing unused users present in portal_membership...')
+
+        self.portal.portal_memberdata.pruneMemberDataContents()
+
+        logger.info('Done.')
+
     def _removeUselessMailTopics(self):
         '''Remove useless mail topics added by PloneMeeting migration'''
         logger.info('Removing useless mail topics added by PloneMeeting migration...')
@@ -160,6 +168,21 @@ class Migrate_To_3_3(Migrator):
         properties = self.portal.portal_properties
         if 'fckeditor_properties' in properties:
             properties.manage_delObjects(['fckeditor_properties', ])
+
+        logger.info('Done.')
+
+    def _adaptUserProperties(self):
+        '''Set CKeditor as default editor for everybody'''
+        logger.info('Setting CKeditor as default editor for everybody...')
+
+        props = { 'wysiwyg_editor': 'CKeditor' }
+        memberDataTool = self.portal.portal_memberdata
+        membershipTool = self.portal.portal_membership
+
+        import pdb; pdb.set_trace()
+
+        for userId in memberDataTool._members.keys():
+            member.setMemberProperties( props )
 
         logger.info('Done.')
 
@@ -209,8 +232,10 @@ class Migrate_To_3_3(Migrator):
         self._updateOnMeetingTransitionItemTransitionToTrigger()
         self._addCDLDTopics()
         self._migrateMailRoles()
+        self._removeUnusedPloneUsers()
         self._removeUselessMailTopics()
         self._removeUselessFCKEditorProperties()
+        self._adaptUserProperties()
         self._adaptMeetingConfigs()
         self._createPODTemplates()
         self._updatePloneGroupsTitle()
@@ -227,12 +252,14 @@ def migrate(context):
        2)  Migrate onMeetingTransitionItemTransitionToTrigger
        3)  Add topics for CDLD synthesis
        4)  Migrate mail roles
-       5)  Remove useless mail topics added by PloneMeeting migration
-       6)  Remove useless fck_editor properties object
-       7)  Change various meetingConfigs properties
-       8)  Recreate the used POD templates
-       9)  Make sure Plone groups linked to a MeetingGroup have a consistent title
-       10) Reinstall Products.MeetingAndenne so skin and so on are correct
+       5)  Remove unused users present in portal_membership
+       6)  Remove useless mail topics added by PloneMeeting migration
+       7)  Remove useless fck_editor properties object
+       8)  Set CKeditor as default editor for everybody
+       9)  Change various meetingConfigs properties
+       10) Recreate the used POD templates
+       11) Make sure Plone groups linked to a MeetingGroup have a consistent title
+       12) Reinstall Products.MeetingAndenne so skin and so on are correct
     '''
     Migrate_To_3_3(context).run()
 # ------------------------------------------------------------------------------
