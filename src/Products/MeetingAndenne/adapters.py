@@ -565,6 +565,21 @@ class CustomMeetingItemAndenne(MeetingItem):
         '''Formats the current date to print in the templates.'''
         return DateTime().strftime("%d/%m/%Y")
 
+### New functionalities ###
+
+    ### TO BE CHANGED ###
+    security.declarePublic('updateMeetingItem')
+    def updateMeetingItem(self):
+        """
+           Update a MeetingItem object following a copygroups on-the-fly modification.
+        """
+        self.updateLocalRoles()
+#        self.adapted().onEdit(isCreated=False)
+        self.reindexObject()
+
+    MeetingItem.updateMeetingItem=updateMeetingItem
+    #it'a a monkey patch because it's the only way to add a behaviour to the MeetingItem class
+
 #    security.declarePublic('getExtraFieldsToCopyWhenCloning')
 #    def getExtraFieldsToCopyWhenCloning(self):
 #        '''Lists the fields to keep when cloning an item'''
@@ -787,17 +802,6 @@ class CustomMeetingItemAndenne(MeetingItem):
 #    MeetingItem.ocrItems=ocrItems
 #
 #
-#    security.declarePublic('updateMeetingItem')
-#    def updateMeetingItem(self):
-#        """
-#           Update a MeetingItem object following a copygroups on-the-fly modification.
-#        """
-#        self.updateLocalRoles()
-#        self.adapted().onEdit(isCreated=False)
-#        self.reindexObject()
-#
-#    MeetingItem.updateMeetingItem=updateMeetingItem
-#    #it'a a monkey patch because it's the only way to change the behaviour of the MeetingItem class
 #
 #
 #    security.declarePublic('onEdit')

@@ -151,14 +151,6 @@
                 <tal:field define="fieldName python: 'copyGroups'; ajaxEdit python:True">
                     <metal:f use-macro="context/@@ma-macros/viewMultiSelectField"/>
                 </tal:field>
-<!-- TO BE REMOVED 
-                <span class="item_attribute_label"
-                      i18n:translate="PloneMeeting_label_copyGroups"></span>:&nbsp;&nbsp;
-                <tal:displayCopyGroups condition="copyGroups">
-                    <span metal:use-macro="python: here.widget('copyGroups', mode='view')" />
-                </tal:displayCopyGroups>
-                <span tal:condition="not: copyGroups">-</span>
--->
             </div>
 
             <tal:comment replace="nothing">Item assembly</tal:comment>
@@ -404,7 +396,6 @@
     <div id="decision" tal:condition="python: not context.adapted().israpcolaucon() and member.has_permission('PloneMeeting: Read decision', context) and (not context.fieldIsEmpty('decision') or not context.fieldIsEmpty('projetpv'))">
       <fieldset>
         <legend>
-          <span tal:condition="lang" class="pmLanguage" tal:content="lang"></span>
           <span class="item_attribute_label" i18n:translate="MeetingAndenne_label_proposition"></span>
         </legend>
         <span tal:replace="structure context/getDecision"></span>
