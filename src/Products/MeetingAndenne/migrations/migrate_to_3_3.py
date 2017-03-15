@@ -179,9 +179,8 @@ class Migrate_To_3_3(Migrator):
         memberDataTool = self.portal.portal_memberdata
         membershipTool = self.portal.portal_membership
 
-        import pdb; pdb.set_trace()
-
         for userId in memberDataTool._members.keys():
+            member = membershipTool.getMemberById(userId)
             member.setMemberProperties( props )
 
         logger.info('Done.')
