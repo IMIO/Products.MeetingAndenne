@@ -176,6 +176,12 @@ class Migrate_To_3_3(Migrator):
         if 'fckeditor_properties' in properties:
             properties.manage_delObjects(['fckeditor_properties', ])
 
+        siteProperties = properties['site_properties']
+        editors = list(siteProperties.available_editors)
+        if 'FCKeditor' in editors:
+            editors.remove('FCKeditor')
+            siteProperties.available_editors = tuple(editors)
+
         logger.info('Done.')
 
     def _adaptUserProperties(self):
