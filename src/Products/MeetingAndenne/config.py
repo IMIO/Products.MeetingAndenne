@@ -33,11 +33,14 @@ PROJECTNAME = "MeetingAndenne"
 # Permissions
 DEFAULT_ADD_CONTENT_PERMISSION = "Add portal content"
 setDefaultRoles(DEFAULT_ADD_CONTENT_PERMISSION, ('Manager', 'Owner', 'Contributor'))
+
+## TO BE CHANGED ##
 ADD_CONTENT_PERMISSIONS = {
     'CourrierFile': 'Add portal content',
 }
 
 setDefaultRoles('Add portal content', ('Manager', 'CourrierManager'))
+## END ##
 
 product_globals = globals()
 
@@ -50,22 +53,13 @@ DEPENDENCIES = []
 PRODUCT_DEPENDENCIES = []
 
 ##code-section config-bottom #fill in your manual code here
-# Define PloneMeeting-specific permissions
-AddAnnex = 'PloneMeeting: Add annex'
-setDefaultRoles(AddAnnex, ('Manager','Owner'))
-# We need 'AddAnnex', which is a more specific permission than
-# 'PloneMeeting: Add MeetingFile', because decision-related annexes, which are
-# also MeetingFile instances, must be secured differently.
-# There is no permission linked to annex deletion. Deletion of annexes is allowed
-# if one has the permission 'Modify portal content' on the corresponding item.
-ReadDecision = 'PloneMeeting: Read decision'
-WriteDecision = 'PloneMeeting: Write decision'
-setDefaultRoles(ReadDecision, ('Manager',))
-setDefaultRoles(WriteDecision, ('Manager',))
+from Products.PloneMeeting import config as PMconfig
+ANDENNEROLES = {}
+ANDENNEROLES['pvwriters'] = 'MeetingPvWriter'
+ANDENNEROLES['mailViewers'] = 'MeetingMailViewer'
 
-
-from Products.PloneMeeting.config import MEETINGROLES
-MEETINGROLES['pvwriters'] = 'MeetingPvWriter'
+PMconfig.MEETINGROLES.update(ANDENNEROLES)
+PMconfig.MEETING_GROUP_SUFFIXES = PMconfig.MEETINGROLES.keys()
 
 # Mail types static define
 MAIL_TYPES = DisplayList((
