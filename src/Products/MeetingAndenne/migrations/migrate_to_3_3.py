@@ -29,6 +29,9 @@ meetingConfigs = { 'meeting-config-college': {
     },
 }
 
+rolesToRemove = [ 'ComdirMember', 'CourrierManager', 'CourrierViewer', 'MeetingAdviceEditor', 'MeetingAdviser', 'MeetingPresenter',
+                  'TaskManager', 'TaskPerformer']
+
 topicsToRemove = { 'meeting-config-college': ['searchallitemstovalidate', 'searchallitemsingroup'],
                    'courrierfake': ['searchmyitems', 'searchitemsofmygroups', 'searchmyitemstakenover',
                                     'searchallitems', 'searchallitemsincopy', 'searchitemstovalidate',
@@ -150,6 +153,23 @@ class Migrate_To_3_3(Migrator):
 
         logger.info('Done.')
 
+    def _removeUnusedGlobalRoles(self):
+        '''Remove unused global roles'''
+        logger.info('Removing unused global roles...')
+
+        roleManager = self.portal.acl_users.portal_role_manager
+        globalRoles = list(self.portal.__ac_roles__)
+        for role in rolesToRemove:
+            if role in globalRoles:
+                globalRoles.remove(role)
+                try:
+                    roleManager.removeRole(role)
+                except KeyError:
+                    pass
+        self.portal.__ac_roles__ = tuple(globalRoles)
+
+        logger.info('Done.')
+
     def _removeUnusedPloneUsers(self):
         '''Remove unused users present in portal_membership'''
         logger.info('Removing unused users present in portal_membership...')
@@ -244,6 +264,7 @@ class Migrate_To_3_3(Migrator):
         self._updateOnMeetingTransitionItemTransitionToTrigger()
         self._addCDLDTopics()
         self._migrateMailRoles()
+        self._removeUnusedGlobalRoles()
         self._removeUnusedPloneUsers()
         self._removeUselessMailTopics()
         self._removeUselessFCKEditorProperties()
@@ -264,14 +285,15 @@ def migrate(context):
        2)  Migrate onMeetingTransitionItemTransitionToTrigger
        3)  Add topics for CDLD synthesis
        4)  Migrate mail roles
-       5)  Remove unused users present in portal_membership
-       6)  Remove useless mail topics added by PloneMeeting migration
-       7)  Remove useless fck_editor properties object
-       8)  Set CKeditor as default editor for everybody
-       9)  Change various meetingConfigs properties
-       10) Recreate the used POD templates
-       11) Make sure Plone groups linked to a MeetingGroup have a consistent title
-       12) Reinstall Products.MeetingAndenne so skin and so on are correct
+       5)  Remove unused global roles
+       6)  Remove unused users present in portal_membership
+       7)  Remove useless mail topics added by PloneMeeting migration
+       8)  Remove useless fck_editor properties object
+       9)  Set CKeditor as default editor for everybody
+       10)  Change various meetingConfigs properties
+       11) Recreate the used POD templates
+       12) Make sure Plone groups linked to a MeetingGroup have a consistent title
+       13) Reinstall Products.MeetingAndenne so skin and so on are correct
     '''
     Migrate_To_3_3(context).run()
 # ------------------------------------------------------------------------------
