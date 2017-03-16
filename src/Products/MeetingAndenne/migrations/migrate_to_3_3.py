@@ -14,10 +14,17 @@ from Products.MeetingAndenne.profiles.default.import_data import collegeTemplate
 
 meetingConfigs = { 'meeting-config-college': {
     'enableAnnexToPrint': True, 'annexToPrintDefault': True, 'annexDecisionToPrintDefault': True,
+    'initItemDecisionIfEmptyOnDecide': False, 'toDiscussShownForLateItems': True, 'xhtmlTransformTypes': (u'removeBlanks', ),
+    'xhtmlTransformFields': (u'Meeting.observations', u'Meeting.postObservations', u'MeetingItem.description',
+                             u'MeetingItem.decision', u'MeetingItem.projetpv', u'MeetingItem.textpv',
+                             u'MeetingItem.pv', u'MeetingItem.observations'),
     'usedItemAttributes': (u'budgetInfos', u'associatedGroups', u'observations', u'toDiscuss'),
     'usedMeetingAttributes': (u'startDate', u'endDate', u'signatories', u'attendees', u'excused',
                               u'absents', u'lateAttendees', u'place', u'observations', u'postObservations'),
-    'toDiscussShownForLateItems': False,
+    'toDiscussShownForLateItems': True, 'transitionsToConfirm': [ u'Meeting.freeze', u'Meeting.close', u'MeetingItem.delay',
+                                                                   u'MeetingItem.backToProposed', u'MeetingItem.backToItemCreated'],
+    'itemDecidedStates': [ u'pre_accepted', u'accepted', u'accepted_and_closed', u'refused', u'refused_and_closed', u'accepted_but_modified',
+                           u'accepted_but_modified_and_closed', u'delayed', u'delayed_and_closed'],
     'useUserReplacements': True,
     },
 }
