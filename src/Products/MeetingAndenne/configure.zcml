@@ -13,6 +13,11 @@
   <include package="Products.PloneMeeting"/>
   <include package=".browser" />
 
+  <!-- Adapters for user information and user preferences panels -->
+  <adapter for="plone.app.layout.navigation.interfaces.INavigationRoot"
+           factory=".adapters.EnhancedUserDataPanelAdapter"
+           provides=".userdataschema.IEnhancedUserDataSchema"/>
+
   <!-- WF actions and conditions for Meeting and MeetingItem for College -->
   <adapter for="Products.PloneMeeting.interfaces.IMeetingItem"
            factory="Products.MeetingAndenne.adapters.MeetingItemCollegeAndenneWorkflowActions"
@@ -50,7 +55,6 @@
   <adapter for="Products.PloneMeeting.interfaces.IToolPloneMeeting"
            factory="Products.MeetingAndenne.adapters.CustomToolMeetingAndenne"
            provides="Products.PloneMeeting.interfaces.IToolPloneMeetingCustom"/>
-
 
   <!-- add the blob field to CourrierFile -->
   <adapter

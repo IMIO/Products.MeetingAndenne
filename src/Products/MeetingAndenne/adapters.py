@@ -30,6 +30,7 @@ from Globals import InitializeClass
 from Products.CMFCore.permissions import ReviewPortalContent
 from Products.CMFCore.utils import getToolByName
 from plone import api
+from plone.app.users.browser.personalpreferences import UserDataPanelAdapter
 from imio.helpers.xhtml import xhtmlContentIsEmpty
 from Products.PloneMeeting.config import ITEM_NO_PREFERRED_MEETING_VALUE, \
      TOPIC_SEARCH_SCRIPT, TOPIC_TYPE
@@ -58,6 +59,23 @@ import os, os.path, time, unicodedata
 import transaction
 import logging
 logger = logging.getLogger( 'MeetingAndenne' )
+
+
+# ------------------------------------------------------------------------------
+class EnhancedUserDataPanelAdapter(UserDataPanelAdapter):
+    """
+    """
+    def get_function(self):
+        return self.context.getProperty('function', '')
+    def set_function(self, value):
+        return self.context.setMemberProperties( {'function': value} )
+    function = property(get_function, set_function)
+
+    def get_gender(self):
+        return self.context.getProperty('gender', '')
+    def set_gender(self, value):
+        return self.context.setMemberProperties( {'gender': value} )
+    gender = property(get_gender, set_gender)
 
 
 # ------------------------------------------------------------------------------
