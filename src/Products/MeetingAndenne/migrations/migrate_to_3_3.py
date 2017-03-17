@@ -30,7 +30,7 @@ meetingConfigs = { 'meeting-config-college': {
 }
 
 rolesToRemove = [ 'ComdirMember', 'CourrierManager', 'CourrierViewer', 'MeetingAdviceEditor', 'MeetingAdviser', 'MeetingPresenter',
-                  'TaskManager', 'TaskPerformer']
+                  'TaskManager', 'TaskPerformer' ]
 
 topicsToRemove = { 'meeting-config-college': ['searchallitemstovalidate', 'searchallitemsingroup'],
                    'courrierfake': ['searchmyitems', 'searchitemsofmygroups', 'searchmyitemstakenover',
@@ -41,6 +41,8 @@ topicsToRemove = { 'meeting-config-college': ['searchallitemstovalidate', 'searc
                                     'searchcorrecteditems', 'searchdecideditems', 'searchallmeetings',
                                     'searchalldecisions']
 }
+
+memberPropertiesToRemove = ( 'fck_skin', 'fck_path', 'fck_root', 'fck_force_paste_as_text', 'service' )
 
 
 # The migration class ----------------------------------------------------------
@@ -184,7 +186,9 @@ class Migrate_To_3_3(Migrator):
 
         for cfg in self.portal.portal_plonemeeting.objectValues('MeetingConfig'):
             if cfg.id in topicsToRemove:
-                cfg.topics.manage_delObjects(topicsToRemove[cfg.id])
+                topics = cfg.topics.keys()
+                topicList = [topic for topic in topicsToRemove[cfg.id] if topic in topics]
+                cfg.topics.manage_delObjects(topicList)
 
         logger.info('Done.')
 
@@ -205,8 +209,8 @@ class Migrate_To_3_3(Migrator):
         logger.info('Done.')
 
     def _adaptUserProperties(self):
-        '''Set CKeditor as default editor for everybody'''
-        logger.info('Setting CKeditor as default editor for everybody...')
+        '''Set CKeditor as default editor for everybody and remove useless properties'''
+        logger.info('Setting CKeditor as default editor for everybody and removing useless properties...')
 
         props = { 'wysiwyg_editor': 'CKeditor' }
         memberDataTool = self.portal.portal_memberdata
@@ -215,6 +219,8 @@ class Migrate_To_3_3(Migrator):
         for userId in memberDataTool._members.keys():
             member = membershipTool.getMemberById(userId)
             member.setMemberProperties( props )
+            propertiesToRemove = [prop for prop in memberPropertiesToRemove if member.hasProperty(prop)]
+            member.manage_delProperties(propertiesToRemove)
 
         logger.info('Done.')
 
@@ -289,8 +295,8 @@ def migrate(context):
        6)  Remove unused users present in portal_membership
        7)  Remove useless mail topics added by PloneMeeting migration
        8)  Remove useless fck_editor properties object
-       9)  Set CKeditor as default editor for everybody
-       10)  Change various meetingConfigs properties
+       9)  Set CKeditor as default editor for everybody and remove useless properties
+       10) Change various meetingConfigs properties
        11) Recreate the used POD templates
        12) Make sure Plone groups linked to a MeetingGroup have a consistent title
        13) Reinstall Products.MeetingAndenne so skin and so on are correct
