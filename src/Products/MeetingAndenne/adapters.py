@@ -27,7 +27,7 @@ from zope.i18n import translate
 from AccessControl import ClassSecurityInfo
 from Products.Archetypes.atapi import DisplayList
 from Globals import InitializeClass
-from Products.CMFCore.permissions import ReviewPortalContent
+from Products.CMFCore.permissions import ModifyPortalContent, ReviewPortalContent
 from Products.CMFCore.utils import getToolByName
 from plone import api
 from plone.app.users.browser.personalpreferences import UserDataPanelAdapter
@@ -1172,7 +1172,30 @@ class CustomMeetingItemAndenne(MeetingItem):
 #            return True
 #    MeetingItem.showDuplicateItemAction=showDuplicateItemAction
 #    #it'a a monkey patch because it's the only way to have a default method in the schema
-#
+
+    security.declareProtected('Modify portal content', 'onWelcomeNowPerson')
+    def onWelcomeNowPerson(self):
+        '''Some user (in request.userId) has join the meeting 
+           We will record this info, excepted if request["action"] tells us to
+           remove it instead (delete).'''
+        tool = getToolByName(self, 'portal_plonemeeting')
+        if not tool.isManager(self) or not checkPermission(ModifyPortalContent, self):
+            raise Unauthorized
+        rq = self.REQUEST
+        userId = rq['userId']
+        actionType = rq.get('actionType')
+        if actionType == 'delete':
+            present = list(self.getItemPresents())
+            present.remove(userId)
+            self.setItemPresents(present)
+        if actionType == 'do':
+            present = list(self.getItemPresents())
+            present.append(userId)
+            self.setItemPresents(present)
+
+    MeetingItem.onWelcomeNowPerson=onWelcomeNowPerson
+    #it'a a monkey patch because it's the only way to add a behaviour to the MeetingItem class
+
     security.declarePublic('israpcolaucon')
     def israpcolaucon(self):
         """
