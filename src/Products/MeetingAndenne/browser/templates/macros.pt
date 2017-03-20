@@ -1,5 +1,5 @@
 <tal:comment replace="nothing">
-  This macro returns the edit view of an Archetypes field.
+  This macro returns the edit view of a MultiSelect field.
   It requires a REQUEST with key "fieldName".
 </tal:comment>
 <metal:editField define-macro="editMultiSelectField" i18n:domain="PloneMeeting"
@@ -17,7 +17,7 @@
        i18n:attributes="title fastedit_save_changes"
        title="Save changes."
        tal:attributes="src string:$portal_url/save.gif;
-                       onClick python:'askAjaxChunk(\'hook_%s\', \'POST\', \'%s\', \'@@ma-macros\', \'saveMultiSelectField\', {\'lang\':\'%s\'}, getMultiSelectContent)' % (fieldName, context.absolute_url(), lang)"/>
+                       onClick python:'askAjaxChunk(\'hook_%s\', \'POST\', \'%s\', \'@@ma-macros\', \'saveMultiSelectField\', {\'lang\':\'%s\'}, getMultiSelectContent)' % (fieldName, context.absolute_url(), lang)" />
   &nbsp;
   <img style="cursor: pointer;"
        i18n:attributes="title fastedit_cancel"
@@ -47,7 +47,7 @@
 </metal:editField>
 
 <tal:comment replace="nothing">
-  Save the content of the copyGroups field and return its consult view.
+  Save the content of a MultiSelect field and return its consult view.
   Requires a REQUEST with keys "fieldName" and "fieldContent".
 </tal:comment>
 <metal:save define-macro="saveMultiSelectField" i18n:domain="PloneMeeting"
@@ -61,7 +61,7 @@
  <metal:view use-macro="context/@@ma-macros/viewMultiSelectField"/>
 </metal:save>
 
-<tal:comment replace="nothing">Displays changes performed on a field.</tal:comment>
+<tal:comment replace="nothing">Displays changes performed on a MultiSelect field.</tal:comment>
 <metal:field define-macro="viewMultiSelectFieldVersion" i18n:domain="PloneMeeting"
  tal:define="fieldName request/fieldName;
              field python: context.getField(fieldName);
@@ -71,7 +71,7 @@
  <metal:view use-macro="context/@@ma-macros/viewMultiSelectField"/>
 </metal:field>
 
-<tal:comment replace="nothing">Displays the field, nothing else.</tal:comment>
+<tal:comment replace="nothing">Displays the MultiSelect field, nothing else.</tal:comment>
 <metal:field define-macro="simplyViewMultiSelectField" i18n:domain="PloneMeeting"
  tal:define="fieldName request/fieldName;
              field python: context.getField(fieldName);
@@ -82,23 +82,27 @@
 </metal:field>
 
 <tal:comment replace="nothing">
-  This macro allows to view the content of an ajax-editable field.
+  This macro allows to view the content of an ajax-editable MultiSelect field.
 </tal:comment>
 <div metal:define-macro="viewMultiSelectField"
      tal:define="hookId python: 'hook_%s' % fieldName;
                  changes changes|python: False;
                  field python: context.getField(fieldName);
                  fieldContent python: field.get(context);
+                 usedAttrs usedAttrs|meetingConfig/getUsedItemAttributes;
+                 isOptional field/optional|python:False;
+                 isUsed python: not isOptional or (isOptional and fieldName in usedAttrs);
+                 ajaxEdit ajaxEdit|nothing;
+                 mayEdit python: ajaxEdit and member.has_permission(field.write_permission, context) and not context.restrictedTraverse('@@plone_lock_info').is_locked_for_current_user();
                  jsUrl context/absolute_url;
                  jsParams python: '\'fieldName\':\'%s\',\'lang\':\'%s\'' % (fieldName, lang);
                  jsCall python:'askAjaxChunk(\'%s\', \'GET\', \'%s\', \'@@ma-macros\'' % (hookId, jsUrl);
                  jsEdit python: '%s,\'editMultiSelectField\',{%s},null,null)' % (jsCall, jsParams);
                  jsChanges python: '%s,\'viewMultiSelectFieldVersion\',{%s,\'changes\':\'True\'})' % (jsCall, jsParams);
                  jsView python: '%s,\'viewMultiSelectFieldVersion\',{%s,\'changes\':\'False\'})' % (jsCall, jsParams);
-                 needToRefreshPage needToRefreshPage|nothing;
-                 ajaxEdit ajaxEdit|nothing;
-                 mayEdit python: ajaxEdit and member.has_permission(field.write_permission, context) and not context.restrictedTraverse('@@plone_lock_info').is_locked_for_current_user()"
-     tal:attributes="id hookId; style python: lang and 'position: relative' or ''">
+                 needToRefreshPage needToRefreshPage|nothing"
+     tal:attributes="id hookId"
+     tal:condition="python: isUsed and field.widget.visible and field.widget.visible and field.widget.testCondition(context.getParentNode(), context.getParentNode(), context) and member.has_permission(field.read_permission, context)">
 
 <script type='text/javascript'>
 function refreshPageIfNeeded(){
@@ -106,24 +110,23 @@ document.location.reload(true);
 }
 </script>
 
-    <span class="item_attribute_label" tal:replace="python: field.widget.Label(context)"></span>:&nbsp;&nbsp;
-    <tal:displayField condition="fieldContent">
-      <img style="cursor:pointer" tal:condition="mayEdit"
-           tal:attributes="src string:$portal_url/edit.gif;
-                           onClick jsEdit;
-                           onload python: needToRefreshPage and 'javascript:refreshPageIfNeeded()' or ''"/>
-      <tal:history define="hasHistory python: context.hasHistory(fieldName)" condition="hasHistory">
-        <img style="cursor:pointer" title="history_changes" i18n:attributes="title"
-             tal:condition="not: changes"
-             tal:attributes="src string:$portal_url/changes.gif; onClick jsChanges"/>
-        <img style="cursor:pointer" title="history_last" i18n:attributes="title"
-             tal:condition="changes"
-             tal:attributes="src string:$portal_url/view.gif; onClick jsView"/>
-      </tal:history>
-      <span metal:use-macro="python: here.widget(fieldName, mode='view')" />
-    </tal:displayField>
+    <span class="item_attribute_label" tal:content="python: field.widget.Label(context)"></span>:&nbsp;&nbsp;
+    <img style="cursor:pointer" tal:condition="mayEdit"
+         tal:attributes="src string:$portal_url/edit.gif;
+                         onClick jsEdit;
+                         onload python: needToRefreshPage and 'javascript:refreshPageIfNeeded()' or ''"/>
+    <tal:history define="hasHistory python: context.hasHistory(fieldName)" condition="hasHistory">
+      <img style="cursor:pointer" title="history_changes" i18n:attributes="title"
+           tal:condition="not: changes"
+           tal:attributes="src string:$portal_url/changes.gif; onClick jsChanges"/>
+      <img style="cursor:pointer" title="history_last" i18n:attributes="title"
+           tal:condition="changes"
+           tal:attributes="src string:$portal_url/view.gif; onClick jsView"/>
+    </tal:history>
+    <span tal:condition="fieldContent" metal:use-macro="python: here.widget(fieldName, mode='view')" />
     <span tal:condition="not: fieldContent">-</span>
 </div>
+
 
 <tal:comment replace="nothing">
   This macro displays the table used for management who is present or absent for a MeetingItem.

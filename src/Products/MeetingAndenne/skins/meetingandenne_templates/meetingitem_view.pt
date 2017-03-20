@@ -135,19 +135,14 @@
             </div>
 
             <tal:comment replace="nothing">Associated groups</tal:comment>
-            <div class="discreet" tal:condition="python: 'associatedGroups' in usedAttrs"
-                                  tal:define="associatedGroups context/getAssociatedGroups;">
-                <span class="item_attribute_label"
-                      i18n:translate="PloneMeeting_label_associatedGroups"></span>:&nbsp;&nbsp;
-                <tal:displayAssociatedGroups condition="associatedGroups">
-                    <span metal:use-macro="python: here.widget('associatedGroups', mode='view')" />
-                </tal:displayAssociatedGroups>
-                <span tal:condition="not: associatedGroups">-</span>
+            <div class="discreet">
+                <tal:field define="fieldName python: 'associatedGroups'; ajaxEdit python:True">
+                    <metal:f use-macro="context/@@ma-macros/viewMultiSelectField"/>
+                </tal:field>
             </div>
 
             <tal:comment replace="nothing">Copy groups for this item</tal:comment>
-            <div class="discreet" tal:condition="python: context.isCopiesEnabled()"
-                                  tal:define="copyGroups context/getCopyGroups;">
+            <div class="discreet" tal:condition="python: context.isCopiesEnabled()">
                 <tal:field define="fieldName python: 'copyGroups'; ajaxEdit python:True">
                     <metal:f use-macro="context/@@ma-macros/viewMultiSelectField"/>
                 </tal:field>
