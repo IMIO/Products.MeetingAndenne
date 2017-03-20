@@ -8,15 +8,18 @@
   <!-- registerTranslations before including package Products.PloneMeeting
        so Products.MeetingAndenne can overrides Products.PloneMeeting translations -->
   <!-- <i18n:registerTranslations directory="locales" /> -->
-
+  <include package=".browser" />
   <include package="Products.CMFPlacefulWorkflow"/>
   <include package="Products.PloneMeeting"/>
-  <include package=".browser" />
 
   <!-- Adapters for user information and user preferences panels -->
   <adapter for="plone.app.layout.navigation.interfaces.INavigationRoot"
            factory=".adapters.EnhancedUserDataPanelAdapter"
            provides=".userdataschema.IEnhancedUserDataSchema"/>
+
+  <adapter for="plone.app.layout.navigation.interfaces.INavigationRoot"
+           factory=".adapters.EnhancedPersonalPreferencesPanelAdapter"
+           provides=".browser.personalpreferences.IEnhancedPersonalPreferences"/>
 
   <!-- WF actions and conditions for Meeting and MeetingItem for College -->
   <adapter for="Products.PloneMeeting.interfaces.IMeetingItem"

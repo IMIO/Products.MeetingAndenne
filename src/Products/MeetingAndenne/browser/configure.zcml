@@ -4,9 +4,26 @@
     xmlns:plone="http://namespaces.plone.org/plone"
     >
 
+    <include package="plone.app.controlpanel" />
+
     <!-- MeetingAndenne-specific viewlets -->
 
     <!-- Overriden Plone viewlets -->
+    <browser:page
+        name="personal-preferences"
+        for="plone.app.layout.navigation.interfaces.INavigationRoot"
+        class=".personalpreferences.EnhancedPersonalPreferencesPanel"
+        layer="..interfaces.IMeetingAndenneLayer"
+        permission="cmf.SetOwnProperties"
+        />
+
+    <browser:page
+        name="user-preferences"
+        for="plone.app.layout.navigation.interfaces.INavigationRoot"
+        class=".personalpreferences.EnhancedPersonalPreferencesConfiglet"
+        layer="..interfaces.IMeetingAndenneLayer"
+        permission="plone.app.controlpanel.UsersAndGroups"
+        />
 
     <!-- Overriden PloneMeeting viewlets -->
 

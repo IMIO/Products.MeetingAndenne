@@ -31,6 +31,7 @@ from Products.CMFCore.permissions import ModifyPortalContent, ReviewPortalConten
 from Products.CMFCore.utils import getToolByName
 from plone import api
 from plone.app.users.browser.personalpreferences import UserDataPanelAdapter
+from plone.app.users.browser.personalpreferences import PersonalPreferencesPanelAdapter
 from imio.helpers.xhtml import xhtmlContentIsEmpty
 from Products.PloneMeeting.config import ITEM_NO_PREFERRED_MEETING_VALUE, \
      TOPIC_SEARCH_SCRIPT, TOPIC_TYPE
@@ -68,14 +69,29 @@ class EnhancedUserDataPanelAdapter(UserDataPanelAdapter):
     def get_function(self):
         return self.context.getProperty('function', '')
     def set_function(self, value):
+        if value is None:
+            value = ''
         return self.context.setMemberProperties( {'function': value} )
     function = property(get_function, set_function)
 
     def get_gender(self):
         return self.context.getProperty('gender', '')
     def set_gender(self, value):
+        if value is None:
+            value = ''
         return self.context.setMemberProperties( {'gender': value} )
     gender = property(get_gender, set_gender)
+
+
+# ------------------------------------------------------------------------------
+class EnhancedPersonalPreferencesPanelAdapter(PersonalPreferencesPanelAdapter):
+    """
+    """
+    def get_listed(self):
+        return self.context.getProperty('listed', '')
+    def set_listed(self, value):
+        return self.context.setMemberProperties( {'listed': value} )
+    listed = property(get_listed, set_listed)
 
 
 # ------------------------------------------------------------------------------
@@ -1107,10 +1123,11 @@ class CustomMeetingItemAndenne(MeetingItem):
 #    MeetingItem.getAttendees=getAttendees
 #    # it'a a monkey patch
 #
-#    security.declarePublic('onDuplicate')
-#    def onDuplicate(self):
-#        '''This method is triggered when the users clicks on
-#           "duplicate item".'''
+    security.declarePublic('onDuplicate')
+    def onDuplicate(self):
+        '''This method is triggered when the users clicks on
+           "duplicate item".'''
+        import pdb; pdb.set_trace()
 #        user = self.portal_membership.getAuthenticatedMember()
 #        newItem = self.clone(newOwnerId=user.id)
 #        newItem.setTreatUser(user.id)
@@ -1141,8 +1158,8 @@ class CustomMeetingItemAndenne(MeetingItem):
 #            self.utranslate('item_duplicated', domain='PloneMeeting'))
 #        return self.REQUEST.RESPONSE.redirect(newItem.absolute_url())
 #
-#    MeetingItem.onDuplicate=onDuplicate
-#    #it'a a monkey patch because it's the only way to have a default method in the schema
+    MeetingItem.onDuplicate=onDuplicate
+    #it'a a monkey patch because it's the only way to have a default method in the schema
 #
 #    security.declarePublic('listAssociatedGroups')
 #    def listAssociatedGroups(self):
