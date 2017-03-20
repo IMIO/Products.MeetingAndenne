@@ -208,6 +208,39 @@ class Migrate_To_3_3(Migrator):
 
         logger.info('Done.')
 
+    def _renameCategories(self):
+        '''Rename some categories if they exist and change related MeetingItems'''
+        logger.info('Renaming some categories if they exist and change related MeetingItems...')
+
+        for mc in self.portal.portal_plonemeeting.objectValues('MeetingConfig'):
+            if mc.getId() == 'meeting-config-college':
+                oldIds = []
+                newIds = []
+
+                if '63.-centre-ville-revitalisation' in mc.categories.keys():
+                    oldIds.append('63.-centre-ville-revitalisation')
+                    newIds.append('63-centre-ville-revitalisation')
+
+                if '64.-cpas' in mc.categories.keys():
+                    oldIds.append('64.-cpas')
+                    newIds.append('64-cpas')
+
+                if 'nage' in mc.categories.keys():
+                    oldIds.append('nage')
+                    newIds.append('65-nage')
+
+                if len(oldIds) > 0:
+                    brains = self.portal.portal_catalog(meta_type='MeetingItem')
+                    for brain in brains:
+                        item = brain.getObject()
+                        if item.category in oldIds:
+                            item.category = newIds[oldIds.index(item.category)]
+                            print item.absolute_url() + ' ' + item.category
+                    for ids in enumerate(oldIds):
+                        mc.categories.manage_renameObject(ids[1], newIds[ids[0]])
+
+        logger.info('Done.')
+
     def _adaptUserProperties(self):
         '''Set CKeditor as default editor for everybody and remove useless properties'''
         logger.info('Setting CKeditor as default editor for everybody and removing useless properties...')
@@ -274,6 +307,7 @@ class Migrate_To_3_3(Migrator):
         self._removeUnusedPloneUsers()
         self._removeUselessMailTopics()
         self._removeUselessFCKEditorProperties()
+        self._renameCategories()
         self._adaptUserProperties()
         self._adaptMeetingConfigs()
         self._createPODTemplates()
@@ -295,11 +329,12 @@ def migrate(context):
        6)  Remove unused users present in portal_membership
        7)  Remove useless mail topics added by PloneMeeting migration
        8)  Remove useless fck_editor properties object
-       9)  Set CKeditor as default editor for everybody and remove useless properties
-       10) Change various meetingConfigs properties
-       11) Recreate the used POD templates
-       12) Make sure Plone groups linked to a MeetingGroup have a consistent title
-       13) Reinstall Products.MeetingAndenne so skin and so on are correct
+       9)  Rename some categories if they exist and change related MeetingItems
+       10) Set CKeditor as default editor for everybody and remove useless properties
+       11) Change various meetingConfigs properties
+       12) Recreate the used POD templates
+       13) Make sure Plone groups linked to a MeetingGroup have a consistent title
+       14) Reinstall Products.MeetingAndenne so skin and so on are correct
     '''
     Migrate_To_3_3(context).run()
 # ------------------------------------------------------------------------------
