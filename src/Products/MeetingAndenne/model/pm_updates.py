@@ -61,8 +61,8 @@ def update_item_schema(baseSchema):
                 name='formation_date1',
                 default_method="getTrainingDate",
                 widget=DateTimeField._properties['widget'](
-                    label='formation_date1',
                     condition="python: here.adapted().isformation()",
+                    label='formation_date1',
                     label_msgid='MeetingAndenne_label_formation_date1',
                     i18n_domain='PloneMeeting',
                 ),
@@ -73,8 +73,8 @@ def update_item_schema(baseSchema):
                 name='formation_date2',
                 default_method="getTrainingDate",
                 widget=DateTimeField._properties['widget'](
-                    label='formation_date2',
                     condition="python: here.adapted().isformation()",
+                    label='formation_date2',
                     label_msgid='MeetingAndenne_label_formation_date2',
                     i18n_domain='PloneMeeting',
                 ),
@@ -84,9 +84,9 @@ def update_item_schema(baseSchema):
             StringField(
                 name='formation_periode',
                 widget=StringWidget(
+                    condition="python: here.adapted().isformation()",
                     size= 100,
                     label='formation_periode',
-                    condition="python: here.adapted().isformation()",
                     label_msgid='MeetingAndenne_label_formation_periode',
                     i18n_domain='PloneMeeting',
                 ),
@@ -95,8 +95,8 @@ def update_item_schema(baseSchema):
             LinesField(
                 name='formation_users',
                 widget=MultiSelectionWidget(
-                    size=10,
                     condition="python: here.adapted().isformation()",
+                    size=10,
                     label='formation_users',
                     label_msgid='MeetingAndenne_label_formation_users',
                     i18n_domain='PloneMeeting',
@@ -110,9 +110,9 @@ def update_item_schema(baseSchema):
                 name='formation_user',
                 default='',
                 widget=StringWidget(
+                    condition="python: here.adapted().isformation()",
                     size=100,
                     label='formation_user',
-                    condition="python: here.adapted().isformation()",
                     label_msgid='MeetingAndenne_label_formation_user',
                     i18n_domain='PloneMeeting',
                 ),
@@ -133,8 +133,8 @@ def update_item_schema(baseSchema):
                 name='formation_desc',
                 default="cette formation à pour but...",
                 widget=TextAreaWidget(
-                    label='formation_desc',
                     condition="python: here.adapted().isformation()",
+                    label='formation_desc',
                     label_msgid='MeetingAndenne_label_formation_desc',
                     i18n_domain='PloneMeeting',
                 ),
@@ -144,9 +144,9 @@ def update_item_schema(baseSchema):
                 name='formation_objet',
                 default='formation_objet',
                 widget=StringWidget(
+                    condition="python: here.adapted().isformation()",
                     size=100,
                     label='formation_objet',
-                    condition="python: here.adapted().isformation()",
                     label_msgid='MeetingAndenne_label_formation_objet',
                     i18n_domain='PloneMeeting',
                 ),
@@ -167,8 +167,8 @@ def update_item_schema(baseSchema):
                 name='formation_place',
                 default='formation_place',
                 widget=StringWidget(
-                    size= 100,
                     condition="python: here.adapted().isformation()",
+                    size= 100,
                     label='formation_place',
                     label_msgid='MeetingAndenne_label_formation_place',
                     i18n_domain='PloneMeeting',
@@ -180,9 +180,9 @@ def update_item_schema(baseSchema):
                 name='formation_name',
                 default='formation_name',
                  widget=StringWidget(
+                    condition="python: here.adapted().isformation()",
                     size= 100,
                     label='formation_name',
-                    condition="python: here.adapted().isformation()",
                     label_msgid='MeetingAndenne_label_formation_name',
                     i18n_domain='PloneMeeting',
                 ),
@@ -192,9 +192,9 @@ def update_item_schema(baseSchema):
             StringField(
                 name='formation_mod',
                 widget=SelectionWidget(
+                    condition="python: here.adapted().isformation()",
                     format="radio",
                     label='formation_mod',
-                    condition="python: here.adapted().isformation()",
                     label_msgid='MeetingAndenne_label_formation_mod',
                     i18n_domain='PloneMeeting',
                 ),
@@ -205,9 +205,9 @@ def update_item_schema(baseSchema):
                 name='formation_compte',
                 default="IBAN: BEXX-XXXX-XXXX-XXXX BIC:XXXX BE XX",
                 widget=StringWidget(
+                    condition="python: here.adapted().isformation()",
                     size= 100,
                     label='formation_compte',
-                    condition="python: here.adapted().isformation()",
                     label_msgid='MeetingAndenne_label_formation_compte',
                     i18n_domain='PloneMeeting',
                 ),
@@ -216,9 +216,9 @@ def update_item_schema(baseSchema):
             StringField(
                 name='formation_compte_name',
                 widget=StringWidget(
+                    condition="python: here.adapted().isformation()",
                     size= 100,
                     label='formation_compte_name',
-                    condition="python: here.adapted().isformation()",
                     label_msgid='MeetingAndenne_label_formation_compte_name',
                     i18n_domain='PloneMeeting',
                 ),
@@ -227,9 +227,9 @@ def update_item_schema(baseSchema):
             StringField(
                 name='formation_compte_com',
                 widget=StringWidget(
+                    condition="python: here.adapted().isformation()",
                     size= 100,
                     label='formation_compte_com',
-                    condition="python: here.adapted().isformation()",
                     label_msgid='MeetingAndenne_label_formation_compte_com',
                     i18n_domain='PloneMeeting',
                 ),
@@ -250,8 +250,9 @@ def update_item_schema(baseSchema):
             TextField(
                 name='projetpv',
                 widget=RichWidget(
-                    label='Projetpv',
                     condition="python: not here.adapted().isformation()",
+                    rows=15,
+                    label='Projetpv',
                     label_msgid='MeetingAndenne_label_projetpv',
                     i18n_domain='PloneMeeting',
                 ),
@@ -265,6 +266,7 @@ def update_item_schema(baseSchema):
             TextField(
                 name='pv',
                 widget=RichWidget(
+                    rows=15,
                     label='Pv',
                     label_msgid='MeetingAndenne_label_pv',
                     i18n_domain='PloneMeeting',
@@ -279,6 +281,7 @@ def update_item_schema(baseSchema):
             TextField(
                 name='textpv',
                 widget=RichWidget(
+                    rows=15,
                     label='Textpv',
                     label_msgid='MeetingAndenne_label_textpv',
                     i18n_domain='PloneMeeting',
@@ -331,6 +334,7 @@ def update_item_schema(baseSchema):
     completeItemSchema['description'].widget.condition='python: not here.adapted().isformation()'
     completeItemSchema['copyGroups'].write_permission="MeetingAndenne: Write copygroup"
     completeItemSchema['description'].widget.label_method='getLabelForDescription'
+    completeItemSchema['budgetInfos'].widget.rows=12
     completeItemSchema['itemSignatories'].optional=True
 
 
