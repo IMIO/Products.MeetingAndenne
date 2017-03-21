@@ -391,7 +391,6 @@ def update_file_schema(baseSchema):
 #
 #    completeFileSchema = baseSchema + specificSchema.copy()
     completeFileSchema = baseSchema
-    completeFileSchema['toPrint'].default=True
 
     return completeFileSchema
 MeetingFile.schema = update_file_schema(MeetingFile.schema)
