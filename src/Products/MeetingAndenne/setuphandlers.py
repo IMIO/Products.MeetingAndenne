@@ -22,11 +22,14 @@ from Products.CMFCore.utils import getToolByName
 import transaction
 ##code-section HEAD
 from Products.PloneMeeting.exportimport.content import ToolInitializer
+from Products.PloneMeeting.model.adaptations import performWorkflowAdaptations
 ##/code-section HEAD
 
 def isNotMeetingAndenneProfile(context):
     return context.readDataFile("MeetingAndenne_marker.txt") is None
 
+def isMeetingAndenneConfigureProfile(context):
+    return context.readDataFile("MeetingAndenne_configure_marker.txt")
 
 
 def run_after(context):
@@ -35,10 +38,24 @@ def run_after(context):
     profileId = 'profile-Products.MeetingAndenne:default'
     stepContext = context._getImportContext(profileId)
 
-    updateRoleMappings(stepContext)
     postInstall(stepContext)
+    updateRoleMappings(stepContext)
+    reorderCss(stepContext)
 
 
+def postInstall(context):
+    """Called as at the end of the setup process. """
+    # the right place for your custom code
+    if isNotMeetingAndenneProfile(context):
+        return
+    logStep("postInstall", context)
+    site = context.getSite()
+    # Need to reinstall PloneMeeting after reinstalling MA workflows to re-apply wfAdaptations
+    reinstallPloneMeeting(context, site)
+    # Make sure the 'home' tab is shown
+    showHomeTab(context, site)
+    # reorder skins so we are sure that the meetingAndenne_xxx skins are just under custom
+    reorderSkinsLayers(context, site)
 
 def updateRoleMappings(context):
     """after workflow changed update the roles mapping. this is like pressing
@@ -46,129 +63,6 @@ def updateRoleMappings(context):
     if isNotMeetingAndenneProfile(context): return
     wft = getToolByName(context.getSite(), 'portal_workflow')
     wft.updateRoleMappings()
-
-def postInstall(context):
-    """Called as at the end of the setup process. """
-    # the right place for your custom code
-    if isNotMeetingAndenneProfile(context):
-        return
-    site = context.getSite()
-    # Reinstall PloneMeeting
-    reinstallPloneMeeting(context, site)
-    # Make sure the 'home' tab is shown
-    showHomeTab(context, site)
-    # Reinstall the skin
-    reinstallPloneMeetingSkin(context, site)
-    # reorder skins so we are sure that the meetingAndenne_xxx skins are just under custom
-    reorderSkinsLayers(context, site)
-
-
-
-##code-section FOOT
-def logStep(method, context):
-    logger.info("Applying '%s' in profile '%s'" % (method, '/'.join(context._profile_path.split(os.sep)[-3:])))
-
-
-def installMeetingAndenne(context):
-    """ Run the default profile before bing able to run the Andenne profile"""
-    if isNotMeetingAndenneProfile(context):
-        return
-
-    logStep("installMeetingAndenne", context)
-    portal = context.getSite()
-    portal.portal_setup.runAllImportStepsFromProfile('profile-Products.MeetingAndenne:default')
-
-
-def reinstallPloneMeeting(context, site):
-    '''Reinstall PloneMeeting so after install methods are called and applied,
-       like performWorkflowAdaptations for example.'''
-
-    if isNotMeetingAndenneProfile(context):
-        return
-
-    logStep("reinstallPloneMeeting", context)
-    _installPloneMeeting(context)
-    # launch skins step for MeetingAndenne so MeetingAndenne skin layers are before PM ones
-    site.portal_setup.runImportStepFromProfile('profile-Products.MeetingAndenne:default', 'skins')
-
-
-def _installPloneMeeting(context):
-    site = context.getSite()
-    profileId = u'profile-Products.PloneMeeting:default'
-    site.portal_setup.runAllImportStepsFromProfile(profileId)
-
-
-def initializeTool(context):
-    '''Initialises the PloneMeeting tool based on information from the current
-       profile.'''
-    if isNotMeetingAndenneProfile(context):
-        return
-
-    logStep("initializeTool", context)
-    _installPloneMeeting(context)
-    return ToolInitializer(context, PROJECTNAME).run()
-
-
-def showHomeTab(context, site):
-    """
-       Make sure the 'home' tab is shown...
-    """
-    if isNotMeetingAndenneProfile(context):
-        return
-
-    logStep("showHomeTab", context)
-
-    index_html = getattr(site.portal_actions.portal_tabs, 'index_html', None)
-    if index_html:
-        index_html.visible = True
-    else:
-        logger.info("The 'Home' tab does not exist !!!")
-
-
-def reinstallPloneMeetingSkin(context, site):
-    """
-       Reinstall Products.plonemeetingskin as the reinstallation of MeetingAndenne
-       change the portal_skins layers order
-    """
-    if isNotMeetingAndenneProfile(context):
-        return
-
-    logStep("reinstallPloneMeetingSkin", context)
-    try:
-        site.portal_setup.runAllImportStepsFromProfile(u'profile-plonetheme.imioapps:default')
-        site.portal_setup.runAllImportStepsFromProfile(u'profile-plonetheme.imioapps:plonemeetingskin')
-    except KeyError:
-        # if the Products.plonemeetingskin profile is not available
-        # (not using plonemeetingskin or in testing?) we pass...
-        pass
-
-
-def reorderSkinsLayers(context, site):
-    """
-       Reinstall Products.plonemeetingskin and re-apply MeetingAndenne skins.xml step
-       as the reinstallation of MeetingAndenne and PloneMeeting changes the portal_skins layers order
-    """
-    if isNotMeetingAndenneProfile(context):
-        return
-
-    logStep("reorderSkinsLayers", context)
-    try:
-        site.portal_setup.runAllImportStepsFromProfile(u'profile-plonetheme.imioapps:default')
-        site.portal_setup.runAllImportStepsFromProfile(u'profile-plonetheme.imioapps:plonemeetingskin')
-        site.portal_setup.runImportStepFromProfile(u'profile-Products.MeetingAndenne:default', 'skins')
-    except KeyError:
-        # if the Products.plonemeetingskin profile is not available
-        # (not using plonemeetingskin or in testing?) we pass...
-        pass
-
-
-def finalizeInstance(context):
-    """
-      Called at the very end of the installation process (after PloneMeeting).
-    """
-    reorderSkinsLayers(context, context.getSite())
-    reorderCss(context)
-
 
 def reorderCss(context):
     """
@@ -185,12 +79,95 @@ def reorderCss(context):
     css = ['plonemeeting.css',
            'meeting.css',
            'meetingitem.css',
-           'meetingSeraing.css',
+           'meetingAndenne.css',
            'imioapps.css',
            'plonemeetingskin.css',
            'imioapps_IEFixes.css',
            'ploneCustom.css']
     for resource in css:
         portal_css.moveResourceToBottom(resource)
+
+
+##code-section FOOT
+def logStep(method, context):
+    logger.info("Applying '%s' in profile '%s'" %
+                (method, '/'.join(context._profile_path.split(os.sep)[-3:])))
+
+
+def reinstallPloneMeeting(context, site):
+    '''Reinstall PloneMeeting so after install methods are called and applied,
+       like performWorkflowAdaptations for example.'''
+
+    if isNotMeetingAndenneProfile(context):
+        return
+
+    logStep("reinstallPloneMeeting", context)
+    _installPloneMeeting(context)
+    # launch skins step for MeetingAndenne so MeetingAndenne skin layers are before PM ones
+    site.portal_setup.runImportStepFromProfile('profile-Products.MeetingAndenne:default', 'skins')
+
+def _installPloneMeeting(context):
+    site = context.getSite()
+    profileId = u'profile-Products.PloneMeeting:default'
+    site.portal_setup.runAllImportStepsFromProfile(profileId)
+
+def showHomeTab(context, site):
+    """
+       Make sure the 'home' tab is shown...
+    """
+    if isNotMeetingAndenneProfile(context):
+        return
+
+    logStep("showHomeTab", context)
+
+    index_html = getattr(site.portal_actions.portal_tabs, 'index_html', None)
+    if index_html:
+        index_html.visible = True
+    else:
+        logger.info("The 'Home' tab does not exist !!!")
+
+def reorderSkinsLayers(context, site):
+    """
+       Re-apply MeetingAndenne skins.xml step as the reinstallation of
+       MeetingAndenne and PloneMeeting changes the portal_skins layers order
+    """
+    if isNotMeetingAndenneProfile(context):
+        return
+
+    logStep("reorderSkinsLayers", context)
+    site.portal_setup.runImportStepFromProfile(u'profile-Products.MeetingAndenne:default', 'skins')
+
+
+def installMeetingAndenne(context):
+    """ Run the default profile before being able to run the Andenne profile"""
+    if isNotMeetingAndenneConfigureProfile(context):
+        return
+
+    logStep("installMeetingAndenne", context)
+    portal = context.getSite()
+    portal.portal_setup.runAllImportStepsFromProfile('profile-Products.MeetingAndenne:default')
+
+def initializeTool(context):
+    '''Initialises the PloneMeeting tool based on information from the current
+       profile.'''
+    if not isMeetingAndenneConfigureProfile(context):
+        return
+
+    logStep("initializeTool", context)
+    _installPloneMeeting(context)
+    return ToolInitializer(context, PROJECTNAME).run()
+
+def finalizeInstance(context):
+    """
+       Some parameters can not be handled by the PloneMeeting installation,
+       so we handle this here
+    """
+    if not isMeetingAndenneConfigureProfile(context):
+        return
+
+    # finally, re-launch plonemeetingskin and MeetingAndenne skins step
+    # because PM has been installed before the import_data profile and messed up skins layers
+    site.portal_setup.runImportStepFromProfile(u'profile-Products.MeetingAndenne:default', 'skins')
+
 
 ##/code-section FOOT

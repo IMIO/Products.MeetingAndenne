@@ -1,0 +1,20 @@
+<?xml version="1.0"?>
+<import-steps>
+ <import-step id="installMeetingAndenne" version="20080501-01"
+              handler="Products.MeetingAndenne.setuphandlers.installMeetingAndenne"
+              title="Install MeetingAndenne.">
+  Install MeetingAndenne.
+ </import-step>
+ <import-step id="initializetool-MeetingAndenne" version="20060707-01"
+              handler="Products.MeetingAndenne.setuphandlers.initializeTool"
+              title="Initialize MeetingAndenne with portal_plonemeeting settings">
+  <dependency step="installMeetingAndenne"/>
+  Initialize portal_plonemeeting folders.
+ </import-step>
+ <import-step id="finalizeInstanceMeetingAndenne" version="20120315-01"
+              handler="Products.MeetingAndenne.setuphandlers.finalizeInstance"
+              title="Finalize instance.">
+  <dependency step="initializetool-MeetingAndenne"/>
+  Finalize instance.
+ </import-step>
+</import-steps>

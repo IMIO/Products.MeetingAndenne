@@ -20,58 +20,51 @@
   <!-- ##code-section profiles.zcml-bottom #fill in your manual code here -->
 
   <genericsetup:registerProfile
-   name="andenne"
-   title="PloneMeeting / For Andenne"
-   description="PloneMeeting for City College and Council of Andenne"
-   provides="Products.GenericSetup.interfaces.EXTENSION"
-   for="Products.CMFPlone.interfaces.IPloneSiteRoot"/>
-
-  <genericsetup:registerProfile
-   name="courrierFake"
-   title="MeetingAndenne / With CourrierFake"
-   description="Extension profile for MeetingAndenne"
-   provides="Products.GenericSetup.interfaces.EXTENSION"
-   for="Products.CMFPlone.interfaces.IPloneSiteRoot"/>
+      name="andenne"
+      title="PloneMeeting / For Andenne"
+      description="PloneMeeting City College and Council of Andenne"
+      provides="Products.GenericSetup.interfaces.EXTENSION"
+      for="Products.CMFPlone.interfaces.IPloneSiteRoot"/>
 
   <genericsetup:upgradeStep
-   title="Migrate to MeetingAndenne 3.0"
-   description="Performs migration from MeetingAndenne 1.9 to MeetingAndenne 3.0"
-   source="*"
-   destination="3000"
-   handler="Products.MeetingAndenne.migrations.migrate_to_3_0.migrate"
-   profile="Products.MeetingAndenne:default" />
+      title="Migrate to MeetingAndenne 3.0"
+      description="Performs migration from MeetingAndenne 1.9 to MeetingAndenne 3.0"
+      source="*"
+      destination="3000"
+      handler="Products.MeetingAndenne.migrations.migrate_to_3_0.migrate"
+      profile="Products.MeetingAndenne:default" />
 
   <genericsetup:upgradeStep
-   title="Migrate to MeetingAndenne 3.0.3"
-   description="Performs migration from MeetingAndenne 3.0 to MeetingAndenne 3.0.3"
-   source="3000"
-   destination="3030"
-   handler="Products.MeetingAndenne.migrations.migrate_to_3_0_3.migrate"
-   profile="Products.MeetingAndenne:default" />
+      title="Migrate to MeetingAndenne 3.0.3"
+      description="Performs migration from MeetingAndenne 3.0 to MeetingAndenne 3.0.3"
+      source="3000"
+      destination="3030"
+      handler="Products.MeetingAndenne.migrations.migrate_to_3_0_3.migrate"
+      profile="Products.MeetingAndenne:default" />
 
   <genericsetup:upgradeStep
-   title="Migrate to MeetingAndenne 3.1"
-   description="Performs migration from MeetingAndenne 3.0.3 to MeetingAndenne 3.1"
-   source="3030"
-   destination="3100"
-   handler="Products.MeetingAndenne.migrations.migrate_to_3_1.migrate"
-   profile="Products.MeetingAndenne:default" />
+      title="Migrate to MeetingAndenne 3.1"
+      description="Performs migration from MeetingAndenne 3.0.3 to MeetingAndenne 3.1"
+      source="3030"
+      destination="3100"
+      handler="Products.MeetingAndenne.migrations.migrate_to_3_1.migrate"
+      profile="Products.MeetingAndenne:default" />
 
   <genericsetup:upgradeStep
-   title="Migrate to MeetingAndenne 3.2"
-   description="Performs migration from MeetingAndenne 3.1 to MeetingAndenne 3.2"
-   source="3100"
-   destination="3200"
-   handler="Products.MeetingAndenne.migrations.migrate_to_3_2.migrate"
-   profile="Products.MeetingAndenne:default" />
+      title="Migrate to MeetingAndenne 3.2"
+      description="Performs migration from MeetingAndenne 3.1 to MeetingAndenne 3.2"
+      source="3100"
+      destination="3200"
+      handler="Products.MeetingAndenne.migrations.migrate_to_3_2.migrate"
+      profile="Products.MeetingAndenne:default" />
 
   <genericsetup:upgradeStep
-   title="Migrate to MeetingAndenne 3.3"
-   description="Performs migration from MeetingAndenne 3.2 to MeetingAndenne 3.3"
-   source="3200"
-   destination="3300"
-   handler="Products.MeetingAndenne.migrations.migrate_to_3_3.migrate"
-   profile="Products.MeetingAndenne:default" />
+      title="Migrate to MeetingAndenne 3.3"
+      description="Performs migration from MeetingAndenne 3.2 to MeetingAndenne 3.3"
+      source="3200"
+      destination="3300"
+      handler="Products.MeetingAndenne.migrations.migrate_to_3_3.migrate"
+      profile="Products.MeetingAndenne:default" />
 
   <!-- ##/code-section profiles.zcml-bottom -->
 
