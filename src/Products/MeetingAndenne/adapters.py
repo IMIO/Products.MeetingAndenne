@@ -1060,7 +1060,7 @@ class CustomMeetingItemAndenne(MeetingItem):
             ref = 'XXXX'
         return ref + '/XX.XX/' + DateTime(self.CreationDate()).strftime('%Y.%m') + '/'
 
-    MeetingItem.getDocReference=getDocReference
+    MeetingItem.getDocReference = getDocReference
     #it'a a monkey patch because it's the only way to have a default method in the schema
 
     security.declarePublic('listUserGroup')
@@ -1075,8 +1075,23 @@ class CustomMeetingItemAndenne(MeetingItem):
 
         return DisplayList( tuple(res) )
 
-    MeetingItem.listUserGroup=listUserGroup
+    MeetingItem.listUserGroup = listUserGroup
     #it'a a monkey patch because it's the only way to have a default method in the schema
+
+    security.declarePublic('getLatestReviewer')
+    def getLatestReviewer(self):
+        '''Returns the user of the latest validate action that was performed on this item or
+           the creator if the history is incomplete.'''
+        item = self.getSelf()
+        wfName = item.portal_workflow.getWorkflowsFor(item)[0].getId()
+        if wfName in item.workflow_history:
+            objectHistory = item.workflow_history[wfName]
+            i = len(objectHistory) - 1
+            while i >= 0:
+                if objectHistory[i]['action'] == 'validate':
+                    return objectHistory[i]['actor']
+                i -= 1
+        return item.Creator()
 
 #    def listItemPresents(self):
 #        '''Returns the list of attendees selectable as presents.'''
@@ -1331,20 +1346,6 @@ class CustomMeetingItemAndenne(MeetingItem):
     MeetingItem.getLabelForDescription=getLabelForDescription
     #it'a a monkey patch because it's the only way to have a default method in the schema
 
-#    security.declarePublic('getUserofAction')
-#    def getUserofAction(self):
-#            '''Returns the user of the last validate action that
-#               was performed on object p_obj.'''
-#            # Get the last validation date of the item
-#            res = self.context.Creator()
-#            objectHistory = self.context.workflow_history
-#            if objectHistory:
-#                objectHistory = objectHistory.values()[0] # We suppose here that the
-#                # object is governed by only one workflow.
-#                for step in objectHistory:
-#                    if (step['action'] == 'validate'):
-#                        res = step['actor']
-#            return res
 #
 #    security.declarePublic('printUserGroup')
 #    def printUserGroup(self):
@@ -1991,18 +1992,18 @@ class MeetingCollegeAndenneWorkflowConditions(MeetingWorkflowConditions):
                 res = No(translate('item_required_to_publish', domain='PloneMeeting', context=self.context.REQUEST))
         return res
 
+    security.declarePublic('mayDecide')
+    def mayDecide(self):
+        res = False
+        if checkPermission(ReviewPortalContent, self.context):
+            res = True
+        return res
+
     security.declarePublic('mayClose')
     def mayClose(self):
         res = False
         # The user just needs the "Review portal content" permission on the
         # object to close it.
-        if checkPermission(ReviewPortalContent, self.context):
-            res = True
-        return res
-
-    security.declarePublic('mayDecide')
-    def mayDecide(self):
-        res = False
         if checkPermission(ReviewPortalContent, self.context):
             res = True
         return res
@@ -2016,12 +2017,36 @@ class MeetingItemCollegeAndenneWorkflowActions(MeetingItemWorkflowActions):
     implements(IMeetingItemCollegeAndenneWorkflowActions)
     security = ClassSecurityInfo()
 
+    security.declarePrivate('doValidate')
+    def doValidate(self, stateChange):
+        MeetingItemWorkflowActions.doValidate(self, stateChange)
+        self.context.setVerifUser(self.context.adapted().getLatestReviewer())
+
+    security.declarePrivate('doItemFreeze')
+    def doItemFreeze (self, stateChange):
+        member = self.context.portal_membership.getAuthenticatedMember()
+        if (member.has_permission('MeetingAndenne: Write pv', self.context)):
+            self.context.setPv(self.context.getProjetpv())
+            self.context.setTextpv(self.context.getDecision())
+
     security.declarePrivate('doPre_accept')
     def doPre_accept(self, stateChange):
         pass
 
     security.declarePrivate('doAccept_but_modify')
     def doAccept_but_modify(self, stateChange):
+        pass
+
+    security.declarePublic('doAccept_but_modify_and_close')
+    def doAccept_but_modify_and_close(self, stateChange):
+        pass
+
+    security.declarePublic('doAccept_and_close')
+    def doAccept_and_close(self, stateChange):
+        pass
+
+    security.declarePublic('doRefuse_and_close')
+    def doRefuse_and_close(self, stateChange):
         pass
 
 

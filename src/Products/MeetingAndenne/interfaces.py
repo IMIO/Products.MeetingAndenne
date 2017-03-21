@@ -34,13 +34,25 @@ from Products.PloneMeeting.interfaces import \
 class IMeetingItemCollegeAndenneWorkflowActions(IMeetingItemWorkflowActions):
     '''This interface represents a meeting item as viewed by the specific meeting
        item workflow that is defined in this MeetingCommunes product.'''
-    def doPre_accept():
+    def doPre_accept(stateChange):
         """
           Triggered while doing the 'pre_accept' transition
         """
-    def doAccept_but_modify():
+    def doAccept_but_modify(stateChange):
         """
           Triggered while doing the 'accept_but_modify' transition
+        """
+    def doAccept_but_modify_and_close(stateChange):
+        """
+          Triggered while doing the 'accept_but_modify_and_close' transition
+        """
+    def doAccept_and_close(stateChange):
+        """
+          Triggered while doing the 'accept_and_close' transition
+        """
+    def doRefuse_and_close(stateChange):
+        """
+          Triggered while doing the 'refuse_and_close' transition
         """
 
 class IMeetingItemCollegeAndenneWorkflowConditions(IMeetingItemWorkflowConditions):
@@ -62,7 +74,7 @@ class IMeetingItemCollegeAndenneWorkflowConditions(IMeetingItemWorkflowCondition
 class IMeetingCollegeAndenneWorkflowActions(IMeetingWorkflowActions):
     '''This interface represents a meeting as viewed by the specific meeting
        workflow that is defined in this MeetingCommunes product.'''
-    def doDecide():
+    def doDecide(stateChange):
         """
           Triggered while doing the 'decide' transition
         """

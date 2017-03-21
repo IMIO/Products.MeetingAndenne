@@ -331,6 +331,7 @@ def update_item_schema(baseSchema):
     completeItemSchema['description'].widget.condition='python: not here.adapted().isformation()'
     completeItemSchema['copyGroups'].write_permission="MeetingAndenne: Write copygroup"
     completeItemSchema['description'].widget.label_method='getLabelForDescription'
+    completeItemSchema['itemSignatories'].optional=True
 
 
     completeItemSchema.moveField('refdoc', pos='top')
