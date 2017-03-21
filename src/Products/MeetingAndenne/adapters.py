@@ -104,7 +104,7 @@ class CustomMeetingAndenne(Meeting):
     def __init__(self, item):
         self.context = item
 
-### Functions used for template generation ###
+    ##### Functions used for template generation ############################
 
     security.declarePublic('getDisplayableName')
     def getDisplayableName(self):
@@ -115,105 +115,8 @@ class CustomMeetingAndenne(Meeting):
     Meeting.getDisplayableName=getDisplayableName
     #it'a a monkey patch because it's the only way to add a behaviour to the Meeting class
 
-    security.declarePublic('getPrintableItemsByNumCategory')
-    def getPrintableItemsByNumCategory(self, late=False, uids=[],
-                                       catstoexclude=[], exclude=True, allItems=False):
-        '''Returns a list of items ordered by category number. If there are many
-           items by category, there is always only one category, even if the
-           user have chosen a different order. If exclude=True , catstoexclude
-           represents the category number that we don't want to print and if
-           exclude=False, catsexclude represents the category number that we
-           only want to print. This is useful when we want for exemple to
-           exclude a personnal category from the meeting an realize a separate
-           meeeting for this personal category. If allItems=True, we return
-           late items AND items in order.'''
-        def getPrintableNumCategory(current_cat):
-            '''Method used here above.'''
-            current_cat_id = current_cat.getId()
-            current_cat_name = current_cat.Title()
-            current_cat_name = current_cat_name[0:2]
-            try:
-                catNum = int(current_cat_name)
-            except ValueError:
-                current_cat_name = current_cat_name[0:1]
-                try:
-                    catNum = int(current_cat_name)
-                except ValueError:
-                    catNum = current_cat_id
-            return catNum
-
-        itemsGetter = self.context.getItems
-        if late:
-            itemsGetter = self.context.getLateItems
-        items = itemsGetter()
-        if allItems:
-            items = self.context.getItems() + self.context.getLateItems()
-        # res contains all items by category, the key of res is the category
-        # number. Pay attention that the category number is obtain by extracting
-        # the 2 first caracters of the categoryname, thus the categoryname must
-        # be for exemple ' 2.travaux' or '10.Urbanisme. If not, the catnum takes
-        # the value of the id + 1000 to be sure to place those categories at the
-        # end.
-        res = {}
-        # First, we create the category and for each category, we create a
-        # dictionary that must contain the list of item in in res[catnum][1]
-        for item in items:
-            if uids:
-                if (item.UID() in uids):
-                    inuid = "ok"
-                else:
-                    inuid = "ko"
-            else:
-                inuid = "ok"
-            if (inuid == "ok"):
-                current_cat = item.getCategory(theObject=True)
-                catNum = getPrintableNumCategory(current_cat)
-                if catNum in res:
-                    res[catNum][1][item.getItemNumber()] = item
-                else:
-                    res[catNum] = {}
-                    #first value of the list is the category object
-                    res[catNum][0] = item.getCategory(True)
-                    #second value of the list is a list of items
-                    res[catNum][1] = {}
-                    res[catNum][1][item.getItemNumber()] = item
-
-        # Now we must sort the res dictionary with the key (containing catnum)
-        # and copy it in the returned array.
-        reskey = res.keys()
-        reskey.sort()
-        ressort = []
-        for i in reskey:
-            if catstoexclude:
-                if (i in catstoexclude):
-                    if exclude is False:
-                        guard = True
-                    else:
-                        guard = False
-                else:
-                    if exclude is False:
-                        guard = False
-                    else:
-                        guard = True
-            else:
-                guard = True
-
-            if guard is True:
-                k = 0
-                ressorti = []
-                ressorti.append(res[i][0])
-                resitemkey = res[i][1].keys()
-                resitemkey.sort()
-                ressorti1 = []
-                for j in resitemkey:
-                    k = k+1
-                    ressorti1.append([res[i][1][j], k])
-                ressorti.append(ressorti1)
-                ressort.append(ressorti)
-        return ressort
-
     security.declarePublic('getSignatoriesForPrinting') 
-    def getSignatoriesForPrinting (self, pos = 0, level = 0, useforpv = False, userepl = True):
+    def getSignatoriesForPrinting (self, pos=0, level=0, useforpv=False, userepl=True):
         '''To be changed'''
         # new from plonemeeting 3.3 :print sigantories in template relative to position ans level. pos 0 and level 0 is the first sigantory (bg) and function. 
         # pos 0 and level 1 is the first signatory (bg) with Name
@@ -233,7 +136,7 @@ class CustomMeetingAndenne(Meeting):
                 return duty
 
     security.declarePublic('reformAssembly')
-    def reformAssembly(self, assembly, strikefirst = True, strikemidle = True, strikelast = False, userepl = True):
+    def reformAssembly(self, assembly, strikefirst=True, strikemidle=True, strikelast=False, userepl=True):
         '''To be changed'''
         # new from plonemeeting 3.3 : used for template only in the header of pv and other. use the return of getstrikeassembly (and item) function to add the replacement user
         # pour une personne absente, soit on la barre (strike=true) , soit on la supprime (strike=false)
@@ -335,157 +238,107 @@ class CustomMeetingAndenne(Meeting):
             res += "</p>"
         return res
 
-#    security.declarePublic('getPrintableItems')
-#    def getPrintableItems(self, itemUids, late=False, ignore_review_states=[],
-#                          privacy='*', oralQuestion='both', toDiscuss='both', categories=[],
-#                          excludedCategories=[], firstNumber=1, renumber=False):
-#        '''Returns a list of items.
-#           An extra list of review states to ignore can be defined.
-#           A privacy can also be given, and the fact that the item is an
-#           oralQuestion or not (or both). Idem with toDiscuss.
-#           Some specific categories can be given or some categories to exchude.
-#           These 2 parameters are exclusive.  If renumber is True, a list of tuple
-#           will be return with first element the number and second element, the item.
-#           In this case, the firstNumber value can be used.'''
-#        # We just filter ignore_review_states here and privacy and call
-#        # getItemsInOrder(uids), passing the correct uids and removing empty
-#        # uids.
-#        # privacy can be '*' or 'public' or 'secret'
-#        # oralQuestion can be 'both' or False or True
-#        # toDiscuss can be 'both' or 'False' or 'True'
-#        for elt in itemUids:
-#            if elt == '': itemUids.remove(elt)
-#        #no filtering, return the items ordered
-#        if not categories and not ignore_review_states and privacy == '*' and oralQuestion == 'both' and toDiscuss == 'both':
-#            return self.context.getItemsInOrder(late=late, uids=itemUids)
-#        # Either, we will have to filter the state here and check privacy
-#        filteredItemUids = []
-#        uid_catalog = self.context.uid_catalog
-#        for itemUid in itemUids:
-#            obj = uid_catalog(UID=itemUid)[0].getObject()
-#            if obj.queryState() in ignore_review_states:
-#                continue
-#            elif not (privacy == '*' or obj.getPrivacy() == privacy):
-#                continue
-#            elif not (oralQuestion == 'both' or obj.getOralQuestion() == oralQuestion):
-#                continue
-#            elif not (toDiscuss == 'both' or obj.getToDiscuss() == toDiscuss):
-#                continue
-#            elif categories and not obj.getCategory() in categories:
-#                continue
-#            elif excludedCategories and obj.getCategory() in excludedCategories:
-#                continue
-#            filteredItemUids.append(itemUid)
-#        #in case we do not have anything, we return an empty list
-#        if not filteredItemUids:
-#            return []
-#        else:
-#            items = self.context.getItemsInOrder(late=late, uids=filteredItemUids)
-#            if renumber:
-#                #return a list of tuple with first element the number and second
-#                #element the item itself
-#                i = firstNumber
-#                res = []
-#                for item in items:
-#                    res.append((i, item))
-#                    i = i + 1
-#                items = res
-#            return items
-#
-#    security.declarePublic('listAllAssemblyMembers')
-#    def listAllAssemblyMembers(self):
-#        '''Returns the active MeetingUsers having usage "assemblyMember".'''
-#        meetingConfig = self.portal_plonemeeting.getMeetingConfig(self)
-#        res = ((u.id, u.Title()) for u in meetingConfig.adapted().getAllMeetingUsers())
-#        return DisplayList(res)
-#
-#    Meeting.listAllAssemblyMembers=listAllAssemblyMembers
-#    #it'a a monkey patch because it's the only way to change the behaviour of the Meeting class
-#
-#    security.declarePublic('meeting_decideseveralitems')
-#    def meeting_decideseveralitems(self, uids=None, toState='accept'):
-#        '''Apply a decision to several MeetingItems at the same time in a Meeting.'''
-#        if not uids:
-#            msg = self.utranslate('no_selected_items', domain='PloneMeeting')
-#            self.plone_utils.addPortalMessage(msg)
-#        elif toState=='accept':
-#            for uid in uids.split(',')[:-1]:
-#                obj = self.uid_catalog.searchResults(UID=uid)[0].getObject()
-#                if obj.queryState() in ('itemfrozen'):
-#                    self.portal_workflow.doActionFor(obj, 'accept')
-#        elif toState=='accept_but_modified':
-#            for uid in uids.split(',')[:-1]:
-#                obj = self.uid_catalog.searchResults(UID=uid)[0].getObject()
-#                if obj.queryState() in ('itemfrozen'):
-#                    self.portal_workflow.doActionFor(obj, 'accept_but_modify')
-#        elif toState=='refuse':
-#            for uid in uids.split(',')[:-1]:
-#                obj = self.uid_catalog.searchResults(UID=uid)[0].getObject()
-#                if obj.queryState() in ('itemfrozen'):
-#                    self.portal_workflow.doActionFor(obj, 'refuse')
-#        elif toState=='delay':
-#            for uid in uids.split(',')[:-1]:
-#                obj = self.uid_catalog.searchResults(UID=uid)[0].getObject()
-#                if obj.queryState() in ('itemfrozen'):
-#                    self.portal_workflow.doActionFor(obj, 'delay')
-#        elif toState=='back':
-#            for uid in uids.split(',')[:-1]:
-#                obj = self.uid_catalog.searchResults(UID=uid)[0].getObject()
-#                if obj.queryState() in ('accepted','refused','delayed','accepted_but_modified','pre_accept'):
-#                    self.portal_workflow.doActionFor(obj, 'backToItemFrozen')
-#        elif toState=='close':
-#            for uid in uids.split(',')[:-1]:
-#                obj = self.uid_catalog.searchResults(UID=uid)[0].getObject()
-#                state = obj.queryState()
-#                if state in ('accepted'):
-#                    self.portal_workflow.doActionFor(obj, 'accept_and_close')
-#                elif state in ('accepted_but_modified'):
-#                    self.portal_workflow.doActionFor(obj, 'accept_but_modify_and_close')
-#                elif state in ('delayed'):
-#                    self.portal_workflow.doActionFor(obj, 'delay_and_close')
-#                elif state in ('refused'):
-#                    self.portal_workflow.doActionFor(obj, 'refuse_and_close')
-#        elif toState=='reopen':
-#            for uid in uids.split(',')[:-1]:
-#                obj = self.uid_catalog.searchResults(UID=uid)[0].getObject()
-#                state = obj.queryState()
-#                if state in ('accepted_and_closed'):
-#                    self.portal_workflow.doActionFor(obj, 'backToAccepted')
-#                elif state in ('accepted_but_modified_and_closed'):
-#                    self.portal_workflow.doActionFor(obj, 'backToAcceptedButModified')
-#                elif state in ('delayed_and_closed'):
-#                    self.portal_workflow.doActionFor(obj, 'backToDelayed')
-#                elif state in ('refused_and_closed'):
-#                    self.portal_workflow.doActionFor(obj, 'backToRefused')
-#
-#        return self.portal_plonemeeting.gotoReferer()
-#
-#    Meeting.meeting_decideseveralitems=meeting_decideseveralitems
-#    #it'a a monkey patch because it's the only way to change the behaviour of the Meeting class
-#
-#    security.declarePublic('getJsItemUids')
-#    def getJsItemUids(self):
-#        '''Returns Javascript code for initializing a Javascript variable with
-#           all item UIDs.'''
-#        res = ''
-#        user = self.portal_membership.getAuthenticatedMember()
-#        if (user.has_role('MeetingManager')):
-#         for uid in self.getRawItems():
-#            res += 'itemUids["%s"] = true;\n' % uid
-#         for uid in self.getRawLateItems():
-#            res += 'itemUids["%s"] = true;\n' % uid
-#        else:
-#         res=''
-#         for item in self.getItems():
-#            if user.has_permission('View', item):
-#               res += 'itemUids["%s"] = true;\n' % item.UID()
-#         for item in self.getLateItems():
-#            if user.has_permission('View', item):
-#              res += 'itemUids["%s"] = true;\n' % item.UID()
-#        return res
-#
-#    Meeting.getJsItemUids=getJsItemUids
-#    #it'a a monkey patch because it's the only way to change the behaviour of the MeetingConfig class
+
+    ##### Taken from MeetingCommunes CustomMeeting adapter ##################
+
+    security.declarePublic('getPrintableItemsByNumCategory')
+    def getPrintableItemsByNumCategory(self, late=False, uids=[],
+                                       catstoexclude=[], exclude=True, allItems=False):
+        '''Returns a list of items ordered by category number. If there are many
+           items by category, there is always only one category, even if the
+           user have chosen a different order. If exclude=True , catstoexclude
+           represents the category number that we don't want to print and if
+           exclude=False, catsexclude represents the category number that we
+           only want to print. This is useful when we want for exemple to
+           exclude a personnal category from the meeting an realize a separate
+           meeeting for this personal category. If allItems=True, we return
+           late items AND items in order.'''
+        def getPrintableNumCategory(current_cat):
+            '''Method used here above.'''
+            current_cat_id = current_cat.getId()
+            current_cat_name = current_cat.Title()
+            current_cat_name = current_cat_name[0:2]
+            try:
+                catNum = int(current_cat_name)
+            except ValueError:
+                current_cat_name = current_cat_name[0:1]
+                try:
+                    catNum = int(current_cat_name)
+                except ValueError:
+                    catNum = current_cat_id
+            return catNum
+
+        itemsGetter = self.context.getItems
+        if late:
+            itemsGetter = self.context.getLateItems
+        items = itemsGetter()
+        if allItems:
+            items = self.context.getItems() + self.context.getLateItems()
+        # res contains all items by category, the key of res is the category
+        # number. Pay attention that the category number is obtain by extracting
+        # the 2 first caracters of the categoryname, thus the categoryname must
+        # be for exemple ' 2.travaux' or '10.Urbanisme. If not, the catnum takes
+        # the value of the id + 1000 to be sure to place those categories at the
+        # end.
+        res = {}
+        # First, we create the category and for each category, we create a
+        # dictionary that must contain the list of item in in res[catnum][1]
+        for item in items:
+            if uids:
+                if (item.UID() in uids):
+                    inuid = "ok"
+                else:
+                    inuid = "ko"
+            else:
+                inuid = "ok"
+            if (inuid == "ok"):
+                current_cat = item.getCategory(theObject=True)
+                catNum = getPrintableNumCategory(current_cat)
+                if catNum in res:
+                    res[catNum][1][item.getItemNumber()] = item
+                else:
+                    res[catNum] = {}
+                    #first value of the list is the category object
+                    res[catNum][0] = item.getCategory(True)
+                    #second value of the list is a list of items
+                    res[catNum][1] = {}
+                    res[catNum][1][item.getItemNumber()] = item
+
+        # Now we must sort the res dictionary with the key (containing catnum)
+        # and copy it in the returned array.
+        reskey = res.keys()
+        reskey.sort()
+        ressort = []
+        for i in reskey:
+            if catstoexclude:
+                if (i in catstoexclude):
+                    if exclude is False:
+                        guard = True
+                    else:
+                        guard = False
+                else:
+                    if exclude is False:
+                        guard = False
+                    else:
+                        guard = True
+            else:
+                guard = True
+
+            if guard is True:
+                k = 0
+                ressorti = []
+                ressorti.append(res[i][0])
+                resitemkey = res[i][1].keys()
+                resitemkey.sort()
+                ressorti1 = []
+                for j in resitemkey:
+                    k = k+1
+                    ressorti1.append([res[i][1][j], k])
+                ressorti.append(ressorti1)
+                ressort.append(ressorti)
+        return ressort
+
+    ##### End Taken from MeetingCommunes CustomMeeting adapter ###############
 
 
 # ------------------------------------------------------------------------------
@@ -498,7 +351,7 @@ class CustomMeetingItemAndenne(MeetingItem):
     def __init__(self, item):
         self.context = item
 
-    ###### Begin Overrides MeetingCommunes MeetingItemCustom adapter ###########################
+    ##### Begin Overrides MeetingCommunes MeetingItemCustom adapter #########
 
     def getIcons(self, inMeeting, meeting):
         '''Check docstring in PloneMeeting interfaces.py.'''
@@ -513,9 +366,9 @@ class CustomMeetingItemAndenne(MeetingItem):
             res.append(('pre_accepted.png', 'icon_help_pre_accepted'))
         return res
 
-    ###### End Overrides MeetingCommunes MeetingItemCustom adapter #############################
+    ##### End Overrides MeetingCommunes MeetingItemCustom adapter ###########
 
-### Functions used for template generation ###
+    ##### Functions used for template generation ############################
 
     security.declarePublic('getPrintableCopyTo')
     def getPrintableCopyTo(self):
@@ -1019,21 +872,6 @@ class CustomMeetingItemAndenne(MeetingItem):
 #    def OnPaste(self):
 #        self.context.at_post_create_script()
 #
-#    security.declarePublic('getPrintableTitleCategory')
-#    def getPrintableTitleCategory(self):
-#        '''return the name of the category without the first 3 caracteres representing the num'''
-#        current_cat = self.context.getCategory(theObject=True)
-#        current_cat_name= current_cat.Title()
-#        current_cat_name=current_cat_name[3:]
-#        return current_cat_name
-#
-#    security.declarePublic('titleProposingGroup')
-#    def titleProposingGroup(self):
-#        '''Return the MeetingGroup Title that may propose this item.'''
-#        vocab=self.context.Vocabulary('proposingGroup')
-#        value=self.context.displayValue(vocab[0],self.context.getProposingGroup())
-#        return value
-#
 #    security.declarePublic('projetpvFieldIsEmpty')
 #    def projetpvFieldIsEmpty(self):
 #        '''Is the 'projetpv' field empty ? '''
@@ -1093,22 +931,6 @@ class CustomMeetingItemAndenne(MeetingItem):
                 i -= 1
         return item.Creator()
 
-#    def listItemPresents(self):
-#        '''Returns the list of attendees selectable as presents.'''
-#        res = []
-#        if self.getMeeting():
-#            meeting = self.getMeeting()
-#            # Get IDs of attendees
-#            meetingAttendees = meeting.getAttendees(False, includeDeleted = True)
-#            meetingConfig = self.portal_plonemeeting.getMeetingConfig(self)
-#            for u in meetingConfig.getActiveMeetingUsers():
-#                if u.id not in meetingAttendees:
-#                    res.append( (u.id, u.Title()) )
-#        return DisplayList( tuple(res) )
-#
-#    MeetingItem.listItemPresents=listItemPresents
-#    # it'a a monkey patch
-#
 #    security.declarePublic('getAttendees')
 #    def getAttendees(self, usage=None, includeDeleted=False, includeAbsents=False, includeReplacements=False):
 #        '''Returns the attendees for this item. Takes into account
@@ -1175,21 +997,7 @@ class CustomMeetingItemAndenne(MeetingItem):
 #
     MeetingItem.onDuplicate=onDuplicate
     #it'a a monkey patch because it's the only way to have a default method in the schema
-#
-#    security.declarePublic('listAssociatedGroups')
-#    def listAssociatedGroups(self):
-#        '''Lists the groups that are associated to the proposing group(s) to
-#           propose this item.  Return groups that have at least one creator...'''
-#        res = []
-#        tool = self.portal_plonemeeting
-#        for group in tool.getActiveGroups(notEmptySuffix="creators"):
-#            res.append( (group.id, group.Title()) )
-#        res=sorted(res, key=lambda student: student[1])
-#        return DisplayList( tuple(res) )
-#
-#    MeetingItem.listAssociatedGroups=listAssociatedGroups
-#    #it'a a monkey patch because it's the only way to have a default method in the schema
-#
+
 #    # cette fonction surgarge showduplicateItemAction dans meetingitem
 #    # de facon a donner le droit de dupliquer n'importe quel point au meetingmanager
 #    security.declarePublic('showDuplicateItemAction')
@@ -1228,6 +1036,7 @@ class CustomMeetingItemAndenne(MeetingItem):
     MeetingItem.onWelcomeNowPerson=onWelcomeNowPerson
     #it'a a monkey patch because it's the only way to add a behaviour to the MeetingItem class
 
+    ### RAPCOLAUCON ###
     security.declarePublic('israpcolaucon')
     def israpcolaucon(self):
         """
@@ -1239,9 +1048,19 @@ class CustomMeetingItemAndenne(MeetingItem):
             return False
 #    MeetingItem.israpcolaucon=israpcolaucon
 
+    security.declarePublic('getLabelForDescription')
+    def getLabelForDescription(self):
+        """
+          If we are in the rapcolaucon meetingConfig, we change the label of the 'description' field
+        """
+        if self.adapted().israpcolaucon():
+            return "Corps du texte"
+        else:
+            return self.utranslate("meeting_item_description", domain="PloneMeeting", context=self)
 
-
-
+    MeetingItem.getLabelForDescription=getLabelForDescription
+    #it'a a monkey patch because it's the only way to have a default method in the schema
+    ### END RAPCOLAUCON ###
 
 
 
@@ -1332,21 +1151,6 @@ class CustomMeetingItemAndenne(MeetingItem):
             return False
 
 
-    ### RAPCOLAUCON ###
-    security.declarePublic('getLabelForDescription')
-    def getLabelForDescription(self):
-        """
-          If we are in the rapcolaucon meetingConfig, we change the label of the 'description' field
-        """
-        if self.adapted().israpcolaucon():
-            return "Corps du texte"
-        else:
-            return self.utranslate("meeting_item_description", domain="PloneMeeting", context=self)
-
-    MeetingItem.getLabelForDescription=getLabelForDescription
-    #it'a a monkey patch because it's the only way to have a default method in the schema
-
-#
 #    security.declarePublic('printUserGroup')
 #    def printUserGroup(self):
 #        '''Lists the Users that are in all groups for printing and reporting'''
@@ -1377,27 +1181,6 @@ class CustomMeetingItemAndenne(MeetingItem):
 #
 #    MeetingItem.printUserGroup=printUserGroup
 #    #it'a a monkey patch because it's the only way to have a default method in the schema
-#
-#    security.declarePublic('getUsersofGroup')
-#    def getUsersofGroup(self,member):
-#        '''Lists the Users that are associated to the proposing group(s) of the m_ user.'''
-#        grp_tool = self.context.acl_users.source_groups
-#        groups = grp_tool.getGroupsForPrincipal(member)
-#        groups2 = []
-#        for group in groups:
-#            i = []
-#            i=group.split('_')
-#            if i[1] == 'observers':
-#                g=i[0]+'_observers'
-#                groups2.append(g)
-#
-#        res = []
-#        for group in groups2:
-#            grp_obj = grp_tool.getGroupById(group)
-#            for user in grp_obj.getMemberIds():
-#                '''if ( (user,self.portal_membership.getMemberById(user).getProperty('fullname')) in res ) == False:'''
-#                res.append(user)
-#        return res
 #
 #    security.declarePublic('listAnnexes')
 #    def listAnnexes(self,decision=False,toprint=True):
@@ -1904,52 +1687,6 @@ class CustomToolMeetingAndenne(ToolPloneMeeting):
 #        res = sorted( res, key=lambda student: student[1] )
 #        return res
 
-#    security.declarePublic('getSpecificAssemblyFor')
-#    def getSpecificAssemblyFor(self, assembly, startTxt=''):
-#        ''' Return the Assembly between two tag.
-#            This method is used in templates.
-#        '''
-#        #Pierre Dupont - Bourgmestre,
-#        #Charles Exemple - 1er Echevin,
-#        #Echevin Un, Echevin Deux excusÃ©, Echevin Trois - Echevins,
-#        #Jacqueline Exemple, Responsable du CPAS
-#        #Absentes:
-#        #Mademoiselle x
-#        #ExcusÃ©s:
-#        #Monsieur Y, Madame Z
-#        res = []
-#        tmp = ['<p class="mltAssembly">']
-#        splitted_assembly = assembly.replace('<p>', '').replace('</p>', '').split('<br />')
-#        start_text = startTxt == ''
-#        for assembly_line in splitted_assembly:
-#            assembly_line = assembly_line.strip()
-#            #check if this line correspond to startTxt (in this cas, we can begin treatment)
-#            if not start_text:
-#                start_text = assembly_line.startswith(startTxt)
-#                if start_text:
-#                    #when starting treatment, add tag (not use if startTxt=='')
-#                    res.append(assembly_line)
-#                continue
-#            #check if we must stop treatment...
-#            if assembly_line.endswith(':'):
-#                break
-#            lines = assembly_line.split(',')
-#            cpt = 1
-#            my_line = ''
-#            for line in lines:
-#                if cpt == len(lines):
-#                    my_line = "%s%s<br />" % (my_line, line)
-#                    tmp.append(my_line)
-#                else:
-#                    my_line = "%s%s," % (my_line, line)
-#                cpt = cpt + 1
-#        if len(tmp) > 1:
-#            tmp[-1] = tmp[-1].replace('<br />', '')
-#            tmp.append('</p>')
-#        else:
-#            return ''
-#        res.append(''.join(tmp))
-#        return res
 
 # ------------------------------------------------------------------------------
 class MeetingCollegeAndenneWorkflowActions(MeetingWorkflowActions):
