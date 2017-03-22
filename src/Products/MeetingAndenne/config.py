@@ -56,7 +56,7 @@ PRODUCT_DEPENDENCIES = []
 from Products.PloneMeeting import config as PMconfig
 ANDENNEROLES = {}
 ANDENNEROLES['pvwriters'] = 'MeetingPvWriter'
-ANDENNEROLES['mailViewers'] = 'MeetingMailViewer'
+ANDENNEROLES['mailviewers'] = 'MeetingMailViewer'
 
 PMconfig.MEETINGROLES.update(ANDENNEROLES)
 PMconfig.MEETING_GROUP_SUFFIXES = PMconfig.MEETINGROLES.keys()

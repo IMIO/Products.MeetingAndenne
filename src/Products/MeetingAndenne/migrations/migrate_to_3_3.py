@@ -10,6 +10,7 @@ from Products.PloneMeeting.config import MEETING_GROUP_SUFFIXES
 from Products.PloneMeeting.migrations import Migrator
 from Products.PloneMeeting.profiles import PodTemplateDescriptor
 
+from Products.MeetingAndenne.config import ANDENNEROLES
 from Products.MeetingAndenne.profiles.default.import_data import collegeTemplates
 
 meetingConfigs = { 'meeting-config-college': {
@@ -18,7 +19,7 @@ meetingConfigs = { 'meeting-config-college': {
     'xhtmlTransformFields': (u'Meeting.observations', u'Meeting.postObservations', u'MeetingItem.description',
                              u'MeetingItem.decision', u'MeetingItem.projetpv', u'MeetingItem.textpv',
                              u'MeetingItem.pv', u'MeetingItem.observations'),
-    'usedItemAttributes': (u'budgetInfos', u'associatedGroups', u'observations', u'toDiscuss'),
+    'usedItemAttributes': (u'budgetInfos', u'associatedGroups', u'observations', u'toDiscuss', u'itemSignatories'),
     'usedMeetingAttributes': (u'startDate', u'endDate', u'signatories', u'attendees', u'excused',
                               u'absents', u'lateAttendees', u'place', u'observations', u'postObservations'),
     'toDiscussShownForLateItems': True, 'transitionsToConfirm': [ u'Meeting.freeze', u'Meeting.close', u'MeetingItem.delay',
@@ -131,6 +132,26 @@ class Migrate_To_3_3(Migrator):
             cfg.createTopics(topicsInfo)
         logger.info('Done.')
 
+    def _addMissingRolesAndGroups(self):
+        '''Add missing global roles and Plone groups related to MeetingAndenne.'''
+        logger.info('Adding missing global roles and Plone groups related to MeetingAndenne...')
+
+        roleManager = self.portal.acl_users.portal_role_manager
+        globalRoles = list(self.portal.__ac_roles__)
+
+        for role in ANDENNEROLES.values():
+            if role not in roleManager.listRoleIds():
+                roleManager.addRole(role, role, '')
+                globalRoles.append(role)
+
+        for mGroup in self.portal.portal_plonemeeting.objectValues('MeetingGroup'):
+            for suffix in ANDENNEROLES.keys():
+                mGroup._createOrUpdatePloneGroup(suffix)
+
+        self.portal.__ac_roles__ = tuple(globalRoles)
+
+        logger.info('Done.')
+
     def _migrateMailRoles(self):
         '''Migrate mail roles'''
         logger.info('Migrating mail roles...')
@@ -152,6 +173,13 @@ class Migrate_To_3_3(Migrator):
             # now remove global role 'CourrierManager' given to globalMeetingManagers
             for member in globalMailManagers:
                 self.portal.acl_users.portal_role_manager.removeRoleFromPrincipal('CourrierManager', member.getId())
+
+        for mGroup in self.portal.portal_plonemeeting.objectValues('MeetingGroup'):
+            advisersGroup = mGroup.getPloneGroupId('advisers')
+            mailViewersGroup = mGroup.getPloneGroupId('mailviewers')
+            for member in groupTool.getGroupMembers(advisersGroup):
+                groupTool.addPrincipalToGroup(member, mailViewersGroup)
+                groupTool.removePrincipalFromGroup(member, advisersGroup)
 
         logger.info('Done.')
 
@@ -302,6 +330,7 @@ class Migrate_To_3_3(Migrator):
         self._migrateItemDecisionReportTextAttributeOnConfigs()
         self._updateOnMeetingTransitionItemTransitionToTrigger()
         self._addCDLDTopics()
+        self._addMissingRolesAndGroups()
         self._migrateMailRoles()
         self._removeUnusedGlobalRoles()
         self._removeUnusedPloneUsers()
@@ -313,7 +342,7 @@ class Migrate_To_3_3(Migrator):
         self._createPODTemplates()
         self._updatePloneGroupsTitle()
         # reinstall so skins and so on are correct
-#        self.reinstall(profiles=[u'profile-Products.MeetingAndenne:default', ])
+        self.reinstall(profiles=[u'profile-Products.MeetingAndenne:default', ])
         self.finish()
 
 
@@ -324,17 +353,18 @@ def migrate(context):
        1)  Remove obsolete attribute 'itemDecisionReportText' from every meetingConfigs
        2)  Migrate onMeetingTransitionItemTransitionToTrigger
        3)  Add topics for CDLD synthesis
-       4)  Migrate mail roles
-       5)  Remove unused global roles
-       6)  Remove unused users present in portal_membership
-       7)  Remove useless mail topics added by PloneMeeting migration
-       8)  Remove useless fck_editor properties object
-       9)  Rename some categories if they exist and change related MeetingItems
-       10) Set CKeditor as default editor for everybody and remove useless properties
-       11) Change various meetingConfigs properties
-       12) Recreate the used POD templates
-       13) Make sure Plone groups linked to a MeetingGroup have a consistent title
-       14) Reinstall Products.MeetingAndenne so skin and so on are correct
+       4)  Add missing global roles and Plone groups related to MeetingAndenne
+       5)  Migrate mail roles
+       6)  Remove unused global roles
+       7)  Remove unused users present in portal_membership
+       8)  Remove useless mail topics added by PloneMeeting migration
+       9)  Remove useless fck_editor properties object
+       10) Rename some categories if they exist and change related MeetingItems
+       11) Set CKeditor as default editor for everybody and remove useless properties
+       12) Change various meetingConfigs properties
+       13) Recreate the used POD templates
+       14) Make sure Plone groups linked to a MeetingGroup have a consistent title
+       15) Reinstall Products.MeetingAndenne so skin and so on are correct
     '''
     Migrate_To_3_3(context).run()
 # ------------------------------------------------------------------------------
