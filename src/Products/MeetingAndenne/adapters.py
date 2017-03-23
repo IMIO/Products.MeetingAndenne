@@ -472,24 +472,6 @@ class CustomMeetingItemAndenne(MeetingItem):
 #        '''Lists the fields to keep when cloning an item'''
 #        return ['formation_desc', 'formation_compte', 'template_flag']
 #
-#    security.declarePublic('showclosewritepvAction')
-#    def showclosewritepvAction(self):
-#        currentState = self.context.queryState()
-#        member = self.context.portal_membership.getAuthenticatedMember()
-#        if (member.has_role('MeetingManager') and self.context.getTowritepv()==True and currentState in ('accepted', 'accepted_but_modified','delayed','pre_accepted','refused')):
-#            return True
-#        else:
-#            return False
-#
-#    security.declarePublic('showopenwritepvAction')
-#    def showopenwritepvAction(self):
-#        currentState = self.context.queryState()
-#        member = self.context.portal_membership.getAuthenticatedMember()
-#        if (member.has_role('MeetingManager') and self.context.getTowritepv()==False and currentState in ('accepted', 'accepted_but_modified','delayed','pre_accepted','refused')):
-#            return True
-#        else:
-#            return False
-#
 #    security.declarePublic('replaceBr')
 #    def replaceBr (self,text):
 #        description=text

@@ -314,17 +314,6 @@ def update_item_schema(baseSchema):
                 ),
                 multiValued=1,
             ),
-            BooleanField(
-                name='towritepv',
-                widget=BooleanField._properties['widget'](
-                    visible=False,
-                    label='Printannexe',
-                    label_msgid='Meetingandenne_label_Printannexe',
-                    i18n_domain='PloneMeeting',
-                ),
-                write_permission="PloneMeeting: Write towritepv",
-                default=True
-            ),
         ),
     )
 
