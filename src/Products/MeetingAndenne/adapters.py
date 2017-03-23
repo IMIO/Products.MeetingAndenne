@@ -904,7 +904,7 @@ class CustomMeetingItemAndenne(MeetingItem):
     security.declarePublic('listUserGroup')
     def listUserGroup(self):
         '''Lists the Users that are associated to the proposing group(s) of the authenticated user.'''
-        userCreatorGroups = self.portal_plonemeeting.getGroupsForUser(suffix="creators", zope=True)
+        userCreatorGroups = self.portal_plonemeeting.getGroupsForUser(suffix="creators", userId = self.Creator(), zope=True)
 
         res = set()
         for group in userCreatorGroups:
