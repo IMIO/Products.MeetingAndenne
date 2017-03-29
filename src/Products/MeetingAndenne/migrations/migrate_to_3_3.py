@@ -6,11 +6,12 @@ logger = logging.getLogger('MeetingAndenne')
 import mimetypes
 from OFS.Image import File
 from Products.CMFCore.utils import getToolByName
-from Products.PloneMeeting.config import MEETING_GROUP_SUFFIXES
+from Products.PloneMeeting.config import MEETING_GROUP_SUFFIXES, TOPIC_TAL_EXPRESSION, \
+                                         TOPIC_TYPE, TOPIC_SEARCH_SCRIPT
 from Products.PloneMeeting.migrations import Migrator
 from Products.PloneMeeting.profiles import PodTemplateDescriptor
 
-from Products.MeetingAndenne.config import ANDENNEROLES
+from Products.MeetingAndenne.config import ANDENNEROLES, MAIL_TOPICS
 from Products.MeetingAndenne.profiles.default.import_data import collegeTemplates
 
 meetingConfigs = { 'meeting-config-college': {
@@ -296,6 +297,61 @@ class Migrate_To_3_3(Migrator):
 
         logger.info('Done.')
 
+    def _adaptMailFolder(self):
+        '''Modify the default view and redirection method of mail folder'''
+        logger.info('Modifying the default view and redirection method of mail folder...')
+
+        folderPath = self.portal.portal_plonemeeting.adapted().getCourrierfakeFolder()
+        folder = self.portal.restrictedTraverse(folderPath)
+
+        if folder.hasProperty('MEETING_CONFIG'):
+            folder.manage_delProperties(['MEETING_CONFIG'])
+
+        folder.setLayout('mailfolder_redirect_view')
+
+        groupId = 'courrierfake_meetingmanagers'
+        folder.__ac_local_roles_block__ = True
+        folder.manage_addLocalRoles(groupId, ('MeetingManager',))
+
+        logger.info('Done.')
+
+    def _createMailTopics(self):
+        '''Create the topics used for mail management'''
+        logger.info('Creating the topics used for mail management...')
+
+        mc = self.portal.portal_plonemeeting.adapted().getCourrierfakeConfig()
+        ids = mc.topics.objectIds()
+        if len(ids) > 0:
+            ids = list(ids)
+            mc.topics.manage_delObjects(ids)
+
+        for topicId, topicCriteria, sortCriterion, searchScriptId, topic_tal_expr in MAIL_TOPICS:
+            mc.topics.invokeFactory('Topic', topicId)
+            topic = getattr(mc.topics, topicId)
+            topic.setExcludeFromNav(True)
+            topic.setTitle(topicId)
+            for criterionName, criterionType, criterionValue in topicCriteria:
+                criterion = topic.addCriterion(field=criterionName, criterion_type=criterionType)
+                if criterionValue is not None:
+                    if criterionType == 'ATPortalTypeCriterion':
+                        concernedType = criterionValue[0]
+                        topic.manage_addProperty(TOPIC_TYPE, concernedType, 'string')
+                        # This is necessary to add a script doing the search
+                        # when the it is too complicated for a topic.
+                        topic.manage_addProperty(TOPIC_SEARCH_SCRIPT, searchScriptId, 'string')
+                        # Add a tal expression property
+                        topic.manage_addProperty(TOPIC_TAL_EXPRESSION, topic_tal_expr, 'string')
+                    criterion.setValue(criterionValue)
+            topic.setLimitNumber(True)
+            topic.setItemCount(50)
+            topic.setSortCriterion(sortCriterion, True)
+            topic.setCustomView(True)
+            topic.setCustomViewFields(['destUsers', 'destOrigin', 'refcourrier', 'Title'])
+            # call processForm passing dummy values so existing values are not touched
+            topic.processForm( values = {'dummy': None} )
+
+        logger.info('Done.')
+
     def _createPODTemplates(self):
         '''Recreate the used POD templates'''
         logger.info('Recreating the used POD templates...')
@@ -339,6 +395,8 @@ class Migrate_To_3_3(Migrator):
         self._renameCategories()
         self._adaptUserProperties()
         self._adaptMeetingConfigs()
+        self._adaptMailFolder()
+        self._createMailTopics()
         self._createPODTemplates()
         self._updatePloneGroupsTitle()
         # reinstall so skins and so on are correct
@@ -362,9 +420,11 @@ def migrate(context):
        10) Rename some categories if they exist and change related MeetingItems
        11) Set CKeditor as default editor for everybody and remove useless properties
        12) Change various meetingConfigs properties
-       13) Recreate the used POD templates
-       14) Make sure Plone groups linked to a MeetingGroup have a consistent title
-       15) Reinstall Products.MeetingAndenne so skin and so on are correct
+       13) Modify the default view and redirection method of mail folder
+       14) Create the topics used for mail management
+       15) Recreate the used POD templates
+       16) Make sure Plone groups linked to a MeetingGroup have a consistent title
+       17) Reinstall Products.MeetingAndenne so skin and so on are correct
     '''
     Migrate_To_3_3(context).run()
 # ------------------------------------------------------------------------------
