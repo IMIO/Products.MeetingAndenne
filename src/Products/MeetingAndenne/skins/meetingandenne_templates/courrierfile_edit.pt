@@ -1,0 +1,63 @@
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en-US"
+      lang="en-US"
+      i18n:domain="PloneMeeting">
+
+<body>
+<div metal:define-macro="body">
+
+<metal:base_body use-macro="base_macros/body">
+
+<metal:widgets fill-slot="widgets"
+           tal:define="member context/@@plone_portal_state/member;
+                       border python: test(member.has_role('Manager'), 'enable_border', 'disable_border');
+                       dummy python:request.set(border, 1);
+                       tool python: context.portal_plonemeeting;
+                       member tool/getUser;
+                       portal context/portal_url/getPortalObject;
+                       meetingConfig python: tool.adapted().getCourrierfakeConfig();
+                       needsOcr request/needsOcr | nothing;
+                       ocrLanguage request/ocrLanguage | nothing;
+                       usedAttrs meetingConfig/getUsedItemAttributes;
+                       bilingual python: 'secondLanguage' in tool.getModelAdaptations();">
+
+    <tal:comment replace="nothing">Custom rendering of widgets</tal:comment>
+    <metal:field use-macro="python:here.widget('refcourrier', mode='edit')"/>
+    <metal:field use-macro="python:here.widget('title', mode='edit')"/>
+    <metal:field use-macro="python:here.widget('destOrigin', mode='edit')"/>
+    <metal:field use-macro="python:here.widget('description', mode='edit')"/>
+    <metal:field use-macro="python:here.widget('typecourrier', mode='edit')"/>
+    <metal:field use-macro="python:here.widget('file', mode='edit')"/>
+    <metal:field use-macro="python:here.widget('destUsers', mode='edit')"/>
+
+    <table cellpadding="0" cellspacing="0" width="100%">
+      <tr valign="top">
+        <tal:comment replace="nothing">Checkbox for asking OCR</tal:comment>
+        <td width="48%">
+          <input class="noborder" type="checkbox" name="needs_ocr"
+                 tal:attributes="checked python: needsOcr != None and (needsOcr == True and 'checked' or False) or True;"/>
+            <label for="needs_ocr" i18n:domain="PloneMeeting" i18n:translate="needs_ocr"></label>
+            <div class="formHelp" i18n:translate="needs_ocr_descr"></div>
+        </td>
+        <td width="4%"></td>
+        <tal:comment replace="nothing">Select the OCR language</tal:comment>
+        <td width="48%"
+            tal:define="requestValue request/ocr_language|nothing;
+                        selectedValue python: requestValue and requestValue or tool.getDefaultOcrLanguage();">
+          <label for="ocr_language" i18n:domain="PloneMeeting" i18n:translate="ocr_language"></label>
+          <div class="formHelp" i18n:translate="ocr_language_descr"></div>
+          <select name="ocr_language">
+            <option tal:repeat="lang tool/getAvailableOcrLanguages" i18n:translate=""
+                    tal:content="python: 'language_%s' % lang"
+                    tal:attributes="value lang;
+                                    selected python: lang == selectedValue" ></option>
+          </select>
+        </td>
+      </tr>
+    </table>
+
+</metal:widgets>
+</metal:base_body>
+</div>
+
+</body>
+</html>

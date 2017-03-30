@@ -43,6 +43,20 @@
         layer="Products.MeetingAndenne.interfaces.IMeetingAndenneLayer"
         permission="zope2.View" />
 
+    <!-- the mailfolder_redirect_view.pt that redirects the user when entering the courrierfake meetingConfig -->
+    <browser:view
+        for="Products.ATContentTypes.interfaces.folder.IATFolder"
+        name="mailfolder_redirect_view"
+        class=".views.MeetingAndenneMailFolderView"
+        layer="Products.MeetingAndenne.interfaces.IMeetingAndenneLayer"
+        permission="zope2.View" />
+    <browser:view
+        for="Products.ATContentTypes.interfaces.folder.IATBTreeFolder"
+        name="mailfolder_redirect_view"
+        class=".views.MeetingAndenneMailFolderView"
+        layer="Products.MeetingAndenne.interfaces.IMeetingAndenneLayer"
+        permission="zope2.View" />
+
     <!-- Macros -->
     <browser:page
         name="ma-macros"

@@ -6,10 +6,11 @@
 
 <dl class="portlet portletPloneMeeting"
     tal:define="tool view/getPloneMeetingTool;
+                userIsMailManager python:tool.isManager(here);
                 meetingConfig python:tool.adapted().getCourrierfakeConfig();
                 meetingFolder python:tool.adapted().getCourrierfakeFolder();
-                member tool/getUser;
-                userIsMailManager python:member.has_role('MailManager')">
+                portal_url tool/getSiteUrl;
+                member tool/getUser;">
 
     <dt class="portletHeader" i18n:translate="mail_portlet_title">Mail</dt>
 

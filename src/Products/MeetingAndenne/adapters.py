@@ -34,7 +34,7 @@ from plone.app.users.browser.personalpreferences import UserDataPanelAdapter
 from plone.app.users.browser.personalpreferences import PersonalPreferencesPanelAdapter
 from imio.helpers.xhtml import xhtmlContentIsEmpty
 from Products.PloneMeeting.config import ITEM_NO_PREFERRED_MEETING_VALUE, \
-     TOPIC_SEARCH_SCRIPT, TOPIC_TYPE
+     TOPIC_SEARCH_SCRIPT, TOPIC_SEARCH_FILTERS, TOPIC_TYPE
 from Products.PloneMeeting.Meeting import MeetingWorkflowActions, \
      MeetingWorkflowConditions, Meeting
 from Products.PloneMeeting.MeetingItem import MeetingItem, \
@@ -49,7 +49,7 @@ from Products.MeetingAndenne.interfaces import \
      IMeetingItemCollegeAndenneWorkflowActions, IMeetingItemCollegeAndenneWorkflowConditions, \
      IMeetingCollegeAndenneWorkflowActions, IMeetingCollegeAndenneWorkflowConditions
 from Products.MeetingAndenne.config import MAIL_TYPES, SEARCH_TYPES
-#from Products.MeetingAndenne.SearcherAndenne import SearcherAndenne
+from Products.MeetingAndenne.SearcherAndenne import SearcherAndenne
 from Products.PloneMeeting.utils import checkPermission, sendMail, getLastEvent, spanifyLink
 from Products.PloneMeeting.model import adaptations
 from Products.PloneMeeting.model.adaptations import WF_DOES_NOT_EXIST_WARNING, WF_APPLIED
@@ -108,16 +108,16 @@ class CustomMeetingAndenne(Meeting):
 
     security.declarePublic('getDisplayableName')
     def getDisplayableName(self):
-        '''Check doc in interfaces.py.'''
+        '''Formats the name of a meeting in the way it is printed in templates.'''
         meeting = self.getSelf()
         return meeting.portal_plonemeeting.formatMeetingDate(meeting=meeting, withHour=True)
 
     Meeting.getDisplayableName=getDisplayableName
-    #it'a a monkey patch because it's the only way to add a behaviour to the Meeting class
+    # it'a a monkey patch because it's the only way to add a behaviour to the Meeting class
 
     security.declarePublic('getSignatoriesForPrinting') 
     def getSignatoriesForPrinting (self, pos=0, level=0, useforpv=False, userepl=True):
-        '''To be changed'''
+        '''To be changed.'''
         # new from plonemeeting 3.3 :print sigantories in template relative to position ans level. pos 0 and level 0 is the first sigantory (bg) and function. 
         # pos 0 and level 1 is the first signatory (bg) with Name
         res = []
@@ -137,7 +137,7 @@ class CustomMeetingAndenne(Meeting):
 
     security.declarePublic('reformAssembly')
     def reformAssembly(self, assembly, strikefirst=True, strikemidle=True, strikelast=False, userepl=True):
-        '''To be changed'''
+        '''To be changed.'''
         # new from plonemeeting 3.3 : used for template only in the header of pv and other. use the return of getstrikeassembly (and item) function to add the replacement user
         # pour une personne absente, soit on la barre (strike=true) , soit on la supprime (strike=false)
         # on peut decider de barrer ou supprimer la premiere ligne (bg) , les lignes du milieu (echevin) ou la derniere ligne (directeur)
@@ -465,13 +465,13 @@ class CustomMeetingItemAndenne(MeetingItem):
         self.reindexObject()
 
     MeetingItem.updateMeetingItem=updateMeetingItem
-    #it'a a monkey patch because it's the only way to add a behaviour to the MeetingItem class
+    # it'a a monkey patch because it's the only way to add a behaviour to the MeetingItem class
 
-#    security.declarePublic('getExtraFieldsToCopyWhenCloning')
-#    def getExtraFieldsToCopyWhenCloning(self):
-#        '''Lists the fields to keep when cloning an item'''
-#        return ['formation_desc', 'formation_compte', 'template_flag']
-#
+    security.declarePublic('getExtraFieldsToCopyWhenCloning')
+    def getExtraFieldsToCopyWhenCloning(self, cloned_to_same_mc):
+        '''Lists the fields to keep when cloning an item'''
+        return ['projetpv', 'textpv', 'pv']
+
 #    security.declarePublic('replaceBr')
 #    def replaceBr (self,text):
 #        description=text
@@ -881,7 +881,7 @@ class CustomMeetingItemAndenne(MeetingItem):
         return ref + '/XX.XX/' + DateTime(self.CreationDate()).strftime('%Y.%m') + '/'
 
     MeetingItem.getDocReference = getDocReference
-    #it'a a monkey patch because it's the only way to have a default method in the schema
+    # it'a a monkey patch because it's the only way to have a default method in the schema
 
     security.declarePublic('listUserGroup')
     def listUserGroup(self):
@@ -896,7 +896,7 @@ class CustomMeetingItemAndenne(MeetingItem):
         return DisplayList( tuple(res) )
 
     MeetingItem.listUserGroup = listUserGroup
-    #it'a a monkey patch because it's the only way to have a default method in the schema
+    # it'a a monkey patch because it's the only way to have a default method in the schema
 
     security.declarePublic('getLatestReviewer')
     def getLatestReviewer(self):
@@ -946,39 +946,18 @@ class CustomMeetingItemAndenne(MeetingItem):
     def onDuplicate(self):
         '''This method is triggered when the users clicks on
            "duplicate item".'''
-        import pdb; pdb.set_trace()
-#        user = self.portal_membership.getAuthenticatedMember()
-#        newItem = self.clone(newOwnerId=user.id)
-#        newItem.setTreatUser(user.id)
-#        newItem.itemPresents = ()
-#        newItem.itemSignatories = ()
-#        newItem.itemAbsents = ()
-#
-#        #copy the content of decision in Projetpv and Decision for later use
-#        if (user.has_permission('MeetingAndenne: Read pv', self)):
-#            pv=self.getPv()
-#            textpv=self.getTextpv()
-#
-#        wf_def = self.portal_workflow.getWorkflowsFor(newItem)[0]
-#        wf_id= wf_def.getId()
-#        wf_state = {
-#                 'action': None,
-#                 'actor': None,
-#                 'comments': "Setting state to itemcreated",
-#                 'review_state': "itemcreated"
-#                 }
-#        self.portal_workflow.setStatusOf(wf_id, newItem, wf_state)
-#        if (user.has_permission('MeetingAndenne: Read pv', self) and user.has_permission('Modify portal content', newItem)):
-#            newItem.setDecision(textpv)
-#            newItem.setProjetpv(pv)
-#
-#        newItem.reindexObject(idxs=['allowedRolesAndUsers', 'review_state'])
-#        self.plone_utils.addPortalMessage(
-#            self.utranslate('item_duplicated', domain='PloneMeeting'))
-#        return self.REQUEST.RESPONSE.redirect(newItem.absolute_url())
-#
+        user = self.portal_membership.getAuthenticatedMember()
+        newItem = self.clone(newOwnerId=user.id, cloneEventAction='Duplicate')
+        newItem.setDecision(self.getTextpv())
+        newItem.setProjetpv(self.getPv())
+        newItem.reindexObject(idxs=['getDecision', 'getProjetpv'])
+
+        self.plone_utils.addPortalMessage(
+            translate('item_duplicated', domain='PloneMeeting', context=self.REQUEST))
+        return self.REQUEST.RESPONSE.redirect(newItem.absolute_url())
+
     MeetingItem.onDuplicate=onDuplicate
-    #it'a a monkey patch because it's the only way to have a default method in the schema
+    #it'a a monkey patch because it's the only way to change the behaviour of the MeetingItem class
 
 #    # cette fonction surgarge showduplicateItemAction dans meetingitem
 #    # de facon a donner le droit de dupliquer n'importe quel point au meetingmanager
@@ -1016,7 +995,7 @@ class CustomMeetingItemAndenne(MeetingItem):
             self.setItemPresents(present)
 
     MeetingItem.onWelcomeNowPerson=onWelcomeNowPerson
-    #it'a a monkey patch because it's the only way to add a behaviour to the MeetingItem class
+    # it'a a monkey patch because it's the only way to add a behaviour to the MeetingItem class
 
     ### RAPCOLAUCON ###
     security.declarePublic('israpcolaucon')
@@ -1401,100 +1380,110 @@ class CustomMeetingConfigAndenne(MeetingConfig):
 #
 #    MeetingConfig.updatePortalTypes=updatePortalTypes
 #    #it'a a monkey patch because it's the only way to change the behaviour of the MeetingConfig class
-#
-#    security.declarePublic('getTopicResults')
-#    def getTopicResults(self, topic, isFake):
-#        '''This method computes results of p_topic. If p_topic is a fake one
-#           (p_isFake is True), it means that some information in the request
-#           will allow to perform a direct query in portal_catalog (the user
-#           triggered an advanced search).'''
-#        rq = self.REQUEST
-#        # How must we sort the result?
-#        sortKey = rq.get('sortKey', None)
-#        sortOrder = 'reverse'
-#        if sortKey and (rq.get('sortOrder', 'asc') == 'asc'):
-#            sortOrder = None
-#        # Is there a filter defined?
-#        filterKey = rq.get('filterKey', '')
-#        filterValue = rq.get('filterValue', '').decode('utf-8')
-#        if not isFake:
-#            # Execute the query corresponding to the topic.
-#            if not sortKey:
-#                sortCriterion = topic.getSortCriterion()
-#                if sortCriterion: sortKey = sortCriterion.Field()
-#                else: sortKey = 'created'
-#            methodId = topic.getProperty(TOPIC_SEARCH_SCRIPT, None)
-#            objectType = topic.getProperty(TOPIC_TYPE, 'Unknown')
-#            batchSize = self.REQUEST.get('MaxShownFound') or \
-#                        self.getParentNode().getMaxShownFound(objectType)
-#            if methodId:
-#                # Topic params are not sufficient, use a specific method.
-#                # keep topics defined paramaters
-#                kwargs={}
-#                for criterion in topic.listSearchCriteria():
-#                    # Only take criterion with a defined value into account
-#                    criterionValue = criterion.value
-#                    if criterionValue:
-#                        kwargs[str(criterion.field)] = criterionValue
-#                brains = getattr(self, methodId)(sortKey, sortOrder,
-#                                                 filterKey, filterValue, **kwargs)
-#            else:
-#                # Execute the topic, but decide ourselves for sorting and
-#                # filtering.
-#                params = topic.buildQuery()
-#                params['sort_on'] = sortKey
-#                params['sort_order'] = sortOrder
-#                if filterKey:
-#                    params[filterKey] = Keywords(filterValue).get()
-#                brains = self.portal_catalog(**params)
-#            res = self.getParentNode().batchAdvancedSearch(
-#                brains, topic, rq, batch_size=batchSize)
-#        else:
-#            # This is an advanced search. Use the Searcher.
-#            searchedType = topic.getProperty('meeting_topic_type', 'MeetingFile')
-#            return SearcherAndenne(self, searchedType, sortKey, sortOrder,
-#                                   filterKey, filterValue).run()
-#        return res
-#
-#    MeetingConfig.getTopicResults=getTopicResults
-#    #it'a a monkey patch because it's the only way to change the behaviour of the MeetingConfig class
-#
-#
-#    security.declarePublic('getQueryColumns')
-#    def getQueryColumns(self, metaType):
-#        '''What columns must we show when displaying results of a query for
-#           objects of p_metaType ?'''
-#        res = ('title',)
-#        if metaType == 'MeetingItem':
-#            res += tuple(self.getUserParam('itemColumns'))
-#        elif metaType == 'Meeting':
-#            res += tuple(self.getUserParam('meetingColumns'))
-#        elif metaType == 'CourrierFile':
-#            res += tuple(self.listMailColumns())
-#        else:
-#            res = ('title','creationDate')
-#        return res
-#
-#    MeetingConfig.getQueryColumns=getQueryColumns
-#    #it'a a monkey patch because it's the only way to change the behaviour of the MeetingConfig class
-#
-#
-#    security.declarePrivate('listMailColumns')
-#    def listMailColumns(self):
-#        d = 'MeetingAndenne'
-#        u = self.utranslate
-#        res = [ ("creationDate", u('pm_creation_date', domain='PloneMeeting')),
-#                ("refCourrier", u('MeetingAndenne_label_refCourrier', domain=d)),
-#                ("destOrigin", u('MeetingAndenne_label_destOrigin', domain=d)),
-#                ("destUsers", u('MeetingAndenne_label_destUsers', domain=d)),
-#                ("actions", u("heading_actions", domain='plone')),
-#        ]
-#        return DisplayList(tuple(res))
-#
-#    MeetingConfig.listMailColumns=listMailColumns
-#    #it'a a monkey patch because it's the only way to change the behaviour of the MeetingConfig class
-#
-#
+
+    security.declarePublic('getTopicResults')
+    def getTopicResults(self, topic, isFake):
+        '''This method computes results of p_topic. If p_topic is a fake one
+           (p_isFake is True), it means that some information in the request
+           will allow to perform a direct query in portal_catalog (the user
+           triggered an advanced search).'''
+        rq = self.REQUEST
+        # How must we sort the result?
+        sortKey = rq.get('sortKey', None)
+        sortOrder = 'reverse'
+        if sortKey and (rq.get('sortOrder', 'asc') == 'asc'):
+            sortOrder = None
+        # Is there a filter defined?
+        filterKey = rq.get('filterKey', '')
+        filterValue = rq.get('filterValue', '').decode('utf-8')
+
+        if not isFake:
+            tool = getToolByName(self, 'portal_plonemeeting')
+            # Execute the query corresponding to the topic.
+            if not sortKey:
+                sortCriterion = topic.getSortCriterion()
+                if sortCriterion:
+                    sortKey = sortCriterion.Field()
+                    sortOrder = sortCriterion.reversed and 'reverse' or None
+                else:
+                    sortKey = 'created'
+            methodId = topic.getProperty(TOPIC_SEARCH_SCRIPT, None)
+            batchSize = self.REQUEST.get('MaxShownFound') or tool.getMaxShownFound()
+            if methodId:
+                # Topic params are not sufficient, use a specific method.
+                # keep topics defined paramaters
+                kwargs = {}
+                kwargs['isDefinedInTool'] = False
+                for criterion in topic.listSearchCriteria():
+                    # Only take criterion with a defined value into account
+                    criterionValue = criterion.value
+                    if criterionValue:
+                        kwargs[str(criterion.field)] = criterionValue
+                # if the topic has a TOPIC_SEARCH_FILTERS, we add it to kwargs
+                # also because it is the called search script that will use it
+                searchFilters = topic.getProperty(TOPIC_SEARCH_FILTERS, None)
+                if searchFilters:
+                    # the search filters are stored in a text property but are
+                    # in reality dicts, so use eval() so it is considered correctly
+                    kwargs[TOPIC_SEARCH_FILTERS] = eval(searchFilters)
+                brains = getattr(self, methodId)(sortKey, sortOrder,
+                                                 filterKey, filterValue, **kwargs)
+            else:
+                # Execute the topic, but decide ourselves for sorting and filtering.
+                params = topic.buildQuery()
+                params['sort_on'] = sortKey
+                params['sort_order'] = sortOrder
+                params['isDefinedInTool'] = False
+                if filterKey:
+                    params[filterKey] = prepareSearchValue(filterValue)
+                brains = self.portal_catalog(**params)
+            res = tool.batchAdvancedSearch(
+
+                brains, topic, rq, batch_size=batchSize)
+        else:
+            # This is an advanced search. Use the Searcher.
+            searchedType = topic.getProperty('meeting_topic_type', 'MeetingFile')
+            return SearcherAndenne(self, searchedType, sortKey, sortOrder,
+                                   filterKey, filterValue).run()
+        return res
+
+    MeetingConfig.getTopicResults=getTopicResults
+    # it'a a monkey patch because it's the only way to change the behaviour of the MeetingConfig class
+
+    security.declarePublic('getQueryColumns')
+    def getQueryColumns(self, metaType):
+        '''What columns must we show when displaying results of a query for
+           objects of p_metaType ?'''
+        res = ('title',)
+        if metaType == 'MeetingItem':
+            res += tuple(self.getUserParam('itemColumns', self.REQUEST))
+        elif metaType == 'Meeting':
+            res += tuple(self.getUserParam('meetingColumns', self.REQUEST))
+        elif metaType == 'CourrierFile':
+            res += tuple(self.listMailColumns())
+        else:
+            res += ('creator', 'creationDate')
+        return res
+
+    MeetingConfig.getQueryColumns=getQueryColumns
+    # it'a a monkey patch because it's the only way to change the behaviour of the MeetingConfig class
+
+    security.declarePrivate('listMailColumns')
+    def listMailColumns(self):
+        '''Lists all the attributes that can be used as columns for displaying
+           information about a mail.'''
+        d = 'PloneMeeting'
+        res = [ ("creationDate", translate('pm_creation_date', domain=d, context=self.REQUEST)),
+                ("refCourrier", translate('MeetingAndenne_label_refCourrier', domain=d, context=self.REQUEST)),
+                ("destOrigin", translate('MeetingAndenne_label_destOrigin', domain=d, context=self.REQUEST)),
+                ("destUsers", translate('MeetingAndenne_label_destUsers', domain=d, context=self.REQUEST)),
+                ("actions", translate("heading_actions", domain='plone', context=self.REQUEST)),
+        ]
+        return DisplayList(tuple(res))
+
+    MeetingConfig.listMailColumns=listMailColumns
+    # it'a a monkey patch because it's the only way to add a behaviour to the MeetingItem class
+
 #    security.declarePublic('searchItemsToValidate')
 #    def searchItemsToValidate(self, sortKey, sortOrder, filterKey, filterValue, **kwargs):
 #        '''Return a list of items that the user can validate.
@@ -1586,27 +1575,28 @@ class CustomMeetingConfigAndenne(MeetingConfig):
 #
 #    MeetingConfig.searchItemsInGroup = searchItemsInGroup
 #    #it'a a monkey patch because it's the only way to change the behaviour of the MeetingConfig class
-#
-#
-#    security.declarePublic('searchMailsInCopy')
-#    def searchMailsInCopy(self, sortKey, sortOrder, filterKey, filterValue, **kwargs):
-#        '''Returns the list of mails for which the user is in copy.'''
-#        member = self.portal_membership.getAuthenticatedMember()
-#        params = {'portal_type': 'CourrierFile',
-#                  'getDestUsers': member.id,
-#                  'sort_on': sortKey,
-#                  'sort_order': sortOrder,
-#                  }
-#
-#        # Manage filter
-#        if filterKey: params[filterKey] = Keywords(filterValue).get()
-#        # update params with kwargs
-#        params.update(kwargs)
-#        # Perform the query in portal_catalog
-#        return self.portal_catalog(**params)
-#
-#    MeetingConfig.searchMailsInCopy = searchMailsInCopy
-#    #it'a a monkey patch because it's the only way to change the behaviour of the MeetingConfig class
+
+    security.declarePublic('searchMailsInCopy')
+    def searchMailsInCopy(self, sortKey, sortOrder, filterKey, filterValue, **kwargs):
+        '''Returns the list of mails for which the user is in copy.'''
+        member = self.portal_membership.getAuthenticatedMember()
+
+        params = {'portal_type': 'CourrierFile',
+                  'getDestUsers': member.id,
+                  'sort_on': sortKey,
+                  'sort_order': sortOrder,
+                  }
+
+        # Manage filter
+        if filterKey:
+            params[filterKey] = prepareSearchValue(filterValue)
+        # update params with kwargs
+        params.update(kwargs)
+        # Perform the query in portal_catalog
+        return self.portal_catalog(**params)
+
+    MeetingConfig.searchMailsInCopy = searchMailsInCopy
+    # it'a a monkey patch because it's the only way to change the behaviour of the MeetingConfig class
 
 
 # ------------------------------------------------------------------------------

@@ -42,7 +42,7 @@ from Products.PloneMeeting.utils import getCustomAdapter, sendMailIfRelevant
 from Products.MeetingAndenne.config import *
 
 ### OLD ###
-#import os, os.path, time, unicodedata, socket
+#import time, unicodedata, socket
 #from Products.PloneMeeting.utils import _getEmailAddress, getOsTempFolder, \
 #     HubSessionsMarshaller, SENDMAIL_ERROR, ENCODING_ERROR, MAILHOST_ERROR
 
@@ -130,18 +130,18 @@ schema = Schema((
     ),
 
 ### Used to migrate to PM3.0 ###
-    FileField('file',
-        required= True,
-        primary=True,
-        searchable=True,
-        languageIndependent=True,
-        storage=AnnotationStorage(migrate=True),
-        widget=FileWidget(
-            description='',
-            label='File',
-            show_content_type=False,
-        ),
-    ),
+#    FileField('file',
+#        required= True,
+#        primary=True,
+#        searchable=True,
+#        languageIndependent=True,
+#        storage=AnnotationStorage(migrate=True),
+#        widget=FileWidget(
+#            description='',
+#            label='File',
+#            show_content_type=False,
+#        ),
+#    ),
 ### END ###
 ),
 )
@@ -204,6 +204,7 @@ class CourrierFile(ATBlob, BrowserDefaultMixin):
             (field MeetingConfig.itemReferenceFormat.'''
         from  DateTime import DateTime
 
+        import pdb; pdb.set_trace()
         actualyear = int( str( DateTime(self.CreationDate()).strftime('%y') ) )
         start = DateTime(actualyear, 1, 1)
         end = DateTime(actualyear, 12, 31)
@@ -369,7 +370,7 @@ class CourrierFile(ATBlob, BrowserDefaultMixin):
             images and Tesseract is the OCR engine that converts those images
             into text. Tesseract needs to know in what p_ocrLanguage the file
             is written in'''
-
+        return ''
         if not hasattr( self.aq_base, 'needsOcr' ):
             return ''
 

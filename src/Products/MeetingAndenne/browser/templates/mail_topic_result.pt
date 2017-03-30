@@ -29,7 +29,7 @@
                   visibleColumns      python: meetingConfig.getQueryColumns(resultMetaType);
                   sortKey             request/sortKey | python:'getRefcourrierFake';
                   sortOrder           request/sortOrder | python:'desc';
-                  showActions         python: member.has_role('CourrierManager');">
+                  showActions         python: tool.isManager(here);">
       <tr>
         <tal:comment replace="nothing">Title</tal:comment>
         <th class="pm_listing_th_title" tal:define="fieldIndex string:sortable_title; filterIndex string:SearchableText">
@@ -100,7 +100,7 @@
                 tal:content="python: obj.getDisplayableDestUsers()"></td>
 
             <tal:comment replace="nothing">Actions</tal:comment>
-            <td align="center" tal:condition="python: member.has_role('MailManager')">
+            <td align="center" tal:condition="showActions">
               <tal:actions replace="structure python: obj.restrictedTraverse('@@actions_panel')(showHistory=True)" />
             </td>
           </tal:wakeUpObject>
