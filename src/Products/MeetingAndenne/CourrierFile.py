@@ -27,6 +27,7 @@ from Products.PloneMeeting.config import *
 ##code-section module-header #fill in your manual code here
 import os
 import os.path
+import socket
 from Acquisition import aq_base
 from AccessControl import Unauthorized
 from zope.annotation import IAnnotations
@@ -35,10 +36,14 @@ from plone.memoize.instance import memoize
 from Products.CMFCore.permissions import View, ModifyPortalContent
 from Products.CMFCore.utils import getToolByName
 from Products.CMFPlone.CatalogTool import getObjSize
+from Products.MailHost.MailHost import MailHostError
 from Products.MimetypesRegistry.common import MimeTypeException
 from collective.documentviewer.async import asyncInstalled
-from Products.PloneMeeting.utils import getCustomAdapter, sendMailIfRelevant
+from Products.PloneMeeting.utils import getCustomAdapter, sendMailIfRelevant, \
+                                        _getEmailAddress, SENDMAIL_ERROR, \
+                                        ENCODING_ERROR, MAILHOST_ERROR
 
+from DateTime import DateTime
 from Products.MeetingAndenne.config import *
 
 ### OLD ###
@@ -152,7 +157,7 @@ schema = Schema((
 CourrierFile_schema = ATBlobSchema.copy() + schema.copy()
 CourrierFile_schema['relatedItems'].widget.visible=False
 CourrierFile_schema['description'].widget.label_msgid='Courrier_label_description'
-CourrierFile_schema['description'].widget.i18n_domain='MeetingAndenne'
+CourrierFile_schema['description'].widget.i18n_domain='PloneMeeting'
 CourrierFile_schema['description'].widget.description_msgid='Courrier_label_description_descr'
 CourrierFile_schema.moveField('refcourrier',pos='top')
 CourrierFile_schema.moveField('typecourrier',pos=4)
@@ -202,10 +207,7 @@ class CourrierFile(ATBlob, BrowserDefaultMixin):
     def getCourrierReference(self):
         '''Return a too complicated item reference to be defined as a TAL Expression
             (field MeetingConfig.itemReferenceFormat.'''
-        from  DateTime import DateTime
-
-        import pdb; pdb.set_trace()
-        actualyear = int( str( DateTime(self.CreationDate()).strftime('%y') ) )
+        actualyear = int( DateTime(self.CreationDate()).strftime('%y') )
         start = DateTime(actualyear, 1, 1)
         end = DateTime(actualyear, 12, 31)
         results = self.portal_catalog.searchResults(Type = "CourrierFile", created = { "query": [ start , end ] ,"range" : "minmax" } )
@@ -218,22 +220,20 @@ class CourrierFile(ATBlob, BrowserDefaultMixin):
         '''Extracts the mail number from the complete reference.'''
         return long(self.getRefcourrier().split('/')[1])
 
-
     security.declarePublic('deletefile')
     def deletefile(self):
-        import os
         os.system( "mv /home/zope/scan/scantmp/" + str(self.getId()) + " /home/zope/scan/scanarchived/" + str(self.getId()))
 
     security.declarePublic('listdestUsers')
     def listDestUsers(self):
-        '''Lists the users that will be selectable to be in destination (view only) for this
+        '''List the users that will be selectable to be in destination (view only) for this
            item.'''
         pgp = self.portal_membership
         res = []
         for user in pgp.listMembers():
             if user.getProperty('listed'):
                 res.append( (user.getId(), user.getProperty('fullname')) )
-        res = sorted( res, key=lambda student: student[1] )
+        res = sorted( res, key=lambda user: user[1] )
         return DisplayList( tuple(res) )
 
     security.declarePublic('getDisplayableDestUsers')
@@ -243,44 +243,29 @@ class CourrierFile(ATBlob, BrowserDefaultMixin):
         res = ""
         for destUser in destUsers:
             if self.portal_membership.getMemberById( destUser ):
-                res = res + self.portal_membership.getMemberById(destUser).getProperty('fullname') + ";"
+                res += self.portal_membership.getMemberById(destUser).getProperty('fullname') + ";"
             else:
-                res = res + destUser + ";"
+                res += destUser + ";"
         if len(res) > 0:
             return res[:-1]
         return res
 
-    security.declarePublic('affectpermission')
-    def affectpermission(self,destuser):
-        ploneUser = self.portal_membership.getMemberById(destuser)
-        grouptoadd = ""
+    security.declarePublic('affectPermissions')
+    def affectPermissions(self, destuser):
+        '''Add the MeetingMailViewer permission to the user and all the groups he belongs to.'''
         grp_tool = self.acl_users.source_groups
+        ploneUser = self.portal_membership.getMemberById(destuser)
         if ploneUser:
             groups = grp_tool.getGroupsForPrincipal(ploneUser)
+            groupsToAdd = set()
             for group in groups:
-                i = []
-                i = group.split('_')
-                if i[1] == 'observers':
-                    grouptoadd=i[0]+'_advisers'
-
-                # We give the CourrierViewer role to the groups and users
-                # this is a read-only view on the item
-                #self.manage_delLocalRoles(destuser)
-                self.manage_addLocalRoles( destuser, ('CourrierViewer', ) )
-                if grouptoadd:
-                    #self.manage_delLocalRoles(grouptoadd)
-                    self.manage_addLocalRoles( grouptoadd, ('CourrierViewer', ) )
+                explodedGroup = group.split('_')
+                if explodedGroup[1] in MEETING_GROUP_SUFFIXES:
+                    groupsToAdd.add( explodedGroup[0] + '_mailviewers' )
+            for group in groupsToAdd:
+                self.manage_addLocalRoles( group, ('MeetingMailViewer', ) )
+            self.manage_addLocalRoles( destuser, ('MeetingMailViewer', ) )
             self.reindexObject()
-
-    security.declarePublic('restorepermission')
-    def restorepermission(self):
-        results = self.portal_catalog.searchResults( Type = "CourrierFile" )
-        for result in results:
-            obj = result.getObject()
-            destUsers = self.getDestUsers()
-            if destUsers:
-                for destUser in destUsers:
-                    self.affectpermission( destUser )
 
     security.declarePrivate('at_post_create_script')
     def at_post_create_script(self):
@@ -328,11 +313,10 @@ class CourrierFile(ATBlob, BrowserDefaultMixin):
         portal = self.portal_url.getPortalObject()
         enc = self.portal_properties.site_properties.getProperty( 'default_charset' )
         destUsers = self.getDestUsers()
-        grouptoadd = ""
         if destUsers:
             for destUser in destUsers:
                 ploneUser = self.portal_membership.getMemberById( destUser )
-                self.affectpermission( destUser )
+                self.affectPermissions( destUser )
                 #Send mail to destUser
                 subjectLabel = 'Courrier_mail_subject'
                 subject = self.utranslate( subjectLabel, domain="PloneMeeting" )

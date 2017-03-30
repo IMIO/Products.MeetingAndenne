@@ -78,26 +78,29 @@ LANGUAGES = DisplayList((
     ))
 
 # Mail topics
-# Format is : topicId, a list of topic criteria, a sort_on attribute,
-# topicScriptId used to manage complex searches and a tal expression
-# to filter who can use the topic.
+# Format is :
+# - topicId
+# - a list of topic criteria
+# - a sort_on attribute
+# - a topicScriptId used to manage complex searches
+# - a tal expression used to filter who can use the topic
 MAIL_TOPICS = (
     # My items.
     ( 'searchmymails',
-    (  ('Type', 'ATPortalTypeCriterion', 'CourrierFile'),
+    (  ('Type', 'ATPortalTypeCriterion', ('CourrierFile',)),
     ), 'CreationDate', 'searchMailsInCopy', '',
     ),
     # Mails in group : need a script to do this search.
     ( 'searchallmailsingroup',
-    (  ('Type', 'ATPortalTypeCriterion', 'CourrierFile'),
+    (  ('Type', 'ATPortalTypeCriterion', ('CourrierFile',)),
     ), 'CreationDate', '', '',
     ),
     # Scanned mails : these were added by a robot.
     ( 'searchmailrobot',
-    (  ('Type', 'ATPortalTypeCriterion', 'CourrierFile'),
+    (  ('Type', 'ATPortalTypeCriterion', ('CourrierFile',)),
        ('Title', 'ATSimpleStringCriterion', 'autotitre'),
     ), 'CreationDate', '',
-       "python: here.portal_membership.getAuthenticatedMember().has_role('CourrierManager')"
+       "python: here.portal_plonemeeting.isManager(here)"
     ),
 )
 
