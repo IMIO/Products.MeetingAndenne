@@ -1363,24 +1363,6 @@ class CustomMeetingConfigAndenne(MeetingConfig):
     def __init__(self, config):
         self.context = config
 
-#    security.declarePublic('getAllMeetingUsers')
-#    def getAllMeetingUsers(self, usages=('assemblyMember',)):
-#        '''Returns the active MeetingUsers having at least one usage among
-#        p_usage.'''
-#        brains = self.portal_catalog(portal_type='MeetingUser',getConfigId=self.id, indexUsages=' OR '.join(usages), sort_on='getObjPositionInParent')
-#        return [b.getObject() for b in brains]
-#
-#    MeetingConfig.getAllMeetingUsers=getAllMeetingUsers
-#    #it'a a monkey patch because it's the only way to change the behaviour of the MeetingConfig class
-#
-#    security.declarePrivate('updatePortalTypes')
-#    def updatePortalTypes(self):
-#        '''Inhibits the reupdating of the portal_types linked to this meeting config.'''
-#        pass
-#
-#    MeetingConfig.updatePortalTypes=updatePortalTypes
-#    #it'a a monkey patch because it's the only way to change the behaviour of the MeetingConfig class
-
     security.declarePublic('getTopicResults')
     def getTopicResults(self, topic, isFake):
         '''This method computes results of p_topic. If p_topic is a fake one
@@ -1483,98 +1465,6 @@ class CustomMeetingConfigAndenne(MeetingConfig):
 
     MeetingConfig.listMailColumns=listMailColumns
     # it'a a monkey patch because it's the only way to add a behaviour to the MeetingItem class
-
-#    security.declarePublic('searchItemsToValidate')
-#    def searchItemsToValidate(self, sortKey, sortOrder, filterKey, filterValue, **kwargs):
-#        '''Return a list of items that the user can validate.
-#           Items to validated are items in state 'proposed' for wich the current user has the
-#           permission to trigger the 'validate' workflow transition.  To avoid waking up the
-#           object, we will check that the current user is in the _reviewers group corresponding
-#           to the item proposing group (that is indexed).  So if the item proposing group is
-#           'secretariat' and the user is member of 'secretariat_reviewers',
-#           then he is able to validate the item.'''
-#        member = self.portal_membership.getAuthenticatedMember()
-#        groupIds = self.portal_groups.getGroupsForPrincipal(member)
-#        res = []
-#        personnel = False
-#        for groupId in groupIds:
-#            if groupId.endswith('_reviewers'):
-#                res.append(groupId[:-10])
-#                if groupId[:-10] == "personnel":
-#                    personnel = True
-#
-#        params = {'portal_type': self.getItemTypeName(),
-#                  'review_state': 'proposed',
-#                  'sort_on': sortKey,
-#                  'sort_order': sortOrder
-#                  }
-#
-#        if personnel:
-#            params['getCategory'] = '45-personnel'
-#        else:
-#            params['getProposingGroup'] = res
-#
-#        # Manage filter
-#        if filterKey: params[filterKey] = Keywords(filterValue).get()
-#        # update params with kwargs
-#        params.update(kwargs)
-#        # Perform the query in portal_catalog
-#        return self.portal_catalog(**params)
-#
-#    MeetingConfig.searchItemsToValidate = searchItemsToValidate
-#    #it'a a monkey patch because it's the only way to change the behaviour of the MeetingConfig class
-#
-#
-#    security.declarePublic('searchItemsInCopy')
-#    def searchItemsInCopy(self, sortKey, sortOrder, filterKey, filterValue, **kwargs):
-#        '''Return a list of items for which the user is in copy.'''
-#        member = self.portal_membership.getAuthenticatedMember()
-#        groupIds = self.portal_groups.getGroupsForPrincipal(member)
-#
-#        params = {'portal_type': self.getItemTypeName(),
-#                  'sort_on': sortKey,
-#                  'sort_order': sortOrder,
-#                  'getCopyGroups':' OR '.join(groupIds)
-#                  }
-#
-#        # Manage filter
-#        if filterKey: params[filterKey] = Keywords(filterValue).get()
-#        # update params with kwargs
-#        params.update(kwargs)
-#        # Perform the query in portal_catalog
-#        return self.portal_catalog(**params)
-#
-#    MeetingConfig.searchItemsInCopy = searchItemsInCopy
-#    #it'a a monkey patch because it's the only way to change the behaviour of the MeetingConfig class
-#
-#
-#    security.declarePublic('searchItemsInGroup')
-#    def searchItemsInGroup(self, sortKey, sortOrder, filterKey, filterValue, **kwargs):
-#        '''Return the list of items belonging to the user's groups.'''
-#        member = self.portal_membership.getAuthenticatedMember()
-#        groupIds = self.portal_groups.getGroupsForPrincipal(member)
-#        res = []
-#
-#        for groupId in groupIds:
-#            group = groupId.split('_')
-#            if group[0] not in res:
-#                res.append(group[0])
-#
-#        params = {'portal_type': self.getItemTypeName(),
-#                  'getProposingGroup': res,
-#                  'sort_on': sortKey,
-#                  'sort_order': sortOrder,
-#                  }
-#
-#        # Manage filter
-#        if filterKey: params[filterKey] = Keywords(filterValue).get()
-#        # update params with kwargs
-#        params.update(kwargs)
-#        # Perform the query in portal_catalog
-#        return self.portal_catalog(**params)
-#
-#    MeetingConfig.searchItemsInGroup = searchItemsInGroup
-#    #it'a a monkey patch because it's the only way to change the behaviour of the MeetingConfig class
 
     security.declarePublic('searchMailsInCopy')
     def searchMailsInCopy(self, sortKey, sortOrder, filterKey, filterValue, **kwargs):
