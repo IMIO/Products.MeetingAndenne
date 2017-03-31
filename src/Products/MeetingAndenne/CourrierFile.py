@@ -133,21 +133,6 @@ schema = Schema((
         multiValued=1,
         vocabulary='listDestUsers'
     ),
-
-### Used to migrate to PM3.0 ###
-#    FileField('file',
-#        required= True,
-#        primary=True,
-#        searchable=True,
-#        languageIndependent=True,
-#        storage=AnnotationStorage(migrate=True),
-#        widget=FileWidget(
-#            description='',
-#            label='File',
-#            show_content_type=False,
-#        ),
-#    ),
-### END ###
 ),
 )
 
