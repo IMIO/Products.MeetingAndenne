@@ -264,7 +264,6 @@ class Migrate_To_3_3(Migrator):
                         item = brain.getObject()
                         if item.category in oldIds:
                             item.category = newIds[oldIds.index(item.category)]
-                            print item.absolute_url() + ' ' + item.category
                     for ids in enumerate(oldIds):
                         mc.categories.manage_renameObject(ids[1], newIds[ids[0]])
 

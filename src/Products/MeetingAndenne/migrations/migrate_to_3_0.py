@@ -47,6 +47,17 @@ class Migrate_To_3_0(Migrator):
 
         logger.info('Done.')
 
+    def _retrieveCourrierFilesTitles(self):
+        '''Restore titles to CourrierFiles which were lost during Blobs migration.'''
+        logger.info('Restoring titles to CourrierFiles which were lost during Blobs migration...')
+
+        for brain in self.portal.portal_catalog(meta_type='CourrierFile'):
+            item = brain.getObject()
+            if not item.Title():
+                item.setTitle(item.__dict__['title'])
+                item.reindexObject(idxs=['Title', ])
+        logger.info('Done.')
+
     def _removeGlobalPowerObservers(self):
         ''' Before, PowerObservers where global to every meetingConfig. Now
             that PowerObservers are locally defined for each meetingConfig,
@@ -95,6 +106,7 @@ class Migrate_To_3_0(Migrator):
         logger.info('Migrating to MeetingAndenne 3.0...')
         self._removeIconExprObjectsOnTypes()
         self._migrateCourrierFilesToBlobs()
+        self._retrieveCourrierFilesTitles()
         self._removeGlobalPowerObservers()
 
         # reinstall so things overwritten by PloneMeeting profile are restored
@@ -108,7 +120,8 @@ def migrate(context):
 
        1) Remove icon_expr_object on portal_types relative to MeetingAndenne
        2) Migrate CourrierFiles to Blobs
-       3) Migrate from global PowerObservers to local PowerObservers
+       3) Restore titles to CourrierFiles which were lost during Blobs migration
+       4) Migrate from global PowerObservers to local PowerObservers
     '''
     Migrate_To_3_0(context).run()
 # ------------------------------------------------------------------------------
