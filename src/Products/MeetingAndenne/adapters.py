@@ -467,91 +467,228 @@ class CustomMeetingItemAndenne(MeetingItem):
     MeetingItem.updateMeetingItem=updateMeetingItem
     # it'a a monkey patch because it's the only way to add a behaviour to the MeetingItem class
 
+    security.declarePublic('getDocReference')
+    def getDocReference(self):
+        '''Return a too complicated item reference to be defined as a TAL Expression
+           (field MeetingConfig.itemReferenceFormat.'''
+        userMeetingGroups = self.portal_plonemeeting.getGroupsForUser(suffix="creators")
+        if len(userMeetingGroups) >= 1:
+            ref = userMeetingGroups[-1].getAcronym()
+        else:
+            ref = 'XXXX'
+        return ref + '/XX.XX/' + DateTime(self.CreationDate()).strftime('%Y.%m') + '/'
+
+    MeetingItem.getDocReference = getDocReference
+    # it'a a monkey patch because it's the only way to have a default method in the schema
+
+    security.declarePublic('listUserGroup')
+    def listUserGroup(self):
+        '''Lists the Users that are associated to the proposing group(s) of the authenticated user.'''
+        userCreatorGroups = self.portal_plonemeeting.getGroupsForUser(suffix="creators", userId = self.Creator(), zope=True)
+
+        res = set()
+        for group in userCreatorGroups:
+            for user in group.getMemberIds():
+                res.add( (user, self.portal_membership.getMemberById(user).getProperty('fullname')) )
+
+        return DisplayList( tuple(res) )
+
+    MeetingItem.listUserGroup = listUserGroup
+    # it'a a monkey patch because it's the only way to have a default method in the schema
+
+    security.declareProtected('Modify portal content', 'onWelcomeNowPerson')
+    def onWelcomeNowPerson(self):
+        '''Some user (in request.userId) has join the meeting 
+           We will record this info, excepted if request["action"] tells us to
+           remove it instead (delete).'''
+        tool = getToolByName(self, 'portal_plonemeeting')
+        if not tool.isManager(self) or not checkPermission(ModifyPortalContent, self):
+            raise Unauthorized
+        rq = self.REQUEST
+        userId = rq['userId']
+        actionType = rq.get('actionType')
+        if actionType == 'delete':
+            present = list(self.getItemPresents())
+            present.remove(userId)
+            self.setItemPresents(present)
+        if actionType == 'do':
+            present = list(self.getItemPresents())
+            present.append(userId)
+            self.setItemPresents(present)
+
+    MeetingItem.onWelcomeNowPerson = onWelcomeNowPerson
+    # it'a a monkey patch because it's the only way to add a behaviour to the MeetingItem class
+
     security.declarePublic('getExtraFieldsToCopyWhenCloning')
     def getExtraFieldsToCopyWhenCloning(self, cloned_to_same_mc):
         '''Lists the fields to keep when cloning an item'''
         return ['projetpv', 'textpv', 'pv']
 
-#    security.declarePublic('replaceBr')
-#    def replaceBr (self,text):
-#        description=text
-#
-#        pos=description.find("<br />")
-#        while pos <> -1 :
-#            ol=description.count("<ol>",0,pos)
-#            ul=description.count ("<ul>",0,pos)
-#            li=description.count("<li>",0,pos)
-#            sol=description.count ("</ol>",0,pos)
-#            sul=description.count("</ul>",0,pos)
-#            sli=description.count ("</li>",0,pos)
-#            print "ol="+str(ol)+" ul="+str(ul)+" li="+str(li)+" sol="+str(sol)+" sul="+str(sul)+" sli="+str(sli)
-#            if ol <= sol and ul <= sul and li <= sli:
-#                p=description.count ("<p",0,pos)
-#                sp=description.count("</p>",0,pos)
-#
-#                print "p="+str(p)+" sp="+str(sp)
-#
-#                if p > sp:
-#                    strong=description.rfind ("<strong>",0,pos)
-#                    strike=description.rfind("<strike>",0,pos)
-#                    u=description.rfind("<u>",0,pos)
-#                    em=description.rfind("<em>",0,pos)
-#                    sup=description.rfind("<sup>",0,pos)
-#                    sub=description.rfind("<sub>",0,pos)
-#                    font=description.rfind("<font",0,pos)
-#                    span=description.rfind("<span",0,pos)
-#                    sstrong=description.rfind("</strong>",0,pos)
-#                    sstrike=description.rfind("</strike>",0,pos)
-#                    su=description.rfind("</u>",0,pos)
-#                    sem=description.rfind("</em>",0,pos)
-#                    ssub=description.rfind("</sub>",0,pos)
-#                    ssup=description.rfind("</sup>",0,pos)
-#                    sfont=description.rfind("</font>",0,pos)
-#                    sspan=description.rfind("</span>",0,pos)
-#                    htmltuple=[]
-#                    if strong > sstrong:
-#                        htmltuple.append(("<strong>","</strong>",strong))
-#                    if strike > sstrike:
-#                        htmltuple.append(("<strike>","</strike>",strike))
-#                    if u > su:
-#                        htmltuple.append(("<u>","</u>",u))
-#                    if em > sem:
-#                        htmltuple.append(("<em>","</em>",em))
-#                    if sup > ssup:
-#                        htmltuple.append(("<sup>","</sup>",sup))
-#                    if sub > ssub:
-#                        htmltuple.append(("<sub>","</sub>",sub))
-#                    if font > sfont:
-#                        htmltuple.append(("<font>","</font>",font))
-#                    if span > sspan:
-#                        htmltuple.append(("<span>","</span>",span))
-#
-#                    htmltupleclose=sorted(htmltuple, key=lambda student: student[2],reverse=True)
-#                    htmltupleopen=sorted(htmltuple, key=lambda student: student[2])
-#                    strhtmlclose=""
-#                    strhtmlopen=""
-#                    for i in htmltupleclose:
-#                        strhtmlclose=strhtmlclose+i[1]
-#                    for i in htmltupleopen:
-#                        strhtmlopen=strhtmlopen+i[0]
-#                    description = description.replace("<br />",strhtmlclose+"</p><p>"+strhtmlopen,1)
-#                else:
-#                    description = description.replace("<br />","<p>&nbsp;</p>",1)
-#            else:
-#                description = description.replace("<br />","",1)
-#            pos=description.find("<br />")
-#
-#        pos=description.find("<table")
-#        while pos <> -1:
-#            tdend=description.find("</table",pos)
-#            if (description.count("<p",pos,tdend)>0):
-#                l=list(description)
-#                l[pos:tdend]=list(description[pos:tdend].replace("<p","<span",10).replace("</p>","</span>",10))
-#                description="".join(l)
-#            pos=description.find("<table",pos+1)
-#        return description
-#
-#
+    security.declarePrivate('replaceBr')
+    def replaceBr (self,text):
+        description = text
+
+        pos = description.find("<br />")
+        while pos <> -1 :
+            ol = description.count("<ol>", 0, pos)
+            ul = description.count("<ul>", 0, pos)
+            li = description.count("<li>", 0, pos)
+            sol = description.count("</ol>", 0, pos)
+            sul = description.count("</ul>", 0, pos)
+            sli = description.count("</li>", 0, pos)
+            if ol <= sol and ul <= sul and li <= sli:
+                p = description.count("<p", 0, pos)
+                sp = description.count("</p>", 0, pos)
+
+                if p > sp:
+                    strong = description.rfind ("<strong>", 0, pos)
+                    strike = description.rfind("<strike>", 0, pos)
+                    u = description.rfind("<u>", 0, pos)
+                    em = description.rfind("<em>", 0, pos)
+                    sup = description.rfind("<sup>", 0, pos)
+                    sub = description.rfind("<sub>", 0, pos)
+                    font = description.rfind("<font", 0, pos)
+                    span = description.rfind("<span", 0, pos)
+                    sstrong = description.rfind("</strong>", 0, pos)
+                    sstrike = description.rfind("</strike>", 0, pos)
+                    su = description.rfind("</u>", 0, pos)
+                    sem = description.rfind("</em>", 0, pos)
+                    ssub = description.rfind("</sub>", 0, pos)
+                    ssup = description.rfind("</sup>", 0, pos)
+                    sfont = description.rfind("</font>", 0, pos)
+                    sspan = description.rfind("</span>", 0, pos)
+                    htmltuple = []
+                    if strong > sstrong:
+                        htmltuple.append( ("<strong>", "</strong>", strong) )
+                    if strike > sstrike:
+                        htmltuple.append( ("<strike>", "</strike>", strike) )
+                    if u > su:
+                        htmltuple.append( ("<u>", "</u>", u) )
+                    if em > sem:
+                        htmltuple.append( ("<em>", "</em>", em) )
+                    if sup > ssup:
+                        htmltuple.append( ("<sup>", "</sup>", sup) )
+                    if sub > ssub:
+                        htmltuple.append( ("<sub>", "</sub>", sub) )
+                    if font > sfont:
+                        htmltuple.append( ("<font>", "</font>", font) )
+                    if span > sspan:
+                        htmltuple.append( ("<span>", "</span>", span) )
+
+                    htmltupleclose = sorted(htmltuple, key=lambda tag: tag[2], reverse = True)
+                    htmltupleopen = sorted(htmltuple, key=lambda tag: tag[2])
+                    strhtmlclose = ""
+                    strhtmlopen = ""
+                    for i in htmltupleclose:
+                        strhtmlclose += i[1]
+                    for i in htmltupleopen:
+                        strhtmlopen += i[0]
+                    description = description.replace("<br />", strhtmlclose + "</p><p>" + strhtmlopen, 1)
+                else:
+                    description = description.replace("<br />", "<p>&nbsp;</p>", 1)
+            else:
+                description = description.replace("<br />", "", 1)
+            pos = description.find("<br />")
+
+        pos = description.find("<table")
+        while pos <> -1:
+            tdend = description.find("</table", pos)
+            if description.count("<p", pos, tdend) > 0:
+                l = list(description)
+                l[pos:tdend] = list(description[pos:tdend].replace("<p", "<span", 10).replace("</p>", "</span>", 10))
+                description = "".join(l)
+            pos = description.find("<table", pos+1 )
+        return description
+
+    security.declarePrivate('onEdit')
+    def onEdit(self, isCreated):
+        tool = self.context.portal_plonemeeting
+
+        # replace div by p, because xhtmlparlser convert div to page-break and it causes problems in text align justify
+        # replace line breaks by </p><p> because line breaks are in <p> and causes justify problems
+        description = self.context.Description()
+        description = description.replace("<div", "<p").replace("</div>", "</p>")
+        self.context.setDescription(self.context.replaceBr(description))
+
+        decision = self.context.getDecision()
+        decision = decision.replace("<div", "<p").replace("</div>", "</p>")
+        self.context.setDecision(self.context.replaceBr(decision))
+
+        projetpv = self.context.getProjetpv()
+        projetpv = projetpv.replace("<div", "<p").replace("</div>", "</p>")
+        self.context.setProjetpv(self.context.replaceBr(projetpv))
+
+        textpv = self.context.getTextpv()
+        textpv = textpv.replace("<div", "<p").replace("</div>", "</p>")
+        self.context.setTextpv(self.context.replaceBr(textpv))
+
+        pv = self.context.getPv()
+        pv = pv.replace("<div", "<p").replace("</div>", "</p>")
+        self.context.setPv(self.context.replaceBr(pv))
+
+        # Add local roles corresponding to the proposing group if item category is personnel or if item is confidential
+        if self.context.getCategory() == "45-personnel" or self.context.getIsconfidential()== True:
+            if self.context.getIsconfidential()==True:
+                MEETINGROLESTOADD = {'reviewers': 'MeetingReviewer'}
+                MEETINGROLESTOREMOVE = ('reviewers', 'observers', 'creators')
+            else:
+                MEETINGROLESTOADD = {'reviewers': 'MeetingReviewer',
+                                     'observers': 'MeetingObserverLocal'}
+                MEETINGROLESTOREMOVE = ('reviewers', )
+
+            # Remove the locale roles
+            meetingGroup = getattr(tool, self.context.getProposingGroup(), None)
+            if meetingGroup:
+                for groupSuffix in MEETINGROLESTOREMOVE:
+                    groupId = meetingGroup.getPloneGroupId(groupSuffix)
+                    # If the corresponding Plone group does not exist anymore,
+                    # recreate it.
+                    ploneGroup = self.context.portal_groups.getGroupById(groupId)
+                    if not ploneGroup:
+                        meetingGroup._createPloneGroup(groupSuffix)
+                    self.context.manage_delLocalRoles((groupId, ))
+
+            if self.context.getCategory() == "45-personnel":
+                meetingGroup = getattr(tool, "personnel", None)
+
+            # Add the local roles
+            if meetingGroup:
+                for groupSuffix, role in MEETINGROLESTOADD.values():
+                    groupId = meetingGroup.getPloneGroupId(groupSuffix)
+                    # If the corresponding Plone group does not exist anymore,
+                    # recreate it.
+                    ploneGroup = self.context.portal_groups.getGroupById(groupId)
+                    if not ploneGroup:
+                        meetingGroup._createPloneGroup(groupSuffix)
+                    self.context.manage_addLocalRoles(groupId, (role, ))
+
+        # Add local roles for associated group
+        assGroups = self.context.getAssociatedGroups()
+        if assGroups:
+            for assGroup in assGroups:
+                groupId = assGroup + '_creators'
+                # If the corresponding Plone group does not exist anymore,
+                # recreate it.
+                ploneGroup = self.context.portal_groups.getGroupById(groupId)
+                if not ploneGroup:
+                    assGroup._createPloneGroup(groupSuffix)
+                self.context.manage_addLocalRoles(groupId, ('MeetingMember', ))
+
+    security.declarePublic('getLatestReviewer')
+    def getLatestReviewer(self):
+        '''Returns the user of the latest validate action that was performed on this item or
+           the creator if the history is incomplete.'''
+        item = self.getSelf()
+        wfName = item.portal_workflow.getWorkflowsFor(item)[0].getId()
+        if wfName in item.workflow_history:
+            objectHistory = item.workflow_history[wfName]
+            i = len(objectHistory) - 1
+            while i >= 0:
+                if objectHistory[i]['action'] == 'validate':
+                    return objectHistory[i]['actor']
+                i -= 1
+        return item.Creator()
+
 #    security.declarePublic('setOcrFlag')
 #    def setOcrFlag(self):
 #        """
@@ -673,172 +810,6 @@ class CustomMeetingItemAndenne(MeetingItem):
 #
 #
 #
-#    security.declarePublic('onEdit')
-#    def onEdit(self,isCreated):
-#        # replace de div for p, because xhtmlparlser convert div to page-break and it cause problem in text align justify
-#        # replace line break for </p><p> because line break are in <p> and cause justify problems
-#        if (self.context.isformation()):
-#            if (isCreated):
-#                self.context.setRefdoc(self.context.getDocReference())
-#                self.context.setVerifUser(self.Creator())
-#                self.context.setTreatUser(self.Creator())
-#                # Needed because we have to put a default value, otherwise we can't add a new MeetingItem. To remove, with the default values
-#                # in the pm_updates when there will be a real TrainingItem type
-#                self.context.setFormation_name("")
-#                self.context.setFormation_objet("")
-#                self.context.setFormation_place("")
-#                self.context.setFormation_date1("")
-#                self.context.setFormation_date2("")
-#                self.context.setBudgetInfos(self.context.translate('MeetingAndenne_default_budgetInfos', domain='PloneMeeting'))
-#            else:
-#                label1=self.context.translate('MeetingAndenne_label_formation_description1', domain='PloneMeeting').encode('utf-8')
-#                label2=self.context.translate('MeetingAndenne_label_formation_description2', domain='PloneMeeting').encode('utf-8')
-#                label1d=self.context.translate('MeetingAndenne_label_formation_decision1', domain='PloneMeeting').encode('utf-8')
-#                label2d=self.context.translate('MeetingAndenne_label_formation_decision2', domain='PloneMeeting').encode('utf-8')
-#                label3d=self.context.translate('MeetingAndenne_label_formation_decision3', domain='PloneMeeting').encode('utf-8')
-#                import locale
-#                loc=locale.getlocale()
-#                locale.setlocale(locale.LC_ALL,'fr_FR.utf8')
-#                if self.context.getFormation_periode()!="":
-#                    formation_periode=", "+self.context.getFormation_periode()+","
-#                else:
-#                    formation_periode=""
-#                label1F=label1 % {'formation_date1':self.context.getFormation_date1().strftime("%d %B %Y à %H:%M"),'formation_date2':self.context.getFormation_date2().strftime("%d %B %Y à %H:%M"),'formation_periode':formation_periode,'formation_name':self.context.getFormation_name(),'formation_type':self.context.getFormation_type(),'formation_objet':self.context.getFormation_objet()}
-#                i=0
-#                formation_users=""
-#                formation_user=self.context.getFormation_user()
-#                for user in self.context.getFormation_users():
-#                    i=i+1
-#                    ploneUser=self.context.portal_membership.getMemberById(user)
-#                    if (ploneUser.getProperty('function')):
-#                        function=", " + ploneUser.getProperty('function')
-#                    else:
-#                        function=""
-#                    if (ploneUser.getProperty('gender')):
-#                        gender=ploneUser.getProperty('gender')
-#                        if gender=='homme':
-#                            gender="Monsieur "
-#                        elif gender=='femme':
-#                            gender="Madame "
-#                        else:
-#                            gender=""
-#                    else:
-#                        gender=""
-#                    if i > 1:
-#                        if ( len(self.context.getFormation_users()) == i and formation_user == ""):
-#                            formation_users=formation_users+" et "
-#                        else:
-#                            formation_users=formation_users+", "
-#                    formation_users=formation_users+gender+ploneUser.getProperty('fullname')+function
-#                if formation_user != "":
-#                    if formation_users != "":
-#                        formation_users=formation_users+", "+formation_user
-#                    else:
-#                        formation_users=formation_user
-#                budget_array=self.adapted().extractBudget()
-#                formation_price=budget_array[0]
-#                formation_budget=budget_array[1]
-#                label1dF=label1d % {'formation_users':formation_users,'formation_type':self.context.getFormation_type(),'formation_objet':self.context.getFormation_objet(),'formation_name':self.context.getFormation_name(),'formation_date1':self.context.getFormation_date1().strftime("%d %B %Y à %H:%M"),'formation_date2':self.context.getFormation_date2().strftime("%d %B %Y à %H:%M"),'formation_periode':formation_periode,'formation_place':self.context.getFormation_place()}
-#                if (formation_price != ''):
-#                    label2dF=label2d % {'formation_price':formation_price,'formation_budget':formation_budget}
-#                    payement=''
-#                    if (self.context.getFormation_mod()):
-#                        res=self.context.listFormationMod(False)
-#                        if (self.context.getFormation_mod()== '1'):
-#                            payement="<p>"+res[0][1]+"</p>"
-#                        else:
-#                            payement="<p>"+res[1][1]+self.context.translate('MeetingAndenne_text_formation_compte', domain='PloneMeeting').encode('utf-8')+self.context.getFormation_compte()+" "+self.context.translate('MeetingAndenne_text_formation_compte_name', domain='PloneMeeting').encode('utf-8')+self.context.getFormation_compte_name()+" "+self.context.translate('MeetingAndenne_text_formation_compte_com', domain='PloneMeeting').encode('utf-8')+self.context.getFormation_compte_com()+"</p>"
-#                else:
-#                    label2dF=self.context.translate('MeetingAndenne_label_formation_decision2free', domain='PloneMeeting').encode('utf-8')
-#                    payement=''
-#                if i < 2:
-#                    usertitle=" - "+formation_users
-#                else:
-#                    usertitle=""
-#
-#                #on ne remplace pas le titre si on est en mode template car le titre doit rester le meme pour l'affichage du template
-#                if self.context.queryState() != "active":
-#                    self.context.setTitle("Demande de formation - "+self.context.getFormation_objet()+usertitle)
-#
-#                self.context.setDecision(label1dF+label2dF+payement+label3d)
-#                self.context.setDescription(label1F+"<p>"+self.context.getFormation_desc()+"</p>"+label2dF+label2)
-#                locale.setlocale(locale.LC_ALL,loc)
-#
-#        self.context.setDescription(self.context.Description().replace("<div","<p"))
-#        self.context.setDescription(self.context.Description().replace("</div>","</p>"))
-#        self.context.setDescription(self.context.replaceBr(self.context.Description()))
-#        #self.context.setDescription(self.context.Description().replace("<br>","</p><p>"))
-#
-#        self.context.setTextpv(self.context.getTextpv().replace("<div","<p"))
-#        self.context.setTextpv(self.context.getTextpv().replace("</div>","</p>"))
-#        self.context.setTextpv(self.context.replaceBr(self.context.getTextpv()))
-#
-#        self.context.setPv(self.context.getPv().replace("<div","<p"))
-#        self.context.setPv(self.context.getPv().replace("</div>","</p>"))
-#        self.context.setPv(self.context.replaceBr(self.context.getPv()))
-#
-#        self.context.setProjetpv(self.context.getProjetpv().replace("<div","<p"))
-#        self.context.setProjetpv(self.context.getProjetpv().replace("</div>","</p>"))
-#        self.context.setProjetpv(self.context.replaceBr(self.context.getProjetpv()))
-#
-#        self.context.setDecision(self.context.getDecision().replace("<div","<p"))
-#        self.context.setDecision(self.context.getDecision().replace("</div>","</p>"))
-#        self.context.setDecision(self.context.replaceBr(self.context.getDecision()))
-#
-#        # Add the local roles corresponding to the proposing group for personnel and when is't confidential
-#        tool = self.context.portal_plonemeeting
-#
-#        if self.context.getIsconfidential()==True:
-#            MEETINGROLES = {'reviewers': 'MeetingReviewer'}
-#            MEETINGROLESTOREMOVE = {'reviewers': 'MeetingReviewer',
-#                'observers': 'MeetingObserverLocal','creators':'MeetingMember'}
-#        else:
-#            MEETINGROLES = {'reviewers': 'MeetingReviewer',
-#                'observers': 'MeetingObserverLocal'}
-#            MEETINGROLESTOREMOVE = {'reviewers': 'MeetingReviewer'}
-#        #remove the locale roles
-#        if self.context.getCategory() == "45-personnel" or self.context.getIsconfidential()==True:
-#            meetingGroup = getattr(tool, self.context.getProposingGroup(), None)
-#            if meetingGroup:
-#                for groupSuffix in MEETINGROLESTOREMOVE.iterkeys():
-#                    groupId = meetingGroup.getPloneGroupId(groupSuffix)
-#                    self.context.manage_delLocalRoles([groupId])
-#                    ploneGroup = self.context.portal_groups.getGroupById(groupId)
-#                    # If the corresponding Plone group does not exist anymore,
-#                    # recreate it.
-#                    if not ploneGroup:
-#                        meetingGroup._createPloneGroup(groupSuffix)
-#                    meetingRole = ploneGroup.getProperties()['meetingRole']
-#                    #self.context.manage_addLocalRoles(groupId, (meetingRole,))
-#
-#        if self.context.getCategory() == "45-personnel":
-#            meetingGroup = getattr(tool, "personnel", None)
-#        else:
-#            meetingGroup = getattr(tool, self.context.getProposingGroup(), None)
-#
-#        # add the local role for personnel or confidential point
-#        if self.context.getCategory() == "45-personnel" or self.context.getIsconfidential()== True:
-#            if meetingGroup:
-#                for groupSuffix in MEETINGROLES.iterkeys():
-#                    groupId = meetingGroup.getPloneGroupId(groupSuffix)
-#                    ploneGroup = self.context.portal_groups.getGroupById(groupId)
-#                    # If the corresponding Plone group does not exist anymore,
-#                    # recreate it.
-#                    if not ploneGroup:
-#                        meetingGroup._createPloneGroup(groupSuffix)
-#                    meetingRole = ploneGroup.getProperties()['meetingRole']
-#                    self.context.manage_addLocalRoles(groupId, (meetingRole,))
-#        #add role owner for jm mathieu (CPAS) on created state (to permit JM to edit and propose all created item in CPAS)
-#        # NOT USE SINCE 20-03-2014 MAY BE REUSE LATER
-#        #if self.context.getProposingGroup() == 'cpas':
-#        #    self.context.manage_addLocalRoles('marmat', ('Owner',))
-#        #add local role for associated group
-#        assGroups = self.context.getAssociatedGroups()
-#        if assGroups:
-#            for assGroup in assGroups:
-#                groupId = assGroup+'_creators'
-#                ploneGroup = self.context.portal_groups.getGroupById(groupId)
-#            self.context.manage_addLocalRoles(groupId, ('MeetingMember',))
 #
 #    security.declarePublic('getDefaultBudgetInfo')
 #    def getDefaultBudgetInfo(self):
@@ -869,49 +840,6 @@ class CustomMeetingItemAndenne(MeetingItem):
 #        '''Is the 'decision' field empty ? '''
 #        return kupuFieldIsEmpty(self.context.getTextpv())
 
-    security.declarePublic('getDocReference')
-    def getDocReference(self):
-        '''Return a too complicated item reference to be defined as a TAL Expression
-           (field MeetingConfig.itemReferenceFormat.'''
-        userMeetingGroups = self.portal_plonemeeting.getGroupsForUser(suffix="creators")
-        if len(userMeetingGroups) >= 1:
-            ref = userMeetingGroups[-1].getAcronym()
-        else:
-            ref = 'XXXX'
-        return ref + '/XX.XX/' + DateTime(self.CreationDate()).strftime('%Y.%m') + '/'
-
-    MeetingItem.getDocReference = getDocReference
-    # it'a a monkey patch because it's the only way to have a default method in the schema
-
-    security.declarePublic('listUserGroup')
-    def listUserGroup(self):
-        '''Lists the Users that are associated to the proposing group(s) of the authenticated user.'''
-        userCreatorGroups = self.portal_plonemeeting.getGroupsForUser(suffix="creators", userId = self.Creator(), zope=True)
-
-        res = set()
-        for group in userCreatorGroups:
-            for user in group.getMemberIds():
-                res.add( (user, self.portal_membership.getMemberById(user).getProperty('fullname')) )
-
-        return DisplayList( tuple(res) )
-
-    MeetingItem.listUserGroup = listUserGroup
-    # it'a a monkey patch because it's the only way to have a default method in the schema
-
-    security.declarePublic('getLatestReviewer')
-    def getLatestReviewer(self):
-        '''Returns the user of the latest validate action that was performed on this item or
-           the creator if the history is incomplete.'''
-        item = self.getSelf()
-        wfName = item.portal_workflow.getWorkflowsFor(item)[0].getId()
-        if wfName in item.workflow_history:
-            objectHistory = item.workflow_history[wfName]
-            i = len(objectHistory) - 1
-            while i >= 0:
-                if objectHistory[i]['action'] == 'validate':
-                    return objectHistory[i]['actor']
-                i -= 1
-        return item.Creator()
 
 #    security.declarePublic('getAttendees')
 #    def getAttendees(self, usage=None, includeDeleted=False, includeAbsents=False, includeReplacements=False):
@@ -974,28 +902,6 @@ class CustomMeetingItemAndenne(MeetingItem):
 #    MeetingItem.showDuplicateItemAction=showDuplicateItemAction
 #    #it'a a monkey patch because it's the only way to have a default method in the schema
 
-    security.declareProtected('Modify portal content', 'onWelcomeNowPerson')
-    def onWelcomeNowPerson(self):
-        '''Some user (in request.userId) has join the meeting 
-           We will record this info, excepted if request["action"] tells us to
-           remove it instead (delete).'''
-        tool = getToolByName(self, 'portal_plonemeeting')
-        if not tool.isManager(self) or not checkPermission(ModifyPortalContent, self):
-            raise Unauthorized
-        rq = self.REQUEST
-        userId = rq['userId']
-        actionType = rq.get('actionType')
-        if actionType == 'delete':
-            present = list(self.getItemPresents())
-            present.remove(userId)
-            self.setItemPresents(present)
-        if actionType == 'do':
-            present = list(self.getItemPresents())
-            present.append(userId)
-            self.setItemPresents(present)
-
-    MeetingItem.onWelcomeNowPerson=onWelcomeNowPerson
-    # it'a a monkey patch because it's the only way to add a behaviour to the MeetingItem class
 
     ### RAPCOLAUCON ###
     security.declarePublic('israpcolaucon')
@@ -1674,17 +1580,6 @@ class MeetingItemCollegeAndenneWorkflowConditions(MeetingItemWorkflowConditions)
     def mayPrevalidate(self):
         '''We'll see who can prevalidate later'''
         pass
-
-#    security.declarePublic('mayValidate')
-#    def mayValidate(self):
-#        '''We'll see what to do with Personnel category'''
-#        from Products.PloneMeeting.MeetingItem import MeetingItemWorkflowConditions
-#        res=MeetingItemWorkflowConditions.mayValidate(self)
-#        #if res:
-#        #  user = self.context.Communesportal_membership.getAuthenticatedMember()
-#        #  if self.context.getCategory() == "66-personnel" and (not user.has_role('MeetingManager')):
-#        #          res = False
-#        return res
 
 
 # ------------------------------------------------------------------------------
