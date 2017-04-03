@@ -44,6 +44,8 @@ topicsToRemove = { 'meeting-config-college': ['searchallitemstovalidate', 'searc
                                     'searchalldecisions']
 }
 
+topicsToLink = { 'meeting-config-college': ['searchallitemsincopy', 'searchitemstovalidate'], }
+
 memberPropertiesToRemove = ( 'fck_skin', 'fck_path', 'fck_root', 'fck_force_paste_as_text', 'service' )
 
 
@@ -293,6 +295,12 @@ class Migrate_To_3_3(Migrator):
             if mc.getId() in meetingConfigs:
                 for key, value in meetingConfigs[mc.getId()].iteritems():
                     setattr(mc, key, value)
+
+            if mc.getId() in topicsToLink:
+                topicsUIDs = list()
+                for topic in topicsToLink[mc.getId()]:
+                    topicsUIDs.append(mc.topics[topic].UID())
+                mc.setToDoListTopics(topicsUIDs)
 
         logger.info('Done.')
 
