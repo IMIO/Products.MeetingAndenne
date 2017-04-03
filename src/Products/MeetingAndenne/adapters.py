@@ -454,14 +454,13 @@ class CustomMeetingItemAndenne(MeetingItem):
 
 ### New functionalities ###
 
-    ### TO BE CHANGED ###
     security.declarePublic('updateMeetingItem')
     def updateMeetingItem(self):
         """
            Update a MeetingItem object following a copygroups on-the-fly modification.
         """
         self.updateLocalRoles()
-#        self.adapted().onEdit(isCreated=False)
+        self.adapted().onEdit(isCreated=False)
         self.reindexObject()
 
     MeetingItem.updateMeetingItem=updateMeetingItem
@@ -653,7 +652,7 @@ class CustomMeetingItemAndenne(MeetingItem):
 
             # Add the local roles
             if meetingGroup:
-                for groupSuffix, role in MEETINGROLESTOADD.values():
+                for groupSuffix, role in MEETINGROLESTOADD.items():
                     groupId = meetingGroup.getPloneGroupId(groupSuffix)
                     # If the corresponding Plone group does not exist anymore,
                     # recreate it.
@@ -869,7 +868,42 @@ class CustomMeetingItemAndenne(MeetingItem):
 #
 #    MeetingItem.getAttendees=getAttendees
 #    # it'a a monkey patch
-#
+
+    security.declarePublic('getAttendees')
+    def getAttendees(self, usage=None, includeDeleted=False,
+                     includeAbsents=False, includeReplacements=False):
+        '''Returns the attendees for this item. Takes into account
+           self.itemAbsents, excepted if p_includeAbsents is True. If a given
+           p_usage is defined, the method returns only users having this
+           p_usage.'''
+        res = []
+        if usage == 'signer':
+            raise 'Please use MeetingItem.getItemSignatories instead.'
+        if not self.hasMeeting():
+            return res
+        # Prevent wrong parameters use
+        if includeDeleted and usage:
+            includeDeleted = False
+        itemAbsents = ()
+        meeting = self.getMeeting()
+        if not includeAbsents:
+            # item absents are absents for the item, absents from an item before this one
+            # and lateAttendees that still not arrived
+            itemAbsents = list(self.getItemAbsents()) + meeting.getDepartures(self, when='before', alsoEarlier=True)
+        # remove lateAttendees that arrived before this item
+        lateAttendees = meeting.getLateAttendees()
+        arrivedLateAttendees = meeting.getEntrances(self, when='during') + meeting.getEntrances(self, when='before')
+        stillNotArrivedLateAttendees = set(lateAttendees).difference(set(arrivedLateAttendees))
+        itemAbsents = itemAbsents + list(stillNotArrivedLateAttendees)
+        for attendee in meeting.getAttendees(True,
+                                             includeDeleted=includeDeleted,
+                                             includeReplacements=includeReplacements):
+            if attendee.id in itemAbsents:
+                continue
+            if not usage or (usage in attendee.getUsages()):
+                res.append(attendee)
+        return res
+
     security.declarePublic('onDuplicate')
     def onDuplicate(self):
         '''This method is triggered when the users clicks on
