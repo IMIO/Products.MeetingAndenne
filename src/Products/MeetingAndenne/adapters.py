@@ -918,24 +918,8 @@ class CustomMeetingItemAndenne(MeetingItem):
             translate('item_duplicated', domain='PloneMeeting', context=self.REQUEST))
         return self.REQUEST.RESPONSE.redirect(newItem.absolute_url())
 
-    MeetingItem.onDuplicate=onDuplicate
+    MeetingItem.onDuplicate = onDuplicate
     #it'a a monkey patch because it's the only way to change the behaviour of the MeetingItem class
-
-#    # cette fonction surgarge showduplicateItemAction dans meetingitem
-#    # de facon a donner le droit de dupliquer n'importe quel point au meetingmanager
-#    security.declarePublic('showDuplicateItemAction')
-#    def showDuplicateItemAction (self):
-#        member = self.portal_membership.getAuthenticatedMember()
-#        if (member.has_role('MeetingManager')):
-#            return True
-#        else:
-#            tool = self.portal_plonemeeting
-#            if tool.getPloneDiskAware() or not tool.userIsAmong('creators'):
-#                return False
-#            return True
-#    MeetingItem.showDuplicateItemAction=showDuplicateItemAction
-#    #it'a a monkey patch because it's the only way to have a default method in the schema
-
 
     ### RAPCOLAUCON ###
     security.declarePublic('israpcolaucon')
@@ -1050,80 +1034,6 @@ class CustomMeetingItemAndenne(MeetingItem):
             return True
         except ValueError:
             return False
-
-
-#    security.declarePublic('printUserGroup')
-#    def printUserGroup(self):
-#        '''Lists the Users that are in all groups for printing and reporting'''
-#        from Products.Archetypes.utils import DisplayList
-#        #member = self.portal_membership.getAuthenticatedMember()
-#        member = self.portal_membership.getMemberById(self.Creator())
-#        grp_tool = self.acl_users.source_groups
-#        res= ""
-#        if member:
-#         #groups = grp_tool.getGroupsForPrincipal(member)
-#         meetingconfig=self.portal_plonemeeting.getMeetingConfig(self)
-#         groups=meetingconfig.getMeetingGroups()
-#         for group in groups:
-#                res=res+"<p><u><b>"+group.id+"</b></u>"
-#                grp_obj = grp_tool.getGroupById(group.id)
-#                for user in grp_obj.getMemberIds():
-#                    if user:
-#                      role=''
-#                      role2=''
-#                      if (self.portal_membership.getMemberById(user).has_role('MeetingManager')):
-#                        role="<b> (est MeetingManager)</b>"
-#                      if (self.portal_membership.getMemberById(user).has_role('CourrierManager')):
-#                        role2="<b> (est CourrierManager)</b>"
-#
-#                      res=res+'<br>'+self.portal_membership.getMemberById(user).getProperty('fullname')+role+role2
-#                res=res+"</p>"
-#        return res
-#
-#    MeetingItem.printUserGroup=printUserGroup
-#    #it'a a monkey patch because it's the only way to have a default method in the schema
-#
-#    security.declarePublic('listAnnexes')
-#    def listAnnexes(self,decision=False,toprint=True):
-#        if decision :
-#            annexes=self.context.getAnnexesDecision()
-#        else:
-#            annexes=self.context.getAnnexes()
-#        res=''
-#        nbann=1
-#        for annex in annexes:
-#            if annex.getToPrint() or toprint:
-#                res = res + ' (' + str(nbann) + ')' + annex.Title() + ';'
-#                nbann=nbann+1
-#        if res != '' :
-#            res= 'Annexe(s): '+res
-#        return res
-#
-#    security.declarePublic('printAnnexes')
-#    def printAnnexes(self,decision=False,toprint=True):
-#        '''Generate annexe in the text'''
-#        import os
-#        if decision :
-#            annexes=self.context.getAnnexesDecision()
-#        else:
-#            annexes=self.context.getAnnexes()
-#        res=''
-#
-#        for annex in annexes:
-#                if annex.getToPrint() or toprint:
-#                    filename=annex.dump()
-#                    mimetype=annex.getContentType()
-#                    dest = annex.getPhysicalPath()[7]
-#                    if dest[len(dest)-4:len(dest)-3] == "." :
-#                          dest = dest[0:len(dest)-4]
-#                    if mimetype == 'application/pdf' :
-#                        os.system ("/srv/importfile.sh " + annex.getPhysicalPath()[3] + " " + annex.getPhysicalPath()[6] + " " +"\"" + annex.getPhysicalPath()[7] + "\"" + " " + dest + " " + "\""+filename+"\"")
-#                    else :
-#                        os.system ("/srv/importfiletopdf.sh " + annex.getPhysicalPath()[3] + " " + annex.getPhysicalPath()[6] + " " +"\"" + annex.getPhysicalPath()[7] + "\"" + " " + dest+ " " + "\""+filename+"\"")
-#                    resume = "/srv/www/htdocs/college/" + annex.getPhysicalPath()[3]+ "/"+annex.getPhysicalPath()[6] +"/FD-"+annex.getPhysicalPath()[7]+"/resume.txt"
-#                    ofi = open (resume,'r')
-#                    res = res + ofi.read()
-#        return res
 
 
 # ------------------------------------------------------------------------------
