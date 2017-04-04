@@ -9,7 +9,7 @@ from Products.CMFCore.utils import getToolByName
 from Products.PloneMeeting.config import MEETING_GROUP_SUFFIXES, TOPIC_TAL_EXPRESSION, \
                                          TOPIC_TYPE, TOPIC_SEARCH_SCRIPT
 from Products.PloneMeeting.migrations import Migrator
-from Products.PloneMeeting.profiles import PodTemplateDescriptor
+from Products.PloneMeeting.profiles import GroupDescriptor, PodTemplateDescriptor
 
 from Products.MeetingAndenne.config import ANDENNEROLES, MAIL_TOPICS
 from Products.MeetingAndenne.profiles.default.import_data import collegeTemplates
@@ -60,6 +60,11 @@ topicsToLink = { 'meeting-config-college': ['searchallitemsincopy', 'searchitems
 
 memberPropertiesToRemove = ( 'fck_skin', 'fck_path', 'fck_root', 'fck_force_paste_as_text', 'service' )
 
+groupsToRename = { 'copy_of_zonet': {
+    'newName': 'cabinet-du-bourgmestre-yt',
+    'groupDescriptor': GroupDescriptor('cabinet-du-bourgmestre-yt', 'Cabinet du Bourgmestre (Yasémin Tuzkan)', 'cab_bg_yastuz')
+    },
+}
 
 # The migration class ----------------------------------------------------------
 class Migrate_To_3_3(Migrator):
@@ -283,6 +288,90 @@ class Migrate_To_3_3(Migrator):
 
         logger.info('Done.')
 
+    def _renameGroups(self):
+        '''Rename some groups if they exist and change related MeetingItems'''
+        logger.info('Renaming some groups if they exist and change related MeetingItems...')
+
+        tool = self.portal.portal_plonemeeting
+        membersTool = self.portal.acl_users
+        groupsTool = self.portal.portal_groups
+        for groupToRename, infos in groupsToRename.items():
+            if groupToRename in tool.keys():
+                if infos['newName'] not in tool.keys():
+                    tool.addUsersAndGroups( (infos['groupDescriptor'], ) )
+                    oldGroup = getattr(tool, groupToRename, None)
+                    newGroup = getattr(tool, infos['newName'], None)
+                    if oldGroup and newGroup:
+                        for groupSuffix in MEETING_GROUP_SUFFIXES:
+                            oldGroupId = oldGroup.getPloneGroupId(groupSuffix)
+                            newGroupId = newGroup.getPloneGroupId(groupSuffix)
+                            groupMembers = membersTool.getGroup(oldGroupId).getMemberIds()
+                            for member in groupMembers:
+                                groupsTool.addPrincipalToGroup(member, newGroupId)
+                                groupsTool.removePrincipalFromGroup(member, oldGroupId)
+
+            for mc in self.portal.portal_plonemeeting.objectValues('MeetingConfig'):
+                selectable = mc.getSelectableCopyGroups()
+                if groupToRename + '_reviewers' in selectable:
+                    selectable = list(selectable)
+                    selectable.remove(groupToRename + '_reviewers')
+                    selectable.append(infos['newName'] + '_reviewers')
+                    mc.setSelectableCopyGroups(tuple(selectable))
+
+            unicodeGroupToRename = unicode(groupToRename)
+            unicodeGroupNewName = unicode(infos['newName'])
+            brains = self.portal.portal_catalog(meta_type='MeetingItem')
+            cpt = 0
+            total = len(brains)
+            for brain in brains:
+                item = brain.getObject()
+                cpt += 1
+                if unicodeGroupToRename == item.proposingGroup:
+                    print item.absolute_url() + ' proposingGroup' + '  ' + str(cpt) + ' / ' + str(total)
+                    item.proposingGroup = unicodeGroupNewName
+
+                if unicodeGroupToRename in item.associatedGroups:
+                    print item.absolute_url() + ' associatedGroups' + '  ' + str(cpt) + ' / ' + str(total)
+                    associatedGroups = list(item.associatedGroups)
+                    associatedGroups.remove(unicodeGroupToRename)
+                    associatedGroups.append(unicodeGroupNewName)
+                    item.associatedGroups = tuple(associatedGroups)
+
+                if unicodeGroupToRename in item.optionalAdvisers:
+                    print item.absolute_url() + ' optionalAdvisers' + '  ' + str(cpt) + ' / ' + str(total)
+                    optionalAdvisers = list(item.optionalAdvisers)
+                    optionalAdvisers.remove(unicodeGroupToRename)
+                    optionalAdvisers.append(unicodeGroupNewName)
+                    item.optionalAdvisers = tuple(optionalAdvisers)
+
+                if unicodeGroupToRename in item.adviceIndex:
+                    print item.absolute_url() + ' adviceIndex' + '  ' + str(cpt) + ' / ' + str(total)
+                    item.adviceIndex[unicodeGroupNewName] = item.adviceIndex[unicodeGroupToRename]
+                    item.adviceIndex.remove(unicodeGroupToRename)
+
+                if unicodeGroupToRename in item.templateUsingGroups:
+                    print item.absolute_url() + ' templateUsingGroups' + '  ' + str(cpt) + ' / ' + str(total)
+                    templateUsingGroups = list(item.templateUsingGroups)
+                    templateUsingGroups.remove(unicodeGroupToRename)
+                    templateUsingGroups.append(unicodeGroupNewName)
+                    item.templateUsingGroups = tuple(templateUsingGroups)
+
+                if unicodeGroupToRename + unicode('_reviewers') in item.copyGroups:
+                    print item.absolute_url() + ' copyGroups' + '  ' + str(cpt) + ' / ' + str(total)
+                    print item.copyGroups
+                    copyGroups = list(item.copyGroups)
+                    copyGroups.remove(unicodeGroupToRename + unicode('_reviewers'))
+                    copyGroups.append(unicodeGroupNewName + unicode('_reviewers'))
+                    item.copyGroups = tuple(copyGroups)
+                    print item.copyGroups
+
+            tool.manage_delObjects( [groupToRename, ])
+            for groupSuffix in MEETING_GROUP_SUFFIXES:
+                groupId = groupToRename + '_' + groupSuffix
+                groupsTool.removeGroup(groupId)
+
+        logger.info('Done.')
+
     def _adaptUserProperties(self):
         '''Set CKeditor as default editor for everybody and remove useless properties'''
         logger.info('Setting CKeditor as default editor for everybody and removing useless properties...')
@@ -417,6 +506,7 @@ class Migrate_To_3_3(Migrator):
         self._removeUselessMailTopics()
         self._removeUselessFCKEditorProperties()
         self._renameCategories()
+        self._renameGroups()
         self._adaptUserProperties()
         self._adaptMeetingConfigs()
         self._adaptMailFolder()
@@ -442,13 +532,14 @@ def migrate(context):
        8)  Remove useless mail topics added by PloneMeeting migration
        9)  Remove useless fck_editor properties object
        10) Rename some categories if they exist and change related MeetingItems
-       11) Set CKeditor as default editor for everybody and remove useless properties
-       12) Change various meetingConfigs properties
-       13) Modify the default view and redirection method of mail folder
-       14) Create the topics used for mail management
-       15) Recreate the used POD templates
-       16) Make sure Plone groups linked to a MeetingGroup have a consistent title
-       17) Reinstall Products.MeetingAndenne so skin and so on are correct
+       11) Rename some groups if they exist and change related MeetingItems
+       12) Set CKeditor as default editor for everybody and remove useless properties
+       13) Change various meetingConfigs properties
+       14) Modify the default view and redirection method of mail folder
+       15) Create the topics used for mail management
+       16) Recreate the used POD templates
+       17) Make sure Plone groups linked to a MeetingGroup have a consistent title
+       18) Reinstall Products.MeetingAndenne so skin and so on are correct
     '''
     Migrate_To_3_3(context).run()
 # ------------------------------------------------------------------------------
