@@ -104,25 +104,6 @@ MAIL_TOPICS = (
     ),
 )
 
-# College topics
-# Format is : topicId, a list of topic criteria, a sort_on attribute,
-# topicScriptId used to manage complex searches and a tal expression
-# to filter who can use the topic.
-CUSTOM_COLLEGE_TOPICS = (
-    # Items to validate.
-    ( 'searchallitemstovalidate',
-    (  ('Type', 'ATPortalTypeCriterion', 'MeetingItem'),
-    ), 'created', 'searchItemsToValidate',
-       "python: here.portal_plonemeeting.userIsAmong('reviewers')"
-    ),
-    # Items in group.
-    ( 'searchallitemsingroup',
-    (  ('Type', 'ATPortalTypeCriterion', 'MeetingItem'),
-    ), 'created', 'searchItemsInGroup',
-       '',
-    ),
-)
-
 # College custom views
 CUSTOM_COLLEGE_TOPICS_VIEWS = {
     'searchmyitems': ['Title', 'CreationDate', 'review_state', 'getDisplayableTreatUser', 'getDisplayableProposingGroup'],
