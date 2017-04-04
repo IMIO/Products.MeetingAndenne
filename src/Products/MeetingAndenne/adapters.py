@@ -463,7 +463,7 @@ class CustomMeetingItemAndenne(MeetingItem):
         self.adapted().onEdit(isCreated=False)
         self.reindexObject()
 
-    MeetingItem.updateMeetingItem=updateMeetingItem
+    MeetingItem.updateMeetingItem = updateMeetingItem
     # it'a a monkey patch because it's the only way to add a behaviour to the MeetingItem class
 
     security.declarePublic('getDocReference')
@@ -1279,7 +1279,7 @@ class CustomMeetingConfigAndenne(MeetingConfig):
                                    filterKey, filterValue).run()
         return res
 
-    MeetingConfig.getTopicResults=getTopicResults
+    MeetingConfig.getTopicResults = getTopicResults
     # it'a a monkey patch because it's the only way to change the behaviour of the MeetingConfig class
 
     security.declarePublic('getQueryColumns')
@@ -1297,7 +1297,7 @@ class CustomMeetingConfigAndenne(MeetingConfig):
             res += ('creator', 'creationDate')
         return res
 
-    MeetingConfig.getQueryColumns=getQueryColumns
+    MeetingConfig.getQueryColumns = getQueryColumns
     # it'a a monkey patch because it's the only way to change the behaviour of the MeetingConfig class
 
     security.declarePrivate('listMailColumns')
@@ -1313,7 +1313,7 @@ class CustomMeetingConfigAndenne(MeetingConfig):
         ]
         return DisplayList(tuple(res))
 
-    MeetingConfig.listMailColumns=listMailColumns
+    MeetingConfig.listMailColumns = listMailColumns
     # it'a a monkey patch because it's the only way to add a behaviour to the MeetingItem class
 
     security.declarePublic('searchMailsInCopy')
@@ -1492,6 +1492,10 @@ class MeetingItemCollegeAndenneWorkflowActions(MeetingItemWorkflowActions):
 
     security.declarePublic('doAccept_and_close')
     def doAccept_and_close(self, stateChange):
+        pass
+
+    security.declarePublic('doDelay_and_close')
+    def doDelay_and_close(self, stateChange):
         pass
 
     security.declarePublic('doRefuse_and_close')

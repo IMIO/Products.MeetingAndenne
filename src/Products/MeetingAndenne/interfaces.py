@@ -50,6 +50,10 @@ class IMeetingItemCollegeAndenneWorkflowActions(IMeetingItemWorkflowActions):
         """
           Triggered while doing the 'accept_and_close' transition
         """
+    def doDelay_and_close(stateChange):
+        """
+          Triggered while doing the 'delay_and_close' transition
+        """
     def doRefuse_and_close(stateChange):
         """
           Triggered while doing the 'refuse_and_close' transition
