@@ -28,6 +28,7 @@ from Products.PloneMeeting.config import *
 import os
 import os.path
 import socket
+import locale
 from Acquisition import aq_base
 from AccessControl import Unauthorized
 from zope.annotation import IAnnotations
@@ -183,6 +184,11 @@ class CourrierFile(ATBlob, BrowserDefaultMixin):
 
     # Manually created methods
 
+    @staticmethod
+    def collateDisplayListsValues(displayList):
+        '''Function used to collate DisplayLists tuples by value'''
+        return locale.strxfrm(displayList[1])
+
     # we must use a fieldindex index to sort but getCourrierReference is ZCTextIndex (use un search with *) thus we must create an index method an use a fake fieldindex
     security.declarePublic('getCourrierReference')
     def getRefcourrierFake(self):
@@ -205,7 +211,7 @@ class CourrierFile(ATBlob, BrowserDefaultMixin):
         '''Extracts the mail number from the complete reference.'''
         return long(self.getRefcourrier().split('/')[1])
 
-    security.declarePublic('deletefile')
+    security.declarePrivate('deletefile')
     def deletefile(self):
         os.system( "mv /home/zope/scan/scantmp/" + str(self.getId()) + " /home/zope/scan/scanarchived/" + str(self.getId()))
 
@@ -218,7 +224,7 @@ class CourrierFile(ATBlob, BrowserDefaultMixin):
         for user in pgp.listMembers():
             if user.getProperty('listed'):
                 res.append( (user.getId(), user.getProperty('fullname')) )
-        res = sorted( res, key=lambda user: user[1] )
+        res = sorted( res, key=self.collateDisplayListsValues )
         return DisplayList( tuple(res) )
 
     security.declarePublic('getDisplayableDestUsers')
@@ -235,7 +241,7 @@ class CourrierFile(ATBlob, BrowserDefaultMixin):
             return res[:-1]
         return res
 
-    security.declarePublic('affectPermissions')
+    security.declarePrivate('affectPermissions')
     def affectPermissions(self, destuser):
         '''Add the MeetingMailViewer permission to the user and all the groups he belongs to.'''
         grp_tool = self.acl_users.source_groups

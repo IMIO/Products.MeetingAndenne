@@ -96,4 +96,7 @@ def initialize(context):
                               permission  = ADD_CONTENT_PERMISSIONS[klassname])
 
     ##code-section custom-init-bottom #fill in your manual code here
+    # Define LC_COLLATE for sorting algorithms to work properly
+    import locale
+    locale.setlocale(locale.LC_COLLATE, 'fr_BE.UTF8') 
     ##/code-section custom-init-bottom
