@@ -27,6 +27,13 @@ meetingConfigs = { 'meeting-config-college': {
                                                                    u'MeetingItem.backToProposed', u'MeetingItem.backToItemCreated'],
     'itemDecidedStates': [ u'pre_accepted', u'accepted', u'accepted_and_closed', u'refused', u'refused_and_closed', u'accepted_but_modified',
                            u'accepted_but_modified_and_closed', u'delayed', u'delayed_and_closed'],
+    'onMeetingTransitionItemTransitionToTrigger': ( {'meeting_transition': 'freeze', 'item_transition': 'itemfreeze'},
+                                                    {'meeting_transition': 'decide', 'item_transition': 'itemfreeze'},
+                                                    {'meeting_transition': 'close', 'item_transition': 'accept'},
+                                                    {'meeting_transition': 'close', 'item_transition': 'accept_and_close'},
+                                                    {'meeting_transition': 'close', 'item_transition': 'accept_but_modify_and_close'},
+                                                    {'meeting_transition': 'close', 'item_transition': 'delay_and_close'},
+                                                    {'meeting_transition': 'close', 'item_transition': 'refuse_and_close'} ),
     'useUserReplacements': True,
     },
 }
