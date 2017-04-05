@@ -310,65 +310,54 @@ class Migrate_To_3_3(Migrator):
                                 groupsTool.addPrincipalToGroup(member, newGroupId)
                                 groupsTool.removePrincipalFromGroup(member, oldGroupId)
 
-            for mc in self.portal.portal_plonemeeting.objectValues('MeetingConfig'):
-                selectable = mc.getSelectableCopyGroups()
-                if groupToRename + '_reviewers' in selectable:
-                    selectable = list(selectable)
-                    selectable.remove(groupToRename + '_reviewers')
-                    selectable.append(infos['newName'] + '_reviewers')
-                    mc.setSelectableCopyGroups(tuple(selectable))
+                for mc in self.portal.portal_plonemeeting.objectValues('MeetingConfig'):
+                    selectable = mc.getSelectableCopyGroups()
+                    if groupToRename + '_reviewers' in selectable:
+                        selectable = list(selectable)
+                        selectable.remove(groupToRename + '_reviewers')
+                        selectable.append(infos['newName'] + '_reviewers')
+                        mc.setSelectableCopyGroups(tuple(selectable))
 
-            unicodeGroupToRename = unicode(groupToRename)
-            unicodeGroupNewName = unicode(infos['newName'])
-            brains = self.portal.portal_catalog(meta_type='MeetingItem')
-            cpt = 0
-            total = len(brains)
-            for brain in brains:
-                item = brain.getObject()
-                cpt += 1
-                if unicodeGroupToRename == item.proposingGroup:
-                    print item.absolute_url() + ' proposingGroup' + '  ' + str(cpt) + ' / ' + str(total)
-                    item.proposingGroup = unicodeGroupNewName
+                unicodeGroupToRename = unicode(groupToRename)
+                unicodeGroupNewName = unicode(infos['newName'])
+                brains = self.portal.portal_catalog(meta_type='MeetingItem')
+                cpt = 0
+                total = len(brains)
+                for brain in brains:
+                    item = brain.getObject()
+                    cpt += 1
+                    if unicodeGroupToRename == item.proposingGroup:
+                        item.proposingGroup = unicodeGroupNewName
 
-                if unicodeGroupToRename in item.associatedGroups:
-                    print item.absolute_url() + ' associatedGroups' + '  ' + str(cpt) + ' / ' + str(total)
-                    associatedGroups = list(item.associatedGroups)
-                    associatedGroups.remove(unicodeGroupToRename)
-                    associatedGroups.append(unicodeGroupNewName)
-                    item.associatedGroups = tuple(associatedGroups)
+                    if unicodeGroupToRename in item.associatedGroups:
+                        associatedGroups = list(item.associatedGroups)
+                        associatedGroups.remove(unicodeGroupToRename)
+                        associatedGroups.append(unicodeGroupNewName)
+                        item.associatedGroups = tuple(associatedGroups)
 
-                if unicodeGroupToRename in item.optionalAdvisers:
-                    print item.absolute_url() + ' optionalAdvisers' + '  ' + str(cpt) + ' / ' + str(total)
-                    optionalAdvisers = list(item.optionalAdvisers)
-                    optionalAdvisers.remove(unicodeGroupToRename)
-                    optionalAdvisers.append(unicodeGroupNewName)
-                    item.optionalAdvisers = tuple(optionalAdvisers)
+                    if unicodeGroupToRename in item.optionalAdvisers:
+                        optionalAdvisers = list(item.optionalAdvisers)
+                        optionalAdvisers.remove(unicodeGroupToRename)
+                        optionalAdvisers.append(unicodeGroupNewName)
+                        item.optionalAdvisers = tuple(optionalAdvisers)
 
-                if unicodeGroupToRename in item.adviceIndex:
-                    print item.absolute_url() + ' adviceIndex' + '  ' + str(cpt) + ' / ' + str(total)
-                    item.adviceIndex[unicodeGroupNewName] = item.adviceIndex[unicodeGroupToRename]
-                    item.adviceIndex.remove(unicodeGroupToRename)
+                    if unicodeGroupToRename in item.adviceIndex:
+                        item.adviceIndex[unicodeGroupNewName] = item.adviceIndex[unicodeGroupToRename]
+                        item.adviceIndex.remove(unicodeGroupToRename)
 
-                if unicodeGroupToRename in item.templateUsingGroups:
-                    print item.absolute_url() + ' templateUsingGroups' + '  ' + str(cpt) + ' / ' + str(total)
-                    templateUsingGroups = list(item.templateUsingGroups)
-                    templateUsingGroups.remove(unicodeGroupToRename)
-                    templateUsingGroups.append(unicodeGroupNewName)
-                    item.templateUsingGroups = tuple(templateUsingGroups)
+                    if unicodeGroupToRename in item.templateUsingGroups:
+                        templateUsingGroups = list(item.templateUsingGroups)
+                        templateUsingGroups.remove(unicodeGroupToRename)
+                        templateUsingGroups.append(unicodeGroupNewName)
+                        item.templateUsingGroups = tuple(templateUsingGroups)
 
-                if unicodeGroupToRename + unicode('_reviewers') in item.copyGroups:
-                    print item.absolute_url() + ' copyGroups' + '  ' + str(cpt) + ' / ' + str(total)
-                    print item.copyGroups
-                    copyGroups = list(item.copyGroups)
-                    copyGroups.remove(unicodeGroupToRename + unicode('_reviewers'))
-                    copyGroups.append(unicodeGroupNewName + unicode('_reviewers'))
-                    item.copyGroups = tuple(copyGroups)
-                    print item.copyGroups
+                    if unicodeGroupToRename + unicode('_reviewers') in item.copyGroups:
+                        copyGroups = list(item.copyGroups)
+                        copyGroups.remove(unicodeGroupToRename + unicode('_reviewers'))
+                        copyGroups.append(unicodeGroupNewName + unicode('_reviewers'))
+                        item.copyGroups = tuple(copyGroups)
 
-            tool.manage_delObjects( [groupToRename, ])
-            for groupSuffix in MEETING_GROUP_SUFFIXES:
-                groupId = groupToRename + '_' + groupSuffix
-                groupsTool.removeGroup(groupId)
+                tool.manage_delObjects( [groupToRename, ])
 
         logger.info('Done.')
 
