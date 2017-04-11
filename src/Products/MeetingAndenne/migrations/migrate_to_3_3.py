@@ -9,6 +9,7 @@ from Products.CMFCore.utils import getToolByName
 from Products.PloneMeeting.config import MEETING_GROUP_SUFFIXES, TOPIC_TAL_EXPRESSION, \
                                          TOPIC_TYPE, TOPIC_SEARCH_SCRIPT
 from Products.PloneMeeting.migrations import Migrator
+from Products.PloneMeeting.model.adaptations import performWorkflowAdaptations
 from Products.PloneMeeting.profiles import GroupDescriptor, PodTemplateDescriptor
 
 from Products.MeetingAndenne.config import ANDENNEROLES, MAIL_TOPICS
@@ -21,7 +22,7 @@ meetingConfigs = { 'meeting-config-college': {
                              u'MeetingItem.decision', u'MeetingItem.projetpv', u'MeetingItem.textpv',
                              u'MeetingItem.pv', u'MeetingItem.observations'),
     'usedItemAttributes': (u'budgetInfos', u'associatedGroups', u'observations', u'toDiscuss', u'itemSignatories'),
-    'usedMeetingAttributes': (u'startDate', u'endDate', u'signatories', u'attendees', u'excused',
+    'usedMeetingAttributes': (u'startDate', u'endDate', u'signatories', u'attendees',
                               u'absents', u'lateAttendees', u'place', u'observations', u'postObservations'),
     'toDiscussShownForLateItems': True, 'transitionsToConfirm': [ u'Meeting.freeze', u'Meeting.close', u'MeetingItem.delay',
                                                                    u'MeetingItem.backToProposed', u'MeetingItem.backToItemCreated'],
@@ -30,6 +31,7 @@ meetingConfigs = { 'meeting-config-college': {
                               u'delayed', u'delayed_and_closed'],
     'itemDecidedStates': [ u'pre_accepted', u'accepted', u'accepted_and_closed', u'refused', u'refused_and_closed', u'accepted_but_modified',
                            u'accepted_but_modified_and_closed', u'delayed', u'delayed_and_closed'],
+    'workflowAdaptations': ( u'pre_validation_keep_reviewer_permissions', u'only_creator_may_delete'),
     'onMeetingTransitionItemTransitionToTrigger': ( {'meeting_transition': 'freeze', 'item_transition': 'itemfreeze'},
                                                     {'meeting_transition': 'decide', 'item_transition': 'itemfreeze'},
                                                     {'meeting_transition': 'close', 'item_transition': 'accept'},
@@ -399,6 +401,8 @@ class Migrate_To_3_3(Migrator):
                 for topicToModify, propertiesDict in topicsPropertiesToModify[mc.getId()].iteritems():
                     if hasattr(mc.topics, topicToModify):
                         mc.topics[topicToModify].manage_changeProperties(**propertiesDict)
+
+            performWorkflowAdaptations(self.portal, mc, logger)
 
         logger.info('Done.')
 

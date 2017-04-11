@@ -34,6 +34,14 @@ from Products.PloneMeeting.interfaces import \
 class IMeetingItemCollegeAndenneWorkflowActions(IMeetingItemWorkflowActions):
     '''This interface represents a meeting item as viewed by the specific meeting
        item workflow that is defined in this MeetingCommunes product.'''
+    def doValidate():
+        """
+          Triggered while doing the 'validate' transition
+        """
+    def doItemFreeze():
+        """
+          Triggered while doing the 'itemfreeze' transition
+        """
     def doPre_accept(stateChange):
         """
           Triggered while doing the 'pre_accept' transition
@@ -70,10 +78,14 @@ class IMeetingItemCollegeAndenneWorkflowConditions(IMeetingItemWorkflowCondition
         """
           Guard for the 'prevalidate' transition
         """
-#    def mayValidate():
-#        """
-#          Guard for the 'validate' transition
-#        """
+    def mayValidate():
+        """
+          Guard for the 'prevalidate' transition
+        """
+    def mayCorrect(toPrevalidated = False):
+        """
+          Guard for the 'correct' transition
+        """
 
 class IMeetingCollegeAndenneWorkflowActions(IMeetingWorkflowActions):
     '''This interface represents a meeting as viewed by the specific meeting
@@ -90,13 +102,13 @@ class IMeetingCollegeAndenneWorkflowConditions(IMeetingWorkflowConditions):
         """
           Guard for the 'freeze' transition
         """
-    def mayClose():
-        """
-          Guard for the 'close' transitions
-        """
     def mayDecide():
         """
           Guard for the 'decide' transition
+        """
+    def mayClose():
+        """
+          Guard for the 'close' transitions
         """
 
 class ICourrierFile(Interface):

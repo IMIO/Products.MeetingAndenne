@@ -40,11 +40,12 @@ from Products.PloneMeeting.Meeting import MeetingWorkflowActions, \
 from Products.PloneMeeting.MeetingItem import MeetingItem, \
      MeetingItemWorkflowConditions, MeetingItemWorkflowActions
 from Products.PloneMeeting.MeetingConfig import MeetingConfig
+from Products.PloneMeeting.MeetingFile import MeetingFile
+from Products.PloneMeeting.MeetingGroup import MeetingGroup
 from Products.PloneMeeting.ToolPloneMeeting import ToolPloneMeeting
 from Products.PloneMeeting.interfaces import IMeetingCustom, IMeetingItemCustom, \
-                                             IMeetingFileCustom, IMeetingConfigCustom, \
-                                             IToolPloneMeetingCustom
-from Products.PloneMeeting.MeetingFile import MeetingFile
+                                             IMeetingConfigCustom, IMeetingFileCustom, \
+                                             IMeetingGroupCustom, IToolPloneMeetingCustom
 from Products.MeetingAndenne.interfaces import \
      IMeetingItemCollegeAndenneWorkflowActions, IMeetingItemCollegeAndenneWorkflowConditions, \
      IMeetingCollegeAndenneWorkflowActions, IMeetingCollegeAndenneWorkflowConditions
@@ -60,6 +61,96 @@ import os, os.path, time, unicodedata
 import transaction
 import logging
 logger = logging.getLogger( 'MeetingAndenne' )
+
+
+# ------------------------------------------------------------------------------
+# Names of available workflow adaptations.
+customwfAdaptations = list(MeetingConfig.wfAdaptations)
+# remove the 'creator_initiated_decisions' as this is always the case in our wfs
+if 'creator_initiated_decisions' in customwfAdaptations:
+    customwfAdaptations.remove('creator_initiated_decisions')
+# remove the 'archiving' as we do not handle archive in our wfs
+if 'archiving' in customwfAdaptations:
+    customwfAdaptations.remove('archiving')
+# remove the 'no_publication' as we do not handle publication in our wfs
+if 'no_publication' in customwfAdaptations:
+    customwfAdaptations.remove('no_publication')
+# remove the 'hide_decision_when_under_writing' as we do not handle publication in our wfs
+if 'no_publication' in customwfAdaptations:
+    customwfAdaptations.remove('hide_decision_when_under_writing')
+
+
+MeetingConfig.wfAdaptations = customwfAdaptations
+originalPerformWorkflowAdaptations = adaptations.performWorkflowAdaptations
+
+# states taken into account by the 'no_global_observation' wfAdaptation
+from Products.PloneMeeting.model import adaptations
+noGlobalObsStates = ('itemfrozen', 'accepted', 'accepted_and_closed', 'refused',
+                     'refused_and_closed', 'delayed', 'delayed_and_closed',
+                     'accepted_but_modified', 'accepted_but_modified_and_closed' 'pre_accepted')
+adaptations.noGlobalObsStates = noGlobalObsStates
+
+adaptations.RETURN_TO_PROPOSING_GROUP_FROM_ITEM_STATES = ('presented', 'itemfrozen', )
+adaptations.RETURN_TO_PROPOSING_GROUP_MAPPINGS = {'backTo_presented_from_returned_to_proposing_group':
+                                                  ['created', ],
+                                                  'backTo_itemfrozen_from_returned_to_proposing_group':
+                                                  ['frozen', 'decided', ],
+                                                  'NO_MORE_RETURNABLE_STATES': ['closed', ]
+                                                  }
+
+adaptations.WF_NOT_CREATOR_EDITS_UNLESS_CLOSED = ('delayed_and_closed', 'refused_and_closed',
+                                                  'accepted_and_closed', 'accepted_but_modified_and_closed')
+
+
+def customPerformWorkflowAdaptations(site, meetingConfig, logger, specificAdaptation=None):
+    '''This function applies workflow changes as specified by the
+       p_meetingConfig.'''
+
+    wfAdaptations = specificAdaptation and [specificAdaptation, ] or meetingConfig.getWorkflowAdaptations()
+
+    #while reinstalling a separate profile, the workflow could not exist
+    wfTool = getToolByName(site, 'portal_workflow')
+    meetingWorkflow = getattr(wfTool, meetingConfig.getMeetingWorkflow(), None)
+    if not meetingWorkflow:
+        logger.warning(WF_DOES_NOT_EXIST_WARNING % meetingConfig.getMeetingWorkflow())
+        return
+    itemWorkflow = getattr(wfTool, meetingConfig.getItemWorkflow(), None)
+    if not itemWorkflow:
+        logger.warning(WF_DOES_NOT_EXIST_WARNING % meetingConfig.getItemWorkflow())
+        return
+
+    error = meetingConfig.validate_workflowAdaptations(wfAdaptations)
+    if error:
+        raise Exception(error)
+
+    for wfAdaptation in wfAdaptations:
+        # Call original perform of PloneMeeting
+        originalPerformWorkflowAdaptations(site, meetingConfig, logger, specificAdaptation = wfAdaptation)
+
+        if wfAdaptation in ['pre_validation_keep_reviewer_permissions', ]:
+            # We override the PloneMeeting's 'pre_validation_keep_reviewer_permissions' wfAdaptation
+            # We update the item workflow
+            wf = itemWorkflow
+            # Update connections between states and transitions
+            wf.states['proposed'].setProperties(
+                title='proposed', description='',
+                transitions=['backToItemCreated', 'prevalidate', 'validate'])
+            wf.states['prevalidated'].setProperties(
+                title='prevalidated', description='',
+                transitions=['backToProposed', 'validate'])
+            wf.states['validated'].setProperties(
+                title='validated', description='',
+                transitions=['backToPrevalidated', 'present', 'backToProposed'])
+            # use a specifig guard_expr 
+            transition = wf.transitions['backToPrevalidated']
+            transition.setProperties(
+                title='backToPrevalidated',
+                new_state_id='prevalidated', trigger_type=1, script_name='',
+                actbox_name='backToPrevalidated', actbox_url='', actbox_category='workflow',
+                props={'guard_expr': 'python:here.wfConditions().mayCorrect(toPrevalidated = True)'})
+            logger.info(WF_APPLIED % ("pre_validation_keep_reviewer_permissions patched for MeetingAndenne", meetingConfig.getId()))
+
+adaptations.performWorkflowAdaptations = customPerformWorkflowAdaptations
 
 
 # ------------------------------------------------------------------------------
@@ -1037,6 +1128,142 @@ class CustomMeetingItemAndenne(MeetingItem):
 
 
 # ------------------------------------------------------------------------------
+class CustomMeetingConfigAndenne(MeetingConfig):
+    '''Adapter that adapts a meeting config item implementing IMeetingConfig to the
+       interface IMeetingConfigCustom.'''
+    implements(IMeetingConfigCustom)
+    security = ClassSecurityInfo()
+
+    def __init__(self, config):
+        self.context = config
+
+    security.declarePublic('getTopicResults')
+    def getTopicResults(self, topic, isFake):
+        '''This method computes results of p_topic. If p_topic is a fake one
+           (p_isFake is True), it means that some information in the request
+           will allow to perform a direct query in portal_catalog (the user
+           triggered an advanced search).'''
+        rq = self.REQUEST
+        # How must we sort the result?
+        sortKey = rq.get('sortKey', None)
+        sortOrder = 'reverse'
+        if sortKey and (rq.get('sortOrder', 'asc') == 'asc'):
+            sortOrder = None
+        # Is there a filter defined?
+        filterKey = rq.get('filterKey', '')
+        filterValue = rq.get('filterValue', '').decode('utf-8')
+
+        if not isFake:
+            tool = getToolByName(self, 'portal_plonemeeting')
+            # Execute the query corresponding to the topic.
+            if not sortKey:
+                sortCriterion = topic.getSortCriterion()
+                if sortCriterion:
+                    sortKey = sortCriterion.Field()
+                    sortOrder = sortCriterion.reversed and 'reverse' or None
+                else:
+                    sortKey = 'created'
+            methodId = topic.getProperty(TOPIC_SEARCH_SCRIPT, None)
+            batchSize = self.REQUEST.get('MaxShownFound') or tool.getMaxShownFound()
+            if methodId:
+                # Topic params are not sufficient, use a specific method.
+                # keep topics defined paramaters
+                kwargs = {}
+                kwargs['isDefinedInTool'] = False
+                for criterion in topic.listSearchCriteria():
+                    # Only take criterion with a defined value into account
+                    criterionValue = criterion.value
+                    if criterionValue:
+                        kwargs[str(criterion.field)] = criterionValue
+                # if the topic has a TOPIC_SEARCH_FILTERS, we add it to kwargs
+                # also because it is the called search script that will use it
+                searchFilters = topic.getProperty(TOPIC_SEARCH_FILTERS, None)
+                if searchFilters:
+                    # the search filters are stored in a text property but are
+                    # in reality dicts, so use eval() so it is considered correctly
+                    kwargs[TOPIC_SEARCH_FILTERS] = eval(searchFilters)
+                brains = getattr(self, methodId)(sortKey, sortOrder,
+                                                 filterKey, filterValue, **kwargs)
+            else:
+                # Execute the topic, but decide ourselves for sorting and filtering.
+                params = topic.buildQuery()
+                params['sort_on'] = sortKey
+                params['sort_order'] = sortOrder
+                params['isDefinedInTool'] = False
+                if filterKey:
+                    params[filterKey] = prepareSearchValue(filterValue)
+                brains = self.portal_catalog(**params)
+            res = tool.batchAdvancedSearch(
+
+                brains, topic, rq, batch_size=batchSize)
+        else:
+            # This is an advanced search. Use the Searcher.
+            searchedType = topic.getProperty('meeting_topic_type', 'MeetingFile')
+            return SearcherAndenne(self, searchedType, sortKey, sortOrder,
+                                   filterKey, filterValue).run()
+        return res
+
+    MeetingConfig.getTopicResults = getTopicResults
+    # it'a a monkey patch because it's the only way to change the behaviour of the MeetingConfig class
+
+    security.declarePublic('getQueryColumns')
+    def getQueryColumns(self, metaType):
+        '''What columns must we show when displaying results of a query for
+           objects of p_metaType ?'''
+        res = ('title',)
+        if metaType == 'MeetingItem':
+            res += tuple(self.getUserParam('itemColumns', self.REQUEST))
+        elif metaType == 'Meeting':
+            res += tuple(self.getUserParam('meetingColumns', self.REQUEST))
+        elif metaType == 'CourrierFile':
+            res += tuple(self.listMailColumns())
+        else:
+            res += ('creator', 'creationDate')
+        return res
+
+    MeetingConfig.getQueryColumns = getQueryColumns
+    # it'a a monkey patch because it's the only way to change the behaviour of the MeetingConfig class
+
+    security.declarePrivate('listMailColumns')
+    def listMailColumns(self):
+        '''Lists all the attributes that can be used as columns for displaying
+           information about a mail.'''
+        d = 'PloneMeeting'
+        res = [ ("creationDate", translate('pm_creation_date', domain=d, context=self.REQUEST)),
+                ("refCourrier", translate('MeetingAndenne_label_refCourrier', domain=d, context=self.REQUEST)),
+                ("destOrigin", translate('MeetingAndenne_label_destOrigin', domain=d, context=self.REQUEST)),
+                ("destUsers", translate('MeetingAndenne_label_destUsers', domain=d, context=self.REQUEST)),
+                ("actions", translate("heading_actions", domain='plone', context=self.REQUEST)),
+        ]
+        return DisplayList(tuple(res))
+
+    MeetingConfig.listMailColumns = listMailColumns
+    # it'a a monkey patch because it's the only way to add a behaviour to the MeetingItem class
+
+    security.declarePublic('searchMailsInCopy')
+    def searchMailsInCopy(self, sortKey, sortOrder, filterKey, filterValue, **kwargs):
+        '''Returns the list of mails for which the user is in copy.'''
+        member = self.portal_membership.getAuthenticatedMember()
+
+        params = {'portal_type': 'CourrierFile',
+                  'getDestUsers': member.id,
+                  'sort_on': sortKey,
+                  'sort_order': sortOrder,
+                  }
+
+        # Manage filter
+        if filterKey:
+            params[filterKey] = prepareSearchValue(filterValue)
+        # update params with kwargs
+        params.update(kwargs)
+        # Perform the query in portal_catalog
+        return self.portal_catalog(**params)
+
+    MeetingConfig.searchMailsInCopy = searchMailsInCopy
+    # it'a a monkey patch because it's the only way to change the behaviour of the MeetingConfig class
+
+
+# ------------------------------------------------------------------------------
 #UNSUPPORTED_FORMAT_FOR_OCR = 'File "%s" could not be OCR-ized because mime ' \
 #    'type "%s" is not a supported input format. Supported input formats ' \
 #    'are: %s; %s.'
@@ -1204,139 +1431,14 @@ class CustomMeetingFileAndenne(MeetingFile):
 
 
 # ------------------------------------------------------------------------------
-class CustomMeetingConfigAndenne(MeetingConfig):
-    '''Adapter that adapts a meeting config item implementing IMeetingConfig to the
-       interface IMeetingConfigCustom.'''
-    implements(IMeetingConfigCustom)
+class CustomMeetingGroupAndenne(MeetingGroup):
+    '''Adapter that adapts a meeting group item implementing IMeetingGroup to the
+       interface IMeetingGroupCustom.'''
+    implements(IMeetingGroupCustom)
     security = ClassSecurityInfo()
 
-    def __init__(self, config):
-        self.context = config
-
-    security.declarePublic('getTopicResults')
-    def getTopicResults(self, topic, isFake):
-        '''This method computes results of p_topic. If p_topic is a fake one
-           (p_isFake is True), it means that some information in the request
-           will allow to perform a direct query in portal_catalog (the user
-           triggered an advanced search).'''
-        rq = self.REQUEST
-        # How must we sort the result?
-        sortKey = rq.get('sortKey', None)
-        sortOrder = 'reverse'
-        if sortKey and (rq.get('sortOrder', 'asc') == 'asc'):
-            sortOrder = None
-        # Is there a filter defined?
-        filterKey = rq.get('filterKey', '')
-        filterValue = rq.get('filterValue', '').decode('utf-8')
-
-        if not isFake:
-            tool = getToolByName(self, 'portal_plonemeeting')
-            # Execute the query corresponding to the topic.
-            if not sortKey:
-                sortCriterion = topic.getSortCriterion()
-                if sortCriterion:
-                    sortKey = sortCriterion.Field()
-                    sortOrder = sortCriterion.reversed and 'reverse' or None
-                else:
-                    sortKey = 'created'
-            methodId = topic.getProperty(TOPIC_SEARCH_SCRIPT, None)
-            batchSize = self.REQUEST.get('MaxShownFound') or tool.getMaxShownFound()
-            if methodId:
-                # Topic params are not sufficient, use a specific method.
-                # keep topics defined paramaters
-                kwargs = {}
-                kwargs['isDefinedInTool'] = False
-                for criterion in topic.listSearchCriteria():
-                    # Only take criterion with a defined value into account
-                    criterionValue = criterion.value
-                    if criterionValue:
-                        kwargs[str(criterion.field)] = criterionValue
-                # if the topic has a TOPIC_SEARCH_FILTERS, we add it to kwargs
-                # also because it is the called search script that will use it
-                searchFilters = topic.getProperty(TOPIC_SEARCH_FILTERS, None)
-                if searchFilters:
-                    # the search filters are stored in a text property but are
-                    # in reality dicts, so use eval() so it is considered correctly
-                    kwargs[TOPIC_SEARCH_FILTERS] = eval(searchFilters)
-                brains = getattr(self, methodId)(sortKey, sortOrder,
-                                                 filterKey, filterValue, **kwargs)
-            else:
-                # Execute the topic, but decide ourselves for sorting and filtering.
-                params = topic.buildQuery()
-                params['sort_on'] = sortKey
-                params['sort_order'] = sortOrder
-                params['isDefinedInTool'] = False
-                if filterKey:
-                    params[filterKey] = prepareSearchValue(filterValue)
-                brains = self.portal_catalog(**params)
-            res = tool.batchAdvancedSearch(
-
-                brains, topic, rq, batch_size=batchSize)
-        else:
-            # This is an advanced search. Use the Searcher.
-            searchedType = topic.getProperty('meeting_topic_type', 'MeetingFile')
-            return SearcherAndenne(self, searchedType, sortKey, sortOrder,
-                                   filterKey, filterValue).run()
-        return res
-
-    MeetingConfig.getTopicResults = getTopicResults
-    # it'a a monkey patch because it's the only way to change the behaviour of the MeetingConfig class
-
-    security.declarePublic('getQueryColumns')
-    def getQueryColumns(self, metaType):
-        '''What columns must we show when displaying results of a query for
-           objects of p_metaType ?'''
-        res = ('title',)
-        if metaType == 'MeetingItem':
-            res += tuple(self.getUserParam('itemColumns', self.REQUEST))
-        elif metaType == 'Meeting':
-            res += tuple(self.getUserParam('meetingColumns', self.REQUEST))
-        elif metaType == 'CourrierFile':
-            res += tuple(self.listMailColumns())
-        else:
-            res += ('creator', 'creationDate')
-        return res
-
-    MeetingConfig.getQueryColumns = getQueryColumns
-    # it'a a monkey patch because it's the only way to change the behaviour of the MeetingConfig class
-
-    security.declarePrivate('listMailColumns')
-    def listMailColumns(self):
-        '''Lists all the attributes that can be used as columns for displaying
-           information about a mail.'''
-        d = 'PloneMeeting'
-        res = [ ("creationDate", translate('pm_creation_date', domain=d, context=self.REQUEST)),
-                ("refCourrier", translate('MeetingAndenne_label_refCourrier', domain=d, context=self.REQUEST)),
-                ("destOrigin", translate('MeetingAndenne_label_destOrigin', domain=d, context=self.REQUEST)),
-                ("destUsers", translate('MeetingAndenne_label_destUsers', domain=d, context=self.REQUEST)),
-                ("actions", translate("heading_actions", domain='plone', context=self.REQUEST)),
-        ]
-        return DisplayList(tuple(res))
-
-    MeetingConfig.listMailColumns = listMailColumns
-    # it'a a monkey patch because it's the only way to add a behaviour to the MeetingItem class
-
-    security.declarePublic('searchMailsInCopy')
-    def searchMailsInCopy(self, sortKey, sortOrder, filterKey, filterValue, **kwargs):
-        '''Returns the list of mails for which the user is in copy.'''
-        member = self.portal_membership.getAuthenticatedMember()
-
-        params = {'portal_type': 'CourrierFile',
-                  'getDestUsers': member.id,
-                  'sort_on': sortKey,
-                  'sort_order': sortOrder,
-                  }
-
-        # Manage filter
-        if filterKey:
-            params[filterKey] = prepareSearchValue(filterValue)
-        # update params with kwargs
-        params.update(kwargs)
-        # Perform the query in portal_catalog
-        return self.portal_catalog(**params)
-
-    MeetingConfig.searchMailsInCopy = searchMailsInCopy
-    # it'a a monkey patch because it's the only way to change the behaviour of the MeetingConfig class
+    def __init__(self, group):
+        self.context = group
 
 
 # ------------------------------------------------------------------------------
@@ -1443,19 +1545,17 @@ class MeetingCollegeAndenneWorkflowConditions(MeetingWorkflowConditions):
 
     security.declarePublic('mayDecide')
     def mayDecide(self):
-        res = False
         if checkPermission(ReviewPortalContent, self.context):
-            res = True
-        return res
+            return True
+        return False
 
     security.declarePublic('mayClose')
     def mayClose(self):
-        res = False
         # The user just needs the "Review portal content" permission on the
         # object to close it.
         if checkPermission(ReviewPortalContent, self.context):
-            res = True
-        return res
+            return True
+        return False
 
 
 # ------------------------------------------------------------------------------
@@ -1517,24 +1617,78 @@ class MeetingItemCollegeAndenneWorkflowConditions(MeetingItemWorkflowConditions)
     security.declarePublic('mayDecide')
     def mayDecide(self):
         '''We may decide an item if the linked meeting is in relevant state'''
-        res = False
         meeting = self.context.getMeeting()
         if checkPermission(ReviewPortalContent, self.context) and \
            meeting and meeting.adapted().isDecided():
-            res = True
-        return res
+            return True
+        return False
 
     security.declarePublic('mayPrevalidate')
     def mayPrevalidate(self):
-        '''We'll see who can prevalidate later'''
-        pass
+        '''We may prevalidate an item if prevalidation workflow adaptation is
+           active, if the proposing group uses prevalidation and if the user has
+           the 'Review portal content' permission'''
+        if not MeetingItemWorkflowConditions.mayPrevalidate(self):
+            return False
+
+        item = self.context
+        tool = getToolByName(item, 'portal_plonemeeting')
+        cfg = tool.getMeetingConfig(item)
+        adaptations = cfg.getWorkflowAdaptations()
+        if not 'pre_validation_keep_reviewer_permissions' in adaptations:
+            return False
+
+        group = tool[item.getProposingGroup()]
+        return group.getUsePrevalidation()
+
+    security.declarePublic('mayValidate')
+    def mayValidate(self):
+        '''We may validate an item if the user has the 'Review portal content' permission
+           and either the prevalidation workflow adaptation is not active or the proposing
+           group doesn't use prevalidation or the user is member of the reviewer group'''
+        if not MeetingItemWorkflowConditions.mayValidate(self):
+            return False
+
+        item = self.context
+        toolMembership = getToolByName(item, 'portal_membership')
+        user = toolMembership.getAuthenticatedMember()
+        tool = getToolByName(item, 'portal_plonemeeting')
+        cfg = tool.getMeetingConfig(item)
+        adaptations = cfg.getWorkflowAdaptations()
+        group = tool[item.getProposingGroup()]
+        if not 'pre_validation_keep_reviewer_permissions' in adaptations or not group.getUsePrevalidation() \
+           or user.has_role('Manager', item):
+            return True
+
+        userMeetingGroups = tool.getGroupsForUser(suffix="reviewers")
+        return group in userMeetingGroups
+
+    security.declarePublic('mayCorrect')
+    def mayCorrect(self, toPrevalidated = False):
+        '''We use the PloneMeeting default implementation except when toPrevalidate is
+           True. We then have to verify that the proposing group also uses prevalidation.
+           This is necessary to avoid that a Manager sets an item in Prevalidated state
+           when it is not in use.'''
+        if not MeetingItemWorkflowConditions.mayCorrect(self):
+            return False
+
+        if not toPrevalidated:
+            return True
+
+        item = self.context
+        tool = getToolByName(item, 'portal_plonemeeting')
+        cfg = tool.getMeetingConfig(item)
+        adaptations = cfg.getWorkflowAdaptations()
+        group = tool[item.getProposingGroup()]
+        return 'pre_validation_keep_reviewer_permissions' in adaptations and group.getUsePrevalidation()
 
 
 # ------------------------------------------------------------------------------
 InitializeClass(CustomMeetingAndenne)
 InitializeClass(CustomMeetingItemAndenne)
-InitializeClass(CustomMeetingFileAndenne)
 InitializeClass(CustomMeetingConfigAndenne)
+InitializeClass(CustomMeetingFileAndenne)
+InitializeClass(CustomMeetingGroupAndenne)
 InitializeClass(CustomToolMeetingAndenne)
 InitializeClass(MeetingCollegeAndenneWorkflowActions)
 InitializeClass(MeetingCollegeAndenneWorkflowConditions)

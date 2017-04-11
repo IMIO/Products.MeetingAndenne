@@ -16,6 +16,7 @@ from Products.PloneMeeting.config import WriteRiskyConfig
 from Products.PloneMeeting.Meeting import Meeting
 from Products.PloneMeeting.MeetingConfig import MeetingConfig
 from Products.PloneMeeting.MeetingFile import MeetingFile
+from Products.PloneMeeting.MeetingGroup import MeetingGroup
 from Products.PloneMeeting.MeetingItem import MeetingItem
 from Products.PloneMeeting.MeetingUser import MeetingUser
 
@@ -388,6 +389,28 @@ def update_file_schema(baseSchema):
 
     return completeFileSchema
 MeetingFile.schema = update_file_schema(MeetingFile.schema)
+
+
+# Schema updates related to MeetingGroup ---------------------------------------
+def update_group_schema(baseSchema):
+    specificSchema = Schema((
+
+            BooleanField(
+                name='usePrevalidation',
+                widget=BooleanField._properties['widget'](
+                    label='Useprevalidation',
+                    label_msgid='Meetingandenne_label_usePrevalidation',
+                    i18n_domain='PloneMeeting',
+                ),
+                default=False
+            ),
+        ),
+    )
+
+    completeGroupSchema = baseSchema + specificSchema.copy()
+
+    return completeGroupSchema
+MeetingGroup.schema = update_group_schema(MeetingGroup.schema)
 
 
 # Schema updates related to MeetingUser ----------------------------------------
