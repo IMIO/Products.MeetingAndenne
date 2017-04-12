@@ -226,10 +226,20 @@ class Migrate_To_3_3(Migrator):
         logger.info('Done.')
 
     def _removeUnusedPloneUsers(self):
-        '''Remove unused users present in portal_membership'''
-        logger.info('Removing unused users present in portal_membership...')
+        '''Remove unused users present in portal_membership and acl_users'''
+        logger.info('Removing unused users present in portal_membership and acl_users...')
 
-        self.portal.portal_memberdata.pruneMemberDataContents()
+        membershipTool = self.portal.portal_membership
+        memberDataTool = self.portal.portal_memberdata
+        pas = self.portal.acl_users
+
+        memberDataTool.pruneMemberDataContents()
+
+        memberIds = membershipTool.listMemberIds()
+        mutableUsers = pas.mutable_properties.enumerateUsers()
+        for user in mutableUsers:
+            if user['id'] not in memberIds:
+                pas.mutable_properties.deleteUser(user['id'])
 
         logger.info('Done.')
 
@@ -524,7 +534,7 @@ def migrate(context):
        4)  Add missing global roles and Plone groups related to MeetingAndenne
        5)  Migrate mail roles
        6)  Remove unused global roles
-       7)  Remove unused users present in portal_membership
+       7)  Remove unused users present in portal_membership and acl_users
        8)  Remove useless mail topics added by PloneMeeting migration
        9)  Remove useless fck_editor properties object
        10) Rename some categories if they exist and change related MeetingItems
