@@ -251,7 +251,7 @@ class CourrierFile(ATBlob, BrowserDefaultMixin):
             groupsToAdd = set()
             for group in groups:
                 explodedGroup = group.split('_')
-                if explodedGroup[1] in MEETING_GROUP_SUFFIXES:
+                if explodedGroup[1] in MEETING_GROUP_SUFFIXES and explodedGroup[1] != "pvwriters":
                     groupsToAdd.add( explodedGroup[0] + '_mailviewers' )
             for group in groupsToAdd:
                 self.manage_addLocalRoles( group, ('MeetingMailViewer', ) )
