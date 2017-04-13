@@ -264,6 +264,7 @@ class CourrierFile(ATBlob, BrowserDefaultMixin):
         self.manage_delLocalRoles( [user.getId()] )
         self.manage_addLocalRoles( user.getId(), ('Owner', ) )
         self.updateLocalRoles()
+        self.sendMailIfRelevant()
         self.deletefile()
         # Add text-extraction-related attributes
         rq = self.REQUEST
@@ -280,6 +281,7 @@ class CourrierFile(ATBlob, BrowserDefaultMixin):
     def at_post_edit_script(self):
         rq = self.REQUEST
         self.updateLocalRoles()
+        self.sendMailIfRelevant()
         self.needsOcr = rq.get('needs_ocr', None) is not None
         self.ocrLanguage = rq.get('ocr_language', 'fra')
         self.flaggedForOcr = False
@@ -302,23 +304,34 @@ class CourrierFile(ATBlob, BrowserDefaultMixin):
         # We give the CourrierFile role to the selected User
         # this will give them a read-only access to the item
         portal = self.portal_url.getPortalObject()
+        destUsers = self.getDestUsers()
+        if destUsers:
+            for destUser in destUsers:
+                self.affectPermissions( destUser )
+
+    security.declarePrivate('indexExtractedText')
+    def sendMailIfRelevant(self):
+        # Send a mail to selected DestUsers.
+        portal = self.portal_url.getPortalObject()
         enc = self.portal_properties.site_properties.getProperty( 'default_charset' )
+
+        subjectLabel = 'Courrier_mail_subject'
+        subject = self.utranslate( subjectLabel, domain="PloneMeeting" )
+        subject = subject.encode( enc )
+
+        bodyLabel = 'Courrier_mail_body'
+        body = self.utranslate( bodyLabel, domain="PloneMeeting" ) + "<a href='http://andana.andenne.be:8080/commune/gestion-courrier/courrierall/" + self.getId() + "/view'>http://andana.andenne.be:8080/commune/gestion-courrier/courrierall/" + self.getId() + "/view</a>"
+        body = body.encode( enc )
+
+        fromAddress = _getEmailAddress( "ANDANA", portal.getProperty( 'email_from_address' ), enc )
         destUsers = self.getDestUsers()
         if destUsers:
             for destUser in destUsers:
                 ploneUser = self.portal_membership.getMemberById( destUser )
-                self.affectPermissions( destUser )
-                #Send mail to destUser
-                subjectLabel = 'Courrier_mail_subject'
-                subject = self.utranslate( subjectLabel, domain="PloneMeeting" )
-                bodyLabel = 'Courrier_mail_body'
-                body = self.utranslate( bodyLabel, domain="PloneMeeting" ) + "<a href='http://andana.andenne.be:8080/commune/gestion-courrier/courrierall/" + self.getId() + "/view'>http://andana.andenne.be:8080/commune/gestion-courrier/courrierall/" + self.getId() + "/view</a>"
-                fromAddress = _getEmailAddress( "ANDANA", portal.getProperty( 'email_from_address' ), enc )
                 recipient = _getEmailAddress( ploneUser.getProperty( 'fullname' ), ploneUser.getProperty( 'email' ), enc )
                 try:
                     self.MailHost.secureSend(
-                    body.encode( enc ), recipient,
-                    fromAddress, subject.encode( enc ),
+                    body, recipient, fromAddress, subject,
                     charset = 'utf-8', subtype = 'html' )
                 except socket.error, sg:
                     logger.warn( SENDMAIL_ERROR % str( sg ) )

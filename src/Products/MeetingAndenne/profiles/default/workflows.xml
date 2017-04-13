@@ -2,8 +2,10 @@
 <object name="portal_workflow" meta_type="Plone Workflow Tool">
  <object name="meetingcollegeandenne_workflow" meta_type="Workflow" remove="True"/>
  <object name="meetingitemcollegeandenne_workflow" meta_type="Workflow" remove="True"/>
+ <object name="courrierfile_workflow" meta_type="Workflow" remove="True"/>
  <object name="meetingcollegeandenne_workflow" meta_type="Workflow"/>
  <object name="meetingitemcollegeandenne_workflow" meta_type="Workflow"/>
+ <object name="courrierfile_workflow" meta_type="Workflow" />
  <!-- ##code-section workflowobjects -->
 <!-- ##/code-section workflowobjects -->
  <bindings>
@@ -12,6 +14,9 @@
   </type>
   <type type_id="DummyMeetingItemCollege">
    <bound-workflow workflow_id="meetingitemcollegeandenne_workflow" />
+  </type>
+  <type type_id="DummyCourrierFile">
+   <bound-workflow workflow_id="courrierfile_workflow" />
   </type>
 <!-- ##code-section workflowbindings -->
 <!-- ##/code-section workflowbindings -->

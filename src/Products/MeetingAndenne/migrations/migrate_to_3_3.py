@@ -434,6 +434,20 @@ class Migrate_To_3_3(Migrator):
 
         logger.info('Done.')
 
+    def _adaptMailSecurity(self):
+        '''Modify the local roles of every mail file'''
+        logger.info('Modifying the local roles of every mail file...')
+
+        brains = self.portal.portal_catalog(meta_type='CourrierFile')
+        for brain in brains:
+            item = brain.getObject()
+            users = item.users_with_local_role('CourrierViewer')
+            if users:
+                item.manage_delLocalRoles(users)
+            item.updateLocalRoles()
+
+        logger.info('Done.')
+
     def _createMailTopics(self):
         '''Create the topics used for mail management'''
         logger.info('Creating the topics used for mail management...')
@@ -516,6 +530,7 @@ class Migrate_To_3_3(Migrator):
         self._adaptUserProperties()
         self._adaptMeetingConfigs()
         self._adaptMailFolder()
+        self._adaptMailSecurity()
         self._createMailTopics()
         self._createPODTemplates()
         self._updatePloneGroupsTitle()
@@ -542,10 +557,11 @@ def migrate(context):
        12) Set CKeditor as default editor for everybody and remove useless properties
        13) Change various meetingConfigs properties
        14) Modify the default view and redirection method of mail folder
-       15) Create the topics used for mail management
-       16) Recreate the used POD templates
-       17) Make sure Plone groups linked to a MeetingGroup have a consistent title
-       18) Reinstall Products.MeetingAndenne so skin and so on are correct
+       15) Modify the local roles of every mail file
+       16) Create the topics used for mail management
+       17) Recreate the used POD templates
+       18) Make sure Plone groups linked to a MeetingGroup have a consistent title
+       19) Reinstall Products.MeetingAndenne so skin and so on are correct
     '''
     Migrate_To_3_3(context).run()
 # ------------------------------------------------------------------------------
