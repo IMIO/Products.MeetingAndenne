@@ -536,6 +536,12 @@ class Migrate_To_3_3(Migrator):
         self._updatePloneGroupsTitle()
         # reinstall so skins and so on are correct
         self.reinstall(profiles=[u'profile-Products.MeetingAndenne:default', ])
+        # update catalogs after performing all those migration steps
+        self.refreshDatabase(catalogs=True,
+                             catalogsToRebuild=['portal_catalog',
+                                                'uid_catalog',
+                                                'reference_catalog', ],
+                             workflows=False)
         self.finish()
 
 
