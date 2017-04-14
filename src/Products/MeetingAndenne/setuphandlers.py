@@ -56,6 +56,9 @@ def postInstall(context):
     showHomeTab(context, site)
     # reorder skins so we are sure that the meetingAndenne_xxx skins are just under custom
     reorderSkinsLayers(context, site)
+    # reimport actions provider so that useless portal_tabs are not shown anymore
+    reorderPortalTabs(context, site)
+
 
 def updateRoleMappings(context):
     """after workflow changed update the roles mapping. this is like pressing
@@ -128,14 +131,27 @@ def showHomeTab(context, site):
 
 def reorderSkinsLayers(context, site):
     """
-       Re-apply MeetingAndenne skins.xml step as the reinstallation of
-       MeetingAndenne and PloneMeeting changes the portal_skins layers order
+       Re-apply sunburst cssregistry.xml step then plonemeetingskin and MeetingAndenne skins.xml step
+       as the reinstallation of MeetingAndenne and PloneMeeting changes the portal_skins layers order
     """
     if isNotMeetingAndenneProfile(context):
         return
 
     logStep("reorderSkinsLayers", context)
+    site.portal_setup.runImportStepFromProfile(u'profile-plonetheme.sunburst:default', 'cssregistry')
+    site.portal_setup.runImportStepFromProfile(u'profile-plonetheme.imioapps:plonemeetingskin', 'skins')
     site.portal_setup.runImportStepFromProfile(u'profile-Products.MeetingAndenne:default', 'skins')
+
+def reorderPortalTabs(context, site):
+    """
+       Re-apply MeetingAndenne actions.xml step as the reinstallation of
+       MeetingAndenne and PloneMeeting changes the portal_tabs order and visibility
+    """
+    if isNotMeetingAndenneProfile(context):
+        return
+
+    logStep("reorderPortalTabs", context)
+    site.portal_setup.runImportStepFromProfile(u'profile-Products.MeetingAndenne:default', 'actions')
 
 
 def installMeetingAndenne(context):
@@ -165,9 +181,9 @@ def finalizeInstance(context):
     if not isMeetingAndenneConfigureProfile(context):
         return
 
-    # finally, re-launch plonemeetingskin and MeetingAndenne skins step
-    # because PM has been installed before the import_data profile and messed up skins layers
-    site.portal_setup.runImportStepFromProfile(u'profile-Products.MeetingAndenne:default', 'skins')
+    reorderSkinsLayers(context, context.getSite())
+    reorderCss(context)
+    reorderPortalTabs(context, context.getSite())
 
 
 ##/code-section FOOT
