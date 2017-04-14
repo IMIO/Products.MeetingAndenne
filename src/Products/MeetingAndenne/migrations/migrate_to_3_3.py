@@ -3,6 +3,7 @@
 import logging
 logger = logging.getLogger('MeetingAndenne')
 
+import sys
 import mimetypes
 from OFS.Image import File
 from Products.CMFCore.utils import getToolByName
@@ -392,6 +393,14 @@ class Migrate_To_3_3(Migrator):
 
         logger.info('Done.')
 
+    def _adaptPloneMeetingConfig(self):
+        '''Change PloneMeeting configuration'''
+        logger.info('Changing PloneMeeting configuration...')
+
+        self.portal.portal_plonemeeting.unoEnabledPython = sys.executable
+
+        logger.info('Done.')
+
     def _adaptMeetingConfigs(self):
         '''Change various meetingConfigs properties'''
         logger.info('Changing various meetingConfigs properties...')
@@ -528,6 +537,7 @@ class Migrate_To_3_3(Migrator):
         self._renameCategories()
         self._renameGroups()
         self._adaptUserProperties()
+        self._adaptPloneMeetingConfig()
         self._adaptMeetingConfigs()
         self._adaptMailFolder()
         self._adaptMailSecurity()
@@ -561,13 +571,14 @@ def migrate(context):
        10) Rename some categories if they exist and change related MeetingItems
        11) Rename some groups if they exist and change related MeetingItems
        12) Set CKeditor as default editor for everybody and remove useless properties
-       13) Change various meetingConfigs properties
-       14) Modify the default view and redirection method of mail folder
-       15) Modify the local roles of every mail file
-       16) Create the topics used for mail management
-       17) Recreate the used POD templates
-       18) Make sure Plone groups linked to a MeetingGroup have a consistent title
-       19) Reinstall Products.MeetingAndenne so skin and so on are correct
+       13) Change ploneMeeting configuration
+       14) Change various meetingConfigs properties
+       15) Modify the default view and redirection method of mail folder
+       16) Modify the local roles of every mail file
+       17) Create the topics used for mail management
+       18) Recreate the used POD templates
+       19) Make sure Plone groups linked to a MeetingGroup have a consistent title
+       20) Reinstall Products.MeetingAndenne so skin and so on are correct
     '''
     Migrate_To_3_3(context).run()
 # ------------------------------------------------------------------------------
