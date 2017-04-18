@@ -34,7 +34,7 @@ from plone.app.users.browser.personalpreferences import UserDataPanelAdapter
 from plone.app.users.browser.personalpreferences import PersonalPreferencesPanelAdapter
 from imio.helpers.xhtml import xhtmlContentIsEmpty
 from Products.PloneMeeting.config import ITEM_NO_PREFERRED_MEETING_VALUE, \
-     TOPIC_SEARCH_SCRIPT, TOPIC_SEARCH_FILTERS, TOPIC_TYPE
+     TOPIC_SEARCH_SCRIPT, TOPIC_SEARCH_FILTERS, TOPIC_TYPE, MEETINGREVIEWERS
 from Products.PloneMeeting.Meeting import MeetingWorkflowActions, \
      MeetingWorkflowConditions, Meeting
 from Products.PloneMeeting.MeetingItem import MeetingItem, \
@@ -475,7 +475,7 @@ class CustomMeetingItemAndenne(MeetingItem):
         else:
             return ''
 
-    security.declarePublic('getPrintableCopyTo')
+    security.declarePublic('getPrintableNumCategory')
     def getPrintableNumCategory(self):
         '''Formats the category number to print in the templates.'''
         current_cat = self.context.getCategory(theObject=True)
@@ -960,41 +960,6 @@ class CustomMeetingItemAndenne(MeetingItem):
 #    MeetingItem.getAttendees=getAttendees
 #    # it'a a monkey patch
 
-    security.declarePublic('getAttendees')
-    def getAttendees(self, usage=None, includeDeleted=False,
-                     includeAbsents=False, includeReplacements=False):
-        '''Returns the attendees for this item. Takes into account
-           self.itemAbsents, excepted if p_includeAbsents is True. If a given
-           p_usage is defined, the method returns only users having this
-           p_usage.'''
-        res = []
-        if usage == 'signer':
-            raise 'Please use MeetingItem.getItemSignatories instead.'
-        if not self.hasMeeting():
-            return res
-        # Prevent wrong parameters use
-        if includeDeleted and usage:
-            includeDeleted = False
-        itemAbsents = ()
-        meeting = self.getMeeting()
-        if not includeAbsents:
-            # item absents are absents for the item, absents from an item before this one
-            # and lateAttendees that still not arrived
-            itemAbsents = list(self.getItemAbsents()) + meeting.getDepartures(self, when='before', alsoEarlier=True)
-        # remove lateAttendees that arrived before this item
-        lateAttendees = meeting.getLateAttendees()
-        arrivedLateAttendees = meeting.getEntrances(self, when='during') + meeting.getEntrances(self, when='before')
-        stillNotArrivedLateAttendees = set(lateAttendees).difference(set(arrivedLateAttendees))
-        itemAbsents = itemAbsents + list(stillNotArrivedLateAttendees)
-        for attendee in meeting.getAttendees(True,
-                                             includeDeleted=includeDeleted,
-                                             includeReplacements=includeReplacements):
-            if attendee.id in itemAbsents:
-                continue
-            if not usage or (usage in attendee.getUsages()):
-                res.append(attendee)
-        return res
-
     security.declarePublic('onDuplicate')
     def onDuplicate(self):
         '''This method is triggered when the users clicks on
@@ -1204,6 +1169,49 @@ class CustomMeetingConfigAndenne(MeetingConfig):
         return res
 
     MeetingConfig.getTopicResults = getTopicResults
+    # it'a a monkey patch because it's the only way to change the behaviour of the MeetingConfig class
+
+    security.declarePublic('searchItemsToValidateOfMyReviewerGroups')
+    def searchItemsToValidateOfMyReviewerGroups(self, sortKey, sortOrder, filterKey, filterValue, **kwargs):
+        '''Return a list of items that the user could validate.  So it returns every items the current
+           user is able to validate at any state of the validation process.  So if a user is 'prereviewer'
+           and 'reviewer' for a group, the search will return items in both states.'''
+        tool = getToolByName(self, 'portal_plonemeeting')
+        member = self.portal_membership.getAuthenticatedMember()
+        groupIds = self.portal_groups.getGroupsForPrincipal(member)
+        reviewProcessInfos = []
+        for groupId in groupIds:
+            for reviewer_suffix, review_state in MEETINGREVIEWERS.items():
+                # current user may be able to validate at at least
+                # one level of the entire validation process, we take it into account
+                if groupId.endswith('_%s' % reviewer_suffix):
+                    groupName = groupId[:-len(reviewer_suffix) - 1]
+                    # specific management for workflows using the 'pre_validation' wfAdaptation
+                    if reviewer_suffix == 'reviewers' and \
+                       ('pre_validation' in self.getWorkflowAdaptations() or
+                       'pre_validation_keep_reviewer_permissions' in self.getWorkflowAdaptations()):
+                        groupObj = getattr(tool, groupName)
+                        if groupObj.getUsePrevalidation():
+                            reviewProcessInfos.append('%s__reviewprocess__%s' % (groupName, review_state))
+                            review_state = 'prevalidated'
+                    reviewProcessInfos.append('%s__reviewprocess__%s' % (groupName, review_state))
+        if not reviewProcessInfos:
+            return []
+
+        params = {'portal_type': self.getItemTypeName(),
+                  'reviewProcessInfo': reviewProcessInfos,
+                  'sort_on': sortKey,
+                  'sort_order': sortOrder
+                  }
+        # Manage filter
+        if filterKey:
+            params[filterKey] = prepareSearchValue(filterValue)
+        # update params with kwargs
+        params.update(kwargs)
+        # Perform the query in portal_catalog
+        return self.portal_catalog(**params)
+
+    MeetingConfig.searchItemsToValidateOfMyReviewerGroups = searchItemsToValidateOfMyReviewerGroups
     # it'a a monkey patch because it's the only way to change the behaviour of the MeetingConfig class
 
     security.declarePublic('getQueryColumns')

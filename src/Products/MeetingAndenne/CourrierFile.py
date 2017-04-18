@@ -40,9 +40,8 @@ from Products.CMFPlone.CatalogTool import getObjSize
 from Products.MailHost.MailHost import MailHostError
 from Products.MimetypesRegistry.common import MimeTypeException
 from collective.documentviewer.async import asyncInstalled
-from Products.PloneMeeting.utils import getCustomAdapter, sendMailIfRelevant, \
-                                        _getEmailAddress, SENDMAIL_ERROR, \
-                                        ENCODING_ERROR, MAILHOST_ERROR
+from Products.PloneMeeting.utils import getCustomAdapter, _getEmailAddress, \
+                                        SENDMAIL_ERROR, ENCODING_ERROR, MAILHOST_ERROR
 
 from DateTime import DateTime
 from Products.MeetingAndenne.config import *
@@ -309,7 +308,7 @@ class CourrierFile(ATBlob, BrowserDefaultMixin):
             for destUser in destUsers:
                 self.affectPermissions( destUser )
 
-    security.declarePrivate('indexExtractedText')
+    security.declarePrivate('sendMailIfRelevant')
     def sendMailIfRelevant(self):
         # Send a mail to selected DestUsers.
         portal = self.portal_url.getPortalObject()
