@@ -142,7 +142,6 @@ document.location.reload(true);
      tal:attributes="style python: (request.get('showPersons', 'true')=='true') and 'display:table' or 'display:none'">
 <form id="itemPeopleForm" name="itemPeopleForm" method="post">
 <table tal:define="meetingAttendees python: meeting.getAttendees(True);
-                   meetingAll python: meeting.getAttendees(True)+meeting.getExcused(True)+meeting.getAbsents(True);
                    meetingAbsents python: meeting.getExcused()+meeting.getAbsents();
                    itemPresents context/getItemPresents;
                    lateAttendees meeting/getLateAttendees;
@@ -205,10 +204,9 @@ document.location.reload(true);
   </tr>
   </thead>
   <tbody>
-  <tr tal:repeat="attendee meetingAll">
+  <tr tal:repeat="attendee meetingAttendees">
     <tal:attendee define="aId attendee/getId;
-                          isPresent python: attendee.isPresent(context, meeting) and aId not in meetingAbsents;
-                          isAbsent python: aId not in itemPresents and aId in meetingAbsents">
+                          isPresent python: attendee.isPresent(context, meeting) or aId in itemPresents">
     <td><b tal:content="attendee/Title"></b></td>
     <td align="center"
         tal:attributes="onmouseover python: 'setByeByeButton(\'%s\', \'visible\')' % aId;
@@ -217,14 +215,14 @@ document.location.reload(true);
       <img tal:condition="isPresent" tal:attributes="src string: $portal_url/checked.gif"/>
 
       <tal:comment replace="nothing">Show entrance number if user is an arrived late attendee</tal:comment>
-      <tal:entered condition="python: aId in lateAttendees and isPresent">
+      <tal:entered condition="python: aId in lateAttendees and isPresent and not aId in itemPresents">
        <img tal:attributes="src string: $portal_url/entrance.gif"
             title="present_since" i18n:attributes="title"/><span style="color:black"
             tal:content="python: meeting.getEntranceItem(aId)"></span>
        <tal:comment replace="nothing">Remove info about user entrance into the meeting</tal:comment>
        <img tal:condition="python: mayEditItem and isManager" style="cursor:pointer" title="remove_info" i18n:attributes="title"
             tal:attributes="src string: $portal_url/delete_small.png;
-                            onClick python:'welcomeUserAndenne(\'%s\', \'%s\', \'delete\')' % (context.absolute_url(), aId)"/>
+                            onClick python:'confirmWelcomeUserAndenne(\'%s\', \'%s\', \'delete\', \'from_now\')' % (context.absolute_url(), aId)"/>
       </tal:entered>
 
       <tal:comment replace="nothing">Show depart number if user has left (or will do after this item)</tal:comment>
@@ -247,41 +245,43 @@ document.location.reload(true);
            tal:attributes="src string: $portal_url/delete_small.png;
                            onClick python:'confirmByebyeUserAndenne(\'%s\', \'%s\', \'delete\', \'leaves_now\')' % (context.absolute_url(), aId)"/>
       </tal:left>
-      
+
       <tal:comment replace="nothing">Show "present" icon if the user join this item only (=item present) (added by fabmar)</tal:comment>
       <tal:left condition="python: aId in context.getItemPresents()">
-      <img tal:attributes="src string: $portal_url/entrance.gif"
-           title="welcome_now" i18n:attributes="title"/>
+      <img tal:attributes="src string: $portal_url/arriving.gif"
+           title="arrived_now" i18n:attributes="title"/>
       <tal:comment replace="nothing">Remove info user being an item present</tal:comment>
       <img tal:condition="python: mayEditItem and isManager" style="cursor:pointer" title="remove_info" i18n:attributes="title"
            tal:attributes="src string: $portal_url/delete_small.png;
-                           onClick python:'welcomeNowUser(\'%s\', \'%s\', \'delete\')' % (context.absolute_url(), aId)"/>
+                           onClick python:'confirmWelcomeUserAndenne(\'%s\', \'%s\', \'delete\', \'just_now\')' % (context.absolute_url(), aId)"/>
       </tal:left>
 
-      <tal:comment replace="nothing">Button for welcoming a late attendee not yet in the meeting</tal:comment>
-      <img title="person_welcome" i18n:attributes="title" style="cursor: pointer"
-           tal:condition="python: isManager and (aId in lateAttendees) and not isPresent and not meeting.getEntranceItem(aId)"
+      <tal:comment replace="nothing">Button for welcoming a late attendee not yet in the meeting (modified by fabmar)</tal:comment>
+      <a href="#" class="link-overlay-pm welcome-overlay" tal:attributes="href string:welcomeuser?userId=${aId}&canJoin=True"
+         tal:condition="python: isManager and mayEditItem and aId in lateAttendees and not isPresent and not meeting.getEntranceItem(aId)">
+      <img title="person_welcome" i18n:attributes="title" style="cursor: pointer; visibility: hidden"
            tal:attributes="src string: $portal_url/entrance.gif;
-                           onClick python:'welcomeUserAndenne(\'%s\', \'%s\', \'do\')' % (context.absolute_url(), aId)"/>
+                           id python: 'welcome_%s' % aId;
+                           name  python: 'welcome_%s' % aId;" />
+      </a>
+
+      <tal:comment replace="nothing">(added by fabmar) Button for welcoming a late attendee not yet in the meeting when we have an entrance period defined somewhere (getEntranceItem must return true in condition)(added by fabmar)</tal:comment>
+      <a href="#" class="link-overlay-pm welcome-overlay" tal:attributes="href string:welcomeuser?userId=${aId}"
+         tal:condition="python: isManager and mayEditItem and not isPresent and aId not in itemAbsents and (aId not in lateAttendees or meeting.getEntranceItem(aId))">
+      <img title="person_welcome" i18n:attributes="title" style="cursor: pointer; visibility: hidden"
+           tal:attributes="src string: $portal_url/entrance.gif;
+                           id python: 'welcome_%s' % aId;
+                           name  python: 'welcome_%s' % aId;" />
+      </a>
 
       <tal:comment replace="nothing">Button for byebying a user</tal:comment>
       <a href="#" class="link-overlay-pm byebye-overlay" tal:attributes="href string:byebyeuser?userId=${aId}"
-         tal:condition="python: isManager and mayEditItem and isPresent and not meeting.getDepartureItem(aId)">
+         tal:condition="python: isManager and mayEditItem and isPresent and not aId in itemPresents and not meeting.getDepartureItem(aId)">
        <img title="person_byebye" i18n:attributes="title" style="cursor: pointer; visibility: hidden"
            tal:attributes="src string: $portal_url/departure.gif;
                            id python: 'byebye_%s' % aId;
                            name  python: 'byebye_%s' % aId;" />
       </a>
-      
-      <tal:comment replace="nothing">Button for welcoming for an item, a user (added by fabmar)</tal:comment>
-      <a href="#" tal:attributes="onClick python:'welcomeNowUser(\'%s\', \'%s\', \'do\')' % (context.absolute_url(), aId)"
-         tal:condition="python: isManager and mayEditItem and isAbsent and not meeting.getDepartureItem(aId)">
-       <img title="person_welcome" i18n:attributes="title" style="cursor: pointer; visibility: hidden"
-           tal:attributes="src string: $portal_url/entrance.gif;
-                           id python: 'byebye_%s' % aId;
-                           name  python: 'byebye_%s' % aId;" />
-      </a>
-
     </td>
     <td align="center" tal:condition="python: 'signatories' in usedMeetingAttributes">
       <img tal:attributes="src string: $portal_url/checked.gif"

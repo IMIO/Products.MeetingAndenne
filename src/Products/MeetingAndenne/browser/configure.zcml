@@ -27,6 +27,15 @@
 
     <!-- Overriden PloneMeeting viewlets -->
 
+    <!-- overlay views used in present <-> absent management -->
+    <browser:page
+        name="welcomeuser"
+        for="Products.PloneMeeting.interfaces.IMeetingItem"
+        class=".welcomeuser.WelcomeUser"
+        template="templates/welcomeuser.pt"
+        layer="Products.MeetingAndenne.interfaces.IMeetingAndenneLayer"
+        permission="zope2.View" />
+
     <!-- the mail_topic_view used to display list of mail items -->
     <browser:page
         name="mail_topic_view"

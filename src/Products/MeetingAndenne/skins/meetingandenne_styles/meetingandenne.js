@@ -23,26 +23,12 @@ function getMultiSelectContent(rq, params) {
   return params
 }
 
-function welcomeNowUser(itemUrl, userId, actionType){
-  if (actionType == "delete") {
-    if (confirm(are_you_sure)) {
-      var params = {'action': 'WelcomeNowPerson', 'userId': userId, 'actionType': actionType};
-      askAjaxChunk('meeting_users_', 'POST', itemUrl, '@@ma-macros', 'itemPeople', params);
-    }
-  }
-  else 
-  {
-    var params = {'action': 'WelcomeNowPerson', 'userId': userId, 'actionType': actionType};
-    askAjaxChunk('meeting_users_', 'POST', itemUrl, '@@ma-macros', 'itemPeople', params);
-
-  }
-}
-
-function welcomeUserAndenne(itemUrl, userId, action){
-  if (confirm(are_you_sure)) {
-    var params = {'action': 'WelcomePerson', 'userId': userId, 'actionType': action};
-    askAjaxChunk('meeting_users_', 'POST', itemUrl, '@@ma-macros', 'itemPeople', params);
-  }
+function setByeByeButton(userId, visibility) {
+  var button = document.getElementById('byebye_' + userId);
+  if (button) button.style.visibility = visibility;
+  button = document.getElementById('welcome_' + userId);
+  if (!button) return;
+  button.style.visibility = visibility;
 }
 
 function confirmByebyeUserAndenne(itemUrl, userId, actionType, byeType){
@@ -55,4 +41,16 @@ function confirmByebyeUserAndenne(itemUrl, userId, actionType, byeType){
     }
   }
   else openDialog('confirmByebyeUser');
+}
+
+function confirmWelcomeUserAndenne(itemUrl, userId, actionType, welcomeType){
+  dialogData = {'action': 'WelcomePerson', 'itemUrl': itemUrl,
+                'userId': userId, 'actionType': actionType, 'welcomeType':welcomeType};
+  if (actionType == "delete") {
+    if (confirm(are_you_sure)) {
+      delete dialogData['itemUrl'];
+      askAjaxChunk('meeting_users_', 'POST', itemUrl, '@@ma-macros', 'itemPeople', dialogData);
+    }
+  }
+  else openDialog('confirmWelcomeUser');
 }

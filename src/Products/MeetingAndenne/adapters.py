@@ -22,6 +22,7 @@
 # ------------------------------------------------------------------------------
 
 from appy.gen import No
+from persistent.mapping import PersistentMapping
 from zope.interface import implements
 from zope.i18n import translate
 from AccessControl import ClassSecurityInfo
@@ -586,28 +587,41 @@ class CustomMeetingItemAndenne(MeetingItem):
     MeetingItem.listUserGroup = listUserGroup
     # it'a a monkey patch because it's the only way to have a default method in the schema
 
-    security.declareProtected('Modify portal content', 'onWelcomeNowPerson')
-    def onWelcomeNowPerson(self):
-        '''Some user (in request.userId) has join the meeting 
-           We will record this info, excepted if request["action"] tells us to
-           remove it instead (delete).'''
+    security.declareProtected('Modify portal content', 'onWelcomePerson')
+    def onWelcomePerson(self):
+        '''Some user (in request.userId) has joined the meeting:
+           1) either a late attendee just before discussion on this item
+             (request.welcomeType == 'from_now'),
+           2) or just during the discussion on this particular item
+             (request.welcomeType == 'just_now').
+           We will record this info, except if request["action"] tells us to
+           remove it instead.'''
         tool = getToolByName(self, 'portal_plonemeeting')
         if not tool.isManager(self) or not checkPermission(ModifyPortalContent, self):
             raise Unauthorized
         rq = self.REQUEST
         userId = rq['userId']
-        actionType = rq.get('actionType')
-        if actionType == 'delete':
-            present = list(self.getItemPresents())
-            present.remove(userId)
-            self.setItemPresents(present)
-        if actionType == 'do':
-            present = list(self.getItemPresents())
-            present.append(userId)
-            self.setItemPresents(present)
+        mustDelete = rq.get('actionType') == 'delete'
+        if rq['welcomeType'] == 'from_now':
+            # Case 1)
+            meeting = self.getMeeting()
+            if mustDelete:
+                del meeting.entrances[userId]
+            else:
+                if not hasattr(meeting.aq_base, 'entrances'):
+                    meeting.entrances = PersistentMapping()
+                meeting.entrances[userId] = self.getItemNumber(relativeTo='meeting')
+        else:
+            # Case 2)
+            presents = list(self.getItemPresents())
+            if mustDelete:
+                presents.remove(userId)
+            else:
+                presents.append(userId)
+            self.setItemPresents(presents)
 
-    MeetingItem.onWelcomeNowPerson = onWelcomeNowPerson
-    # it'a a monkey patch because it's the only way to add a behaviour to the MeetingItem class
+    MeetingItem.onWelcomePerson = onWelcomePerson
+    # it'a a monkey patch because it's the only way to change the behaviour of the MeetingItem class
 
     security.declarePublic('getExtraFieldsToCopyWhenCloning')
     def getExtraFieldsToCopyWhenCloning(self, cloned_to_same_mc):
