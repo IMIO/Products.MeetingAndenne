@@ -28,7 +28,7 @@ meetingConfigs = { 'meeting-config-college': {
     'toDiscussShownForLateItems': True, 'transitionsToConfirm': [ u'Meeting.freeze', u'Meeting.close', u'MeetingItem.delay',
                                                                    u'MeetingItem.backToProposed', u'MeetingItem.backToItemCreated'],
     'itemCopyGroupsStates': [ u'validated', u'presented', u'itemfrozen', u'pre_accepted', u'accepted', u'accepted_and_closed',
-                              u'accepted_but_modified', u'accepted_but_modified_and_closed', u'refused', u'refused_and_closed', 
+                              u'accepted_but_modified', u'accepted_but_modified_and_closed', u'refused', u'refused_and_closed',
                               u'delayed', u'delayed_and_closed'],
     'itemDecidedStates': [ u'pre_accepted', u'accepted', u'accepted_and_closed', u'refused', u'refused_and_closed', u'accepted_but_modified',
                            u'accepted_but_modified_and_closed', u'delayed', u'delayed_and_closed'],
