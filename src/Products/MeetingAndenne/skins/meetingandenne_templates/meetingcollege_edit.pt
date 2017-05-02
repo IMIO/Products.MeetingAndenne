@@ -21,7 +21,7 @@
 
       <script language="javascript">
       // When a checkbox is unchecked, what other one will we check?
-      var uncheckWillCheck = {"attendee":"excused", "excused":"attendee",
+      var uncheckWillCheck = {"attendee":"absent", "excused":"attendee",
                               "absent":"attendee", "lateAttendee":"attendee"};
       function showOrHideReplField(userId, show) {
         // Shows of hides "replacement" field for p_userId, depending on p_show.
@@ -64,7 +64,7 @@
       }
       /// XXXXXXX added by fabmar
       function onClickBox2(box, boxType, userId) {
-           // Must we show or hide the "replacements" column?
+        // Must we show or hide the "replacements" column?
         if ((!box.checked && (boxType == 'attendee')) ||
             (box.checked && (boxType == 'excused')) ||
             (box.checked && (boxType == 'absent'))) {
@@ -73,9 +73,9 @@
         else showOrHideReplField(userId, false);
         var repl = document.getElementById('muser_'+userId+'_replacement');
         if (repl) {
-            // Hide the field, and set 'nobody' as replacement.
-            repl.value = '';
-            repl.style.display = 'none';
+          // Hide the field, and set 'nobody' as replacement.
+          repl.value = '';
+          repl.style.display = 'none';
         }
       }
       /// XXXXX  end
