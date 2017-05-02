@@ -272,7 +272,7 @@ class CustomMeetingAndenne(Meeting):
                 userDuty = mUser.getDuty()
                 strikeme = True
                 deleteme = False
-                if userepl = =True:
+                if userepl == True:
                     ### ce members est-il a remplacer?
                     if userId in repl:
                         # Oui, il est a remplacer
