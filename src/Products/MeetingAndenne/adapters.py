@@ -52,7 +52,7 @@ from Products.MeetingAndenne.interfaces import \
      IMeetingCollegeAndenneWorkflowActions, IMeetingCollegeAndenneWorkflowConditions
 from Products.MeetingAndenne.config import MAIL_TYPES, SEARCH_TYPES
 from Products.MeetingAndenne.SearcherAndenne import SearcherAndenne
-from Products.PloneMeeting.utils import checkPermission, sendMail, getLastEvent, spanifyLink
+from Products.PloneMeeting.utils import checkPermission, sendMail, getLastEvent, spanifyLink, prepareSearchValue
 from Products.PloneMeeting.model import adaptations
 from Products.PloneMeeting.model.adaptations import WF_DOES_NOT_EXIST_WARNING, WF_APPLIED
 from DateTime import DateTime
