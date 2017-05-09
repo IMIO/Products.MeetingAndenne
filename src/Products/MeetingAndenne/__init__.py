@@ -71,6 +71,7 @@ def initialize(context):
     # imports packages and types for registration
 
     import CourrierFile
+    import MeetingItemFormation
 
     # Initialize portal content
     all_content_types, all_constructors, all_ftis = process_types(
@@ -99,4 +100,5 @@ def initialize(context):
     # Define LC_COLLATE for sorting algorithms to work properly
     import locale
     locale.setlocale(locale.LC_COLLATE, 'fr_BE.UTF8') 
+    locale.setlocale(locale.LC_TIME, 'fr_FR.UTF8') 
     ##/code-section custom-init-bottom

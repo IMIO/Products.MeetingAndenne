@@ -45,6 +45,7 @@ from Products.PloneMeeting.utils import getCustomAdapter, _getEmailAddress, \
 
 from DateTime import DateTime
 from Products.MeetingAndenne.config import *
+from Products.MeetingAndenne.utils import *
 
 ### OLD ###
 #import time, unicodedata, socket
@@ -183,11 +184,6 @@ class CourrierFile(ATBlob, BrowserDefaultMixin):
 
     # Manually created methods
 
-    @staticmethod
-    def collateDisplayListsValues(displayList):
-        '''Function used to collate DisplayLists tuples by value'''
-        return locale.strxfrm(displayList[1])
-
     # we must use a fieldindex index to sort but getCourrierReference is ZCTextIndex (use un search with *) thus we must create an index method an use a fake fieldindex
     security.declarePublic('getCourrierReference')
     def getRefcourrierFake(self):
@@ -223,7 +219,7 @@ class CourrierFile(ATBlob, BrowserDefaultMixin):
         for user in pgp.listMembers():
             if user.getProperty('listed'):
                 res.append( (user.getId(), user.getProperty('fullname')) )
-        res = sorted( res, key=self.collateDisplayListsValues )
+        res = sorted( res, key=collateDisplayListsValues )
         return DisplayList( tuple(res) )
 
     security.declarePublic('getDisplayableDestUsers')

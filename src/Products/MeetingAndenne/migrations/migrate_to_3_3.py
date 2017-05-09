@@ -15,6 +15,39 @@ from Products.PloneMeeting.profiles import GroupDescriptor, PodTemplateDescripto
 
 from Products.MeetingAndenne.config import ANDENNEROLES, MAIL_TOPICS
 from Products.MeetingAndenne.profiles.default.import_data import collegeTemplates
+from Products.MeetingAndenne.MeetingItemFormation import MeetingItemFormation
+
+meetingFormationFields = (
+    ('formation_type', 'training_type', { u"une formation": u"training",
+                                          u"un atelier": u"workshop",
+                                          u"un séminaire": u"seminar",
+                                          u"une réunion de travail": u"workSession",
+                                          u"une séance d'information": u"informationSession",
+                                          u"un colloque": u"symposium",
+                                          u"un salon": u"show"
+                                        }, ),
+    ('formation_objet', 'training_purpose', {}, ),
+    ('formation_date1', 'training_startDate', {}, ),
+    ('formation_date2', 'training_endDate', {}, ),
+    ('formation_periode', 'training_periodicity', {}, ),
+    ('formation_name', 'training_organiser', {}, ),
+    ('formation_place', 'training_place', {}, ),
+    ('formation_users', 'training_users', {}, ),
+    ('formation_user', 'training_additionalUsers', {}, ),
+    ('formation_desc', 'training_description', {}, ),
+    ('formation_frais_inscription', 'training_registrationFee', {}, ),
+    ('formation_frais_syllabi', 'training_syllabusCosts', {}, ),
+    ('formation_frais_deplacement', 'training_travelExpenses', {}, ),
+    ('formation_frais_stationnement', 'training_parkingFees', {}, ),
+    ('formation_frais_sejour', 'training_accomodationExpenses', {}, ),
+    ('formation_frais_autre', 'training_otherFees', {}, ),
+    ('formation_mod', 'training_paymentTerms', { "1": "after",
+                                                 "2": "before",
+                                               }, ),
+    ('formation_compte', 'training_accountNumber', {}, ),
+    ('formation_compte_name', 'training_accountName', {}, ),
+    ('formation_compte_com', 'training_acceptanceGiro', {}, ),
+)
 
 meetingConfigs = { 'meeting-config-college': {
     'enableAnnexToPrint': True, 'annexToPrintDefault': True, 'annexDecisionToPrintDefault': True,
@@ -22,7 +55,7 @@ meetingConfigs = { 'meeting-config-college': {
     'xhtmlTransformFields': (u'Meeting.observations', u'Meeting.postObservations', u'MeetingItem.description',
                              u'MeetingItem.decision', u'MeetingItem.projetpv', u'MeetingItem.textpv',
                              u'MeetingItem.pv', u'MeetingItem.observations'),
-    'usedItemAttributes': (u'budgetInfos', u'associatedGroups', u'observations', u'toDiscuss', u'itemSignatories'),
+    'usedItemAttributes': (u'budgetInfos', u'observations', u'toDiscuss', u'itemSignatories'),
     'usedMeetingAttributes': (u'startDate', u'endDate', u'signatories', u'attendees',
                               u'absents', u'lateAttendees', u'place', u'observations', u'postObservations'),
     'toDiscussShownForLateItems': True, 'transitionsToConfirm': [ u'Meeting.freeze', u'Meeting.close', u'MeetingItem.delay',
@@ -175,6 +208,55 @@ class Migrate_To_3_3(Migrator):
                 mGroup._createOrUpdatePloneGroup(suffix)
 
         self.portal.__ac_roles__ = tuple(globalRoles)
+
+        logger.info('Done.')
+
+    def _addMeetingFormationType(self):
+        '''Add the template used to create MeetingItemFormation objects'''
+        logger.info('Adding the template used to create MeetingItemFormation objects...')
+
+        collegeConfig = getattr(self.portal.portal_plonemeeting, 'meeting-config-college')
+        folder = getattr(collegeConfig, 'itemtemplates')
+
+        if hasattr(folder, 'demande-de-formation'):
+            folder.manage_delObjects( ['demande-de-formation', ] )
+
+        data = dict()
+        data['id'] = 'demande-de-formation'
+        data['title'] = 'Demande de formation'
+        data['templateUsingGroups'] = []
+        data['category'] = '45-personnel'
+        folder.invokeFactory('MeetingItemCollege', **data)
+
+        item = getattr(folder, data['id'])
+        item.schema = MeetingItemFormation.schema
+        item.template = 'MeetingItemFormation'
+        item.templateStates = ['itemcreated', 'active', 'inactive']
+
+        # call processForm passing dummy values so existing values are not touched
+        item.processForm(values={'dummy': None})
+
+        logger.info('Done.')
+
+    def _migrateMeetingItemFormations(self):
+        '''Migrate MeetingItemFormation objects'''
+        logger.info('Migrating MeetingItemFormation objects...')
+
+        brains = self.portal.portal_catalog(meta_type='MeetingItem')
+        for brain in brains:
+            item = brain.getObject()
+            if hasattr(item, 'template_flag'):
+                if getattr(item, 'template_flag') != 'normal':
+                    item.schema = MeetingItemFormation.schema
+                    item.template = 'MeetingItemFormation'
+                    for oldName, newName, valuesDict in meetingFormationFields:
+                        if hasattr(item, oldName):
+                            oldValue = getattr(item, oldName)
+                            setattr(item, newName, valuesDict.get(oldValue, oldValue))
+                delattr(item, 'template_flag')
+            for oldName, newName, valuesDict in meetingFormationFields:
+                if hasattr(item, oldName):
+                    delattr(item, oldName)
 
         logger.info('Done.')
 
@@ -529,6 +611,8 @@ class Migrate_To_3_3(Migrator):
         self._updateOnMeetingTransitionItemTransitionToTrigger()
         self._addCDLDTopics()
         self._addMissingRolesAndGroups()
+        self._addMeetingFormationType()
+        self._migrateMeetingItemFormations()
         self._migrateMailRoles()
         self._removeUnusedGlobalRoles()
         self._removeUnusedPloneUsers()
@@ -563,22 +647,24 @@ def migrate(context):
        2)  Migrate onMeetingTransitionItemTransitionToTrigger
        3)  Add topics for CDLD synthesis
        4)  Add missing global roles and Plone groups related to MeetingAndenne
-       5)  Migrate mail roles
-       6)  Remove unused global roles
-       7)  Remove unused users present in portal_membership and acl_users
-       8)  Remove useless mail topics added by PloneMeeting migration
-       9)  Remove useless fck_editor properties object
-       10) Rename some categories if they exist and change related MeetingItems
-       11) Rename some groups if they exist and change related MeetingItems
-       12) Set CKeditor as default editor for everybody and remove useless properties
-       13) Change ploneMeeting configuration
-       14) Change various meetingConfigs properties
-       15) Modify the default view and redirection method of mail folder
-       16) Modify the local roles of every mail file
-       17) Create the topics used for mail management
-       18) Recreate the used POD templates
-       19) Make sure Plone groups linked to a MeetingGroup have a consistent title
-       20) Reinstall Products.MeetingAndenne so skin and so on are correct
+       5)  Add the template used to create MeetingItemFormation objects
+       6)  Migrate MeetingItemFormation objects
+       7)  Migrate mail roles
+       8)  Remove unused global roles
+       9)  Remove unused users present in portal_membership and acl_users
+       10) Remove useless mail topics added by PloneMeeting migration
+       11) Remove useless fck_editor properties object
+       12) Rename some categories if they exist and change related MeetingItems
+       13) Rename some groups if they exist and change related MeetingItems
+       14) Set CKeditor as default editor for everybody and remove useless properties
+       15) Change ploneMeeting configuration
+       16) Change various meetingConfigs properties
+       17) Modify the default view and redirection method of mail folder
+       18) Modify the local roles of every mail file
+       19) Create the topics used for mail management
+       20) Recreate the used POD templates
+       21) Make sure Plone groups linked to a MeetingGroup have a consistent title
+       22) Reinstall Products.MeetingAndenne so skin and so on are correct
     '''
     Migrate_To_3_3(context).run()
 # ------------------------------------------------------------------------------

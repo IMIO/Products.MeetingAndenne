@@ -49,10 +49,11 @@ from Products.PloneMeeting.interfaces import IMeetingCustom, IMeetingItemCustom,
                                              IMeetingGroupCustom, IToolPloneMeetingCustom
 from Products.MeetingAndenne.interfaces import \
      IMeetingItemCollegeAndenneWorkflowActions, IMeetingItemCollegeAndenneWorkflowConditions, \
-     IMeetingCollegeAndenneWorkflowActions, IMeetingCollegeAndenneWorkflowConditions
+     IMeetingCollegeAndenneWorkflowActions, IMeetingCollegeAndenneWorkflowConditions, \
+     IMeetingItemFormation
 from Products.MeetingAndenne.config import MAIL_TYPES, SEARCH_TYPES
 from Products.MeetingAndenne.SearcherAndenne import SearcherAndenne
-from Products.PloneMeeting.utils import checkPermission, sendMail, getLastEvent, spanifyLink, prepareSearchValue
+from Products.PloneMeeting.utils import checkPermission, getCustomAdapter, prepareSearchValue
 from Products.PloneMeeting.model import adaptations
 from Products.PloneMeeting.model.adaptations import WF_DOES_NOT_EXIST_WARNING, WF_APPLIED
 from DateTime import DateTime
@@ -661,6 +662,24 @@ class CustomMeetingItemAndenne(MeetingItem):
 
 ### New functionalities ###
 
+    security.declarePublic('adapted')
+    def adapted(self):
+        '''Gets the "adapted" version of myself. If no custom adapter is found,
+           this method returns me.'''
+        if not hasattr(self, 'template'):
+            return getCustomAdapter(self)
+        else:
+            res = self
+            cmd = "res = I%s(self)" % getattr(self, 'template')
+            try:
+                exec cmd
+            except TypeError:
+                pass
+            return res
+
+    MeetingItem.adapted = adapted
+    # it'a a monkey patch because it's the only way to change the behaviour of the MeetingItem class
+
     security.declarePublic('updateMeetingItem')
     def updateMeetingItem(self):
         """
@@ -1131,94 +1150,6 @@ class CustomMeetingItemAndenne(MeetingItem):
     MeetingItem.getLabelForDescription=getLabelForDescription
     #it'a a monkey patch because it's the only way to have a default method in the schema
     ### END RAPCOLAUCON ###
-
-
-
-    ### FORMATION : TO BE REMOVED LATER ###
-    security.declarePublic('isformation')
-    def isformation(self):
-        if self.context.getTemplate_flag()=='formation' and (self.context.queryState()=='active' or self.context.queryState()=='itemcreated'):
-            return True
-        else :
-            return False
-
-    ### FORMATION : TO BE REMOVED LATER ###
-    security.declarePublic('getTrainingDate')
-    def getTrainingDate(self):
-        '''Sets training date default value to now'''
-        return DateTime()
-
-    MeetingItem.getTrainingDate=getTrainingDate
-    #it'a a monkey patch because it's the only way to change the behaviour of the MeetingItem class
-
-    ### FORMATION : TO BE REMOVED LATER ###
-    security.declarePublic('listDestUsers') 
-    def listDestUsers(self):
-        '''Lists the users that will be selectable to be in destination (view only) for this
-            item.'''
-        pgp = self.portal_membership
-        res = []
-        for user in pgp.listMembers():
-            res.append((user.getId(),user.getProperty('fullname')))
-        res = sorted(res, key=lambda student: student[1])
-        return DisplayList(tuple(res))
-
-    MeetingItem.listDestUsers=listDestUsers
-    #it'a a monkey patch because it's the only way to have a default method in the schema
-
-    ### FORMATION : TO BE REMOVED LATER ###
-    security.declarePublic('listFormationMod') 
-    def listFormationMod(self,displaylist=True):
-        res = []
-        res.append(('1',self.translate('MeetingAndenne_label_formation_mod1', domain='PloneMeeting').encode('utf-8')))
-        res.append(('2',self.translate('MeetingAndenne_label_formation_mod2', domain='PloneMeeting').encode('utf-8')))
-        if (displaylist):
-            return DisplayList(tuple(res))
-        else:
-            return tuple(res)
-
-    MeetingItem.listFormationMod=listFormationMod
-    #it'a a monkey patch because it's the only way to have a default method in the schema
-
-    ### FORMATION : TO BE REMOVED LATER ###
-    security.declarePublic('getLabelForIncludebudget')
-    def getLabelForIncludebudget(self):
-        """
-          If we are in the formation template, we change the label of the 'includebudget' field
-        """
-        if self.adapted().isformation():
-            return "La formation est payante - Je remplis les champs suivants (si la formation est gratuite, il y a lieu de décocher et ne rien remplir ci-dessous)"
-        else:
-            return self.utranslate("MeetingAndenne_label_IncludeBudget", domain="MeetingAndenne", context=self)
-
-    ### FORMATION : TO BE REMOVED LATER ###
-    security.declarePublic('extractBudget')
-    def extractBudget(self):
-        if (not self.context.budgetRelated):
-            return ['','']
-
-        returnValue=['XXXX','YYYY']
-        budget_array=self.context.budgetInfos().replace(';',' ').replace('>',' ').replace('&',' ').replace('<',' ').split()
-        for element in budget_array:
-            price=element.replace('.','').replace(',','.')
-            if (self.adapted().isFloat(price)):
-                returnValue[0]=element
-                break
-        for element in budget_array:
-            article=element.replace('.','').replace('/','').replace('-','')
-            if (self.adapted().isFloat(article) and element.count('/')== 1):
-                returnValue[1]=element
-                break
-        return returnValue
-
-    ### FORMATION : TO BE REMOVED LATER ###
-    security.declarePublic('isFloat')
-    def isFloat(self,string):
-        try:
-            float(string)
-            return True
-        except ValueError:
-            return False
 
 
 # ------------------------------------------------------------------------------

@@ -28,7 +28,8 @@ from zope.interface import Interface
 from zope.publisher.interfaces.browser import IDefaultBrowserLayer
 from Products.PloneMeeting.interfaces import \
     IMeetingItemWorkflowConditions, IMeetingItemWorkflowActions, \
-    IMeetingWorkflowActions, IMeetingWorkflowConditions
+    IMeetingWorkflowActions, IMeetingWorkflowConditions, \
+    IMeetingItemCustom
 
 # ------------------------------------------------------------------------------
 class IMeetingItemCollegeAndenneWorkflowActions(IMeetingItemWorkflowActions):
@@ -111,14 +112,16 @@ class IMeetingCollegeAndenneWorkflowConditions(IMeetingWorkflowConditions):
           Guard for the 'close' transitions
         """
 
+class IMeetingItemFormation(IMeetingItemCustom):
+    '''Marker interface for .MeetingAndenne.MeetingItemFormation'''
+    pass
+
 class ICourrierFile(Interface):
-    '''Marker interface for .MeetingAndenne.CourrierFile
-    '''
+    '''Marker interface for .MeetingAndenne.CourrierFile'''
+    pass
 
 class IMeetingAndenneLayer(IDefaultBrowserLayer):
-    """
-      Define a layer so some elements are only added for it
-    """
+    '''Define a layer so some elements are only added for it.'''
     pass
 
 # ------------------------------------------------------------------------------
