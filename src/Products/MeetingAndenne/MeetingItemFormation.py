@@ -264,7 +264,6 @@ class MeetingItemFormation(CustomMeetingItemAndenne):
 
     def __init__(self, item):
         self.context = item
-        self.context.schema = MeetingItemFormation.schema
 
     def getExtraFieldsToCopyWhenCloning(self, cloned_to_same_mc):
         ''' Lists the fields to keep when cloning an item'''

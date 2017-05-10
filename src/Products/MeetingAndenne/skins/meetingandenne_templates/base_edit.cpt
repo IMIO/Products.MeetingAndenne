@@ -17,7 +17,7 @@ In MeetingAndenne, we can use different templates linked to adapters (meetingite
                    fieldset request/fieldset|options/fieldset|default_fieldset;
                    fields python: view.fields(fieldsets);
                    dummy python:context.at_isEditable(fields);
-                   portal_type python:context.meta_type == 'MeetingItem' and hasattr(context, 'template') and hasattr(context, 'templateStates') and getattr(context, 'template').lower() or context.getPortalTypeName().lower().replace(' ', '_');
+                   portal_type python:context.meta_type == 'MeetingItem' and hasattr(context, 'template') and hasattr(context, 'templateStates') and ( context.queryState() in getattr(context, 'templateStates') ) and getattr(context, 'template').lower() or context.getPortalTypeName().lower().replace(' ', '_');
                    portal_url nocall:context/portal_url;
                    portal portal_url/getPortalObject;
                    base_macros context/edit_macros/macros;
