@@ -15,7 +15,7 @@ msgstr ""
 "Domain: plone\n"
 "X-is-fallback-for: fr-be fr-ca fr-lu fr-mc fr-ch fr-fr\n"
 
-# types
+# Meeting
 #. Default: "MeetingCollege"
 msgid "MeetingCollege"
 msgstr "Séance du Collège communal"
@@ -24,6 +24,15 @@ msgstr "Séance du Collège communal"
 msgid "MeetingCouncil"
 msgstr "Séance du Conseil communal"
 
+#. Default: "Meetingcd"
+msgid "Meetingcd"
+msgstr "Séance du Comité de Direction"
+
+#. Default: "Meetingrcc"
+msgid "Meetingrcc"
+msgstr "Rapport du Collège au Conseil"
+
+# MeetingItems
 #. Default: "MeetingItemCollege"
 msgid "MeetingItemCollege"
 msgstr "Point Collège communal"
@@ -32,222 +41,112 @@ msgstr "Point Collège communal"
 msgid "MeetingItemCouncil"
 msgstr "Point Conseil communal"
 
-# various
-# MeetingItem
-#. Default: "Decision"
-msgid "PloneMeeting_label_decision"
-msgstr "Décision"
+#. Default: "MeetingItemcd"
+msgid "MeetingItemcd"
+msgstr "Point Comité de Direction"
 
-#. Default: "accept but modify"
-msgid "accept_but_modify"
-msgstr "Accepter avec modifications"
+#. Default: "MeetingItemrcc"
+msgid "MeetingItemrcc"
+msgstr "Rapport d'Activité"
 
-#. Default: "Accepted but modified"
+# Workflow states
+#. Default: "Accepted and closed"
+msgid "accepted_and_closed"
+msgstr "Accepté et PV cloturé"
+
+#. Default: "Accepted with modifications"
 msgid "accepted_but_modified"
 msgstr "Accepté avec modifications"
 
+#. Default: "Accepted with modifications and closed"
+msgid "accepted_but_modified_and_closed"
+msgstr "Accepté avec modifications et PV cloturé"
+
+#. Default: "Closed"
+msgid "closed"
+msgstr "Clôturé"
+
+#. Default: "Delayed and closed"
+msgid "delayed_and_closed"
+msgstr "Reporté et PV cloturé"
+
+#. Default: "Published (frozen)"
+msgid "frozen"
+msgstr "Arrêté"
+
+#. Default: "Frozen"
+msgid "itemfrozen"
+msgstr "Arrêté"
+
+#. Default: "Pre accepted"
+msgid "pre_accepted"
+msgstr "Accepté provisoirement"
+
+#. Default: "Refused and closed"
+msgid "refused_and_closed"
+msgstr "Refusé et PV cloturé"
+
 # Workflow transitions
-#. Default: "Ask advices"
-msgid "ask_advices_by_itemcreator"
-msgstr "Demander les avis"
+#. Default: "Accept and close"
+msgid "accept_and_close"
+msgstr "Clôturer le PV en écriture"
 
-#. Default: "send back"
-msgid "backToItemCreated"
-msgstr "Renvoyer en création"
+#. Default: "Accept with modifications"
+msgid "accept_but_modify"
+msgstr "Accepter avec modifications"
 
-#. Default: "bo to item frozen"
+#. Default: "Accept with modifications and close"
+msgid "accept_but_modify_and_close"
+msgstr "Clôturer le PV en écriture"
+
+#. Default: "Back to 'Accepted'"
+msgid "backToAccepted"
+msgstr "Réouvrir le PV en écriture"
+
+#. Default: "Back to 'Accepted with modifications'"
+msgid "backToAcceptedButModified"
+msgstr "Réouvrir le PV en écriture"
+
+#. Default: "Back to 'Delayed'"
+msgid "backToDelayed"
+msgstr "Réouvrir le PV en écriture"
+
+#. Default: "Back to 'Frozen'"
+msgid "backToFrozen"
+msgstr "Remettre en 'Arrêté'"
+
+#. Default: "Back to 'Frozen'"
 msgid "backToItemFrozen"
-msgstr "Remettre en gelé"
+msgstr "Remettre en 'Arrêté'"
 
-#. Default: "send back"
-msgid "backToPresented"
-msgstr "Remettre en présenté"
+#. Default: "Back to 'Refused'"
+msgid "backToRefused"
+msgstr "Réouvrir le PV en écriture"
 
-#. Default: "send back"
-msgid "backToProposed"
-msgstr "Renvoyer au directeur"
+#. Default: "Close PV"
+msgid "Closewritepv"
+msgstr "Clôturer le droit d'écriture du PV"
 
-#. Default: "send back"
-msgid "backToProposedToDivisionHead"
-msgstr "Renvoyer au chef de division"
-
-#. Default: "send back"
-msgid "backToProposedToOfficeManager"
-msgstr "Renvoyer au chef de bureau"
-
-#. Default: "send back"
-msgid "backToProposedToServiceHead"
-msgstr "Renvoyer au chef de service"
-
-#. Default: "Create a plonmeeting item from a plonegov item"
-msgid "create_to_meeting-config-council_from_meeting-config-college"
-msgstr "Créer un point Conseil depuis un point Collège"
-
-#. Default: "Decisions"
-msgid "decisions"
-msgstr "Décisions"
+#. Default: "Delay and close"
+msgid "delay_and_close"
+msgstr "Clôturer le PV en écriture"
 
 #. Default: "Freeze"
 msgid "freeze"
-msgstr "Geler"
+msgstr "Arrêter"
 
-#. Default: "frozen"
-msgid "frozen"
-msgstr "Gelée"
+#. Default: "Freeze"
+msgid "itemfreeze"
+msgstr "Arrêter"
 
+#. Default: "Reopen PV"
+msgid "Openwritepv"
+msgstr "Réouvrir le droit d'écriture du PV"
 
-#. Default: "frozen"
-msgid "itemfrozen"
-msgstr "Gelé"
+#. Default: "Pre accept"
+msgid "pre_accept"
+msgstr "Accepter provisoirement"
 
-#. Default: "Description"
-msgid "meeting_item_description"
-msgstr "Description dans l'ordre du jour"
-
-msgid "propose"
-msgstr "Proposer au directeur"
-
-msgid "proposeToDivisionHead"
-msgstr "Proposer au chef de division"
-
-msgid "proposeToOfficeManager"
-msgstr "Proposer au chef de bureau"
-
-msgid "proposeToServiceHead"
-msgstr "Proposer au chef de service"
-
-#. Default: "Proposed to director"
-msgid "proposed"
-msgstr "Proposé au directeur"
-
-#. Default: "Proposed to division head"
-msgid "proposed_to_divisionhead"
-msgstr "Proposé au chef de division"
-
-#. Default: "Proposed to office manager"
-msgid "proposed_to_officemanager"
-msgstr "Proposé au chef de bureau"
-
-#. Default: "Proposed to service head"
-msgid "proposed_to_servicehead"
-msgstr "Proposé au chef de service"
-
-msgid "remove"
-msgstr "Retirer de la séance"
-
-#. Default: "Removed from meeting"
-msgid "removed"
-msgstr "Retiré de la séance"
-
-msgid "return_to_secretary"
-msgstr "Renvoyer au secrétariat"
-
-msgid "return_to_secretary_in_committee"
-msgstr "Renvoyer au secrétariat"
-
-msgid "return_to_secretary_in_council"
-msgstr "Renvoyer au secrétariat"
-
-msgid "return_to_service"
-msgstr "Renvoyer au service pour corrections"
-
-#. Default: "The item has been sent to the college."
-msgid "sendto_meeting-config-college_success"
-msgstr "Ce point a été envoyé au Collège communal."
-
-#. Default: "The item has been sent to the council."
-msgid "sendto_meeting-config-council_success"
-msgstr "Ce point a été envoyé au Conseil communal."
-
-#. Default: "The creator of this item does not exist in the meeting config you try to send the item to!"
-msgid "sendtocouncil_error_no_corresponding_meetingconfigfolder"
-msgstr "Le créateur de ce point n'a pas d'accès dans la partie Conseil communal, le point n'a pas pu être transféré!"
-
-#. Default: "The meeting config you try to send the item to does not exist!"
-msgid "sendtocouncil_error_no_existing_meetingconfig"
-msgstr "Le type de séance vers laquelle vous souhaitez envoyer ce point n'existe pas!"
-
-
-#. Default: "Some items are still under corrections in services"
-msgid "some_item_still_in_service"
-msgstr "Certains points sont toujours dans des services pour corrections"
-
-#. Default: "Validate"
-msgid "validate"
-msgstr "Valider"
-
-#. Default: "Validated"
-msgid "validated"
-msgstr "Validé"
-
-#. Default: "Create an item council from an item college"
-msgid "create_to_meeting-config-council_from_meeting-config-college"
-msgstr "Envoyer vers Conseil Communal"
-
-#. Default: "Accepted but modified On Closed Meeting"
-msgid "accepted_but_modified_closed"
-msgstr "Accepté avec modifications (c)"
-
-#. Default: "Accepted On Closed Meeting"
-msgid "accepted_closed"
-msgstr "Accepté (c)"
-
-#. Default: "Delayed On Closed Meeting"
-msgid "delayed_closed"
-msgstr "Reporté (c)"
-
-#. Default: "Accepted but modified On Closed Meeting"
-msgid "accept_but_modify_close"
-msgstr "Accepter avec modifications (c)"
-
-#. Default: "Accept On Closed Meeting"
-msgid "accept_close"
-msgstr "Accepter (c)"
-
-#. Default: "Delay On Closed Meeting"
-msgid "delay_close"
-msgstr "Reporter (c)"
-
-#. Default: "Back to Accepted"
-msgid "backToItemAccepted"
-msgstr "Remettre en accepté"
-
-#. Default: "Back to Accepted But Modified"
-msgid "backToItemAcceptedButModified"
-msgstr "Remettre en Accepté avec modifications"
-
-#. Default: "Back to Delayed"
-msgid "backToItemDelayed"
-msgstr "Remettre en reporté"
-
-#. Default: "Returned to advise"
-msgid "returned_to_advise"
-msgstr "Retourné pour avis"
-
-#. Default: "Return to advise"
-msgid "return_to_advise"
-msgstr "Retourner pour avis"
-
-#. Default: "Return to proposing group from returned to advise"
-msgid "backTo_returned_to_proposing_group_from_returned_to_advise"
-msgstr "Retourner au groupe proposant"
-
-#. Default: "Validate item by DG"
-msgid "itemValidateByDG"
-msgstr "Valider le point par le DG"
-
-#. Default: "Validate item by DG"
-msgid "validateByDG"
-msgstr "Valider la séance par le DG"
-
-#. Default: "Back to 'validated by DG'"
-msgid "backToValidatedByDG"
-msgstr "Remettre en 'validé par le DG'"
-
-#. Default: "Back to 'validated by DG'"
-msgid "backToItemValidatedByDG"
-msgstr "Remettre en 'validé par le DG'"
-
-#. Default: "Validated By DG"
-msgid "validated_by_dg"
-msgstr "Validé par le DG"
+#. Default: "Refuse and close"
+msgid "refuse_and_close"
+msgstr "Clôturer le PV en écriture"

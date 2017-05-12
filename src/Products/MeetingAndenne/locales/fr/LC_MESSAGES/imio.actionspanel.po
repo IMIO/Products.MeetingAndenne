@@ -12,151 +12,66 @@ msgstr ""
 "Language-Code: fr\n"
 "Language-Name: French\n"
 "Preferred-Encodings: utf-8 latin1\n"
-"Domain: plone\n"
+"Domain: PloneMeeting\n"
 "X-is-fallback-for: fr-be fr-ca fr-lu fr-mc fr-ch fr-fr\n"
 
-#. Default: "accept_but_modify_done_descr"
+#. Default: "The PV is now closed"
+msgid "accept_and_close_done_descr"
+msgstr "Le procès-verbal est maintenant clôturé."
+
+#. Default: "The item has been accepted with modifications."
 msgid "accept_but_modify_done_descr"
 msgstr "Le point a été accepté avec modifications."
 
-#. Default: "accept_done_descr"
-msgid "accept_done_descr"
-msgstr "Le point a été accepté."
+#. Default: "The PV is now closed"
+msgid "accept_but_modify_and_close_done_descr"
+msgstr "Le procès-verbal est maintenant clôturé."
 
-#. Default: "ask_advices_by_itemcreator_done_descr"
-msgid "ask_advices_by_itemcreator_done_descr"
-msgstr "Le point est en attente des avis."
-
-#. Default: "backToCreated_done_descr"
+#. Default: "The publication of the meeting agenda has been canceled."
 msgid "backToCreated_done_descr"
-msgstr "Vous venez d'annuler le gel de l'ordre du jour."
+msgstr "Vous venez d'annuler l'arrêt de l'ordre du jour."
 
-#. Default: "backToDecided_done_descr"
+#. Default: "The publication of definitive decisions has been canceled."
 msgid "backToDecided_done_descr"
 msgstr "Vous pouvez à nouveau modifier le procès-verbal."
 
-#. Default: "backToFrozen_done_descr"
+#. Default: "The publication of temporary decisions has been canceled."
 msgid "backToFrozen_done_descr"
-msgstr "La séance est à nouveau gelée."
+msgstr "Vous ne pouvez plus rédiger le Procès-verbal pour l'instant."
 
-#. Default: "send back to in committee"
-msgid "backToInCommittee_done_descr"
-msgstr "La séance a été remise en commission.  Tous les points qui étaient en conseil sont repassés en commission."
-
-#. Default: "send back to in council"
-msgid "backToInCouncil_done_descr"
-msgstr "La séance a été remise en conseil communal."
-
-#. Default: "This item is back in its initial state. The person who created it (or another creator within the same group) can now modify it and will need to propose it again once finished."
-msgid "backToItemCreated_done_descr"
-msgstr "Le point est revenu dans l'état initial de sa création. Lorsque vous ou la personne pouvant corriger le point aura terminé, elle devra le proposer à nouveau."
-
-#. Default: "The decision taken on this item has been canceled."
-msgid "backToItemFrozen_done_descr"
-msgstr "Le point est à nouveau gelé."
-
-#. Default: "This item has been send back to the committee."
-msgid "backToItemInCommittee_done_descr"
-msgstr "Le point a été remis en commission."
-
-#. Default: "This item has been send back to the council."
-msgid "backToItemInCouncil_done_descr"
-msgstr "Le point a été remis en Conseil communal."
-
-#. Default: "Item freeze has been cancelled."
-msgid "backToPresented_done_descr"
-msgstr "Le gel du point a été annulé."
-
-#. Default: "This item has been send back to the director."
-msgid "backToProposed_done_descr"
-msgstr "Le point a été renvoyé au directeur."
-
-#. Default: "This item has been send back to the division head."
-msgid "backToProposedToDivisionHead_done_descr"
-msgstr "Le point a été renvoyé au chef de division."
-
-#. Default: "This item has been send back to the office manager."
-msgid "backToProposedToOfficeManager_done_descr"
-msgstr "Le point a été renvoyé au chef de bureau."
-
-#. Default: "This item has been send back to the service head."
-msgid "backToProposedToServiceHead_done_descr"
-msgstr "Le point a été renvoyé au chef de service."
-
-#. Default: "The item has been removed from the meeting agenda."
-msgid "backToValidated_done_descr"
-msgstr "Le point a été retiré de l'ordre du jour."
-
-#. Default: "The definitive decisions have been confirmed."
+#. Default: "The definitive decisions have been published for this meeting."
 msgid "close_done_descr"
-msgstr "La séance a été clôturée."
+msgstr "Le procès-verbal est maintenant clôturé, tous les points pour lesquels aucune décision n'avait été prise ont été automatiquement acceptés."
 
-#. Default: "decide_done_descr"
+#. Default: "The temporary decisions have been published for this meeting."
 msgid "decide_done_descr"
-msgstr "Les décisions peuvent maintenant être encodées."
+msgstr "Vous pouvez maintenant rédiger le Procès-verbal de cette séance."
 
-#. Default: "The item has been 'delayed'.  If it is the college, is has been duplicated, if it is the council, it has not been duplicated."
+#. Default: "The item has been delayed.  It has been duplicated for the corresponding proposing group so it can propose it again easily."
 msgid "delay_done_descr"
-msgstr "Le point a été reporté.  S'il s'agit d'un point collège, il a été dupliqué chez le service proposant afin qu'il puisse facilement le proposer à nouveau."
+msgstr "Le point a été reporté. Il a été dupliqué chez le service proposant afin qu'il puisse facilement le proposer à nouveau."
 
-# transitions descriptions
-#. Default: "freeze_done_descr"
+#. Default: "The PV is now closed"
+msgid "delay_and_close_done_descr"
+msgstr "Le procès-verbal est maintenant clôturé."
+
+#. Default: "The meeting has been frozen."
 msgid "freeze_done_descr"
-msgstr "L'ordre du jour est maintenant gelé."
+msgstr "L'ordre du jour vient d'être arrêté."
 
-#. Default: "itemfreeze_done_descr"
+#. Default: "The item has been frozen."
 msgid "itemfreeze_done_descr"
-msgstr "Le point a été gelé."
+msgstr "Le point a été arrêté."
 
-#. Default: "propose_done_descr"
-msgid "propose_done_descr"
-msgstr "Le point a été envoyé au directeur."
+#. Default: "The item has been pre accepted"
+msgid "pre_accept_done_descr"
+msgstr "Le point a été accepté provisoirement."
 
-#. Default: "proposeToDivisionHead_done_descr"
-msgid "proposeToDivisionHead_done_descr"
-msgstr "Le point a été envoyé au chef de division."
+#. Default: "The decision linked to this item has been refused."
+msgid "refuse_done_descr"
+msgstr "La point a été refusé."
 
-#. Default: "proposeToOfficeManager_done_descr"
-msgid "proposeToOfficeManager_done_descr"
-msgstr "Le point a été envoyé au chef de bureau."
-
-#. Default: "proposeToServiceHead_done_descr"
-msgid "proposeToServiceHead_done_descr"
-msgstr "Le point a été envoyé au chef de service."
-
-#. Default: "return_to_secretary_done_descr"
-msgid "return_to_secretary_done_descr"
-msgstr "Le point a été renvoyé au Secrétariat communal."
-
-#. Default: "return_to_secretary_in_committee_done_descr"
-msgid "return_to_secretary_in_committee_done_descr"
-msgstr "Le point a été renvoyé au Secrétariat communal."
-
-#. Default: "return_to_secretary_in_council_done_descr"
-msgid "return_to_secretary_in_council_done_descr"
-msgstr "Le point a été renvoyé au Secrétariat communal."
-
-#. Default: "return_to_service_done_descr"
-msgid "return_to_service_done_descr"
-msgstr "Le point a été renvoyé au service."
-
-#. Default: "setInCommittee_done_descr"
-msgid "setInCommittee_done_descr"
-msgstr "La séance est passée en commission."
-
-#. Default: "setInCouncil_done_descr"
-msgid "setInCouncil_done_descr"
-msgstr "La séance est passée en Conseil communal."
-
-#. Default: "setItemInCommittee_done_descr"
-msgid "setItemInCommittee_done_descr"
-msgstr "Le point est passé en Commission."
-
-#. Default: "setItemInCouncil_done_descr"
-msgid "setItemInCouncil_done_descr"
-msgstr "Le point est passé en Conseil communal."
-
-#. Default: "The item has been validated."
-msgid "validate_done_descr"
-msgstr "Le point a été validé: il est maintenant visible par le gestionnaire de séance, qui peut décider de le présenter à l'ordre du jour d'une séance."
+#. Default: "The PV is now closed"
+msgid "refuse_and_close_done_descr"
+msgstr "Le procès-verbal est maintenant clôturé."
 
