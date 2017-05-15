@@ -6,8 +6,8 @@ from plone.app.users.browser.personalpreferences import WysiwygEditorWidget
 from Products.Five.browser.pagetemplatefile import ViewPageTemplateFile
 from zope import schema
 from zope.formlib import form
-from zope.i18nmessageid import MessageFactory
-_ = MessageFactory("PloneMeeting")
+
+from Products.CMFPlone import PloneMessageFactory as _
 
 
 class IEnhancedPersonalPreferences(IPersonalPreferences):

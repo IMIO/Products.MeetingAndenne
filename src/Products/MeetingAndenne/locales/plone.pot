@@ -1,17 +1,25 @@
 msgid ""
 msgstr ""
-"Project-Id-Version: PloneMeeting\n"
+"Project-Id-Version: MeetingAndenne\n"
 "POT-Creation-Date: 2011-03-01 09:00-100\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=1; plural=0\n"
-"Language-code: \n"
-"Language-name: \n"
-"Preferred-encodings: utf-8 latin1\n"
+"Language-Code: \n"
+"Language-Name: \n"
+"Preferred-Encodings: utf-8 latin1\n"
 "Domain: plone\n"
 
 # types
+#. Default: "CourrierFile"
+msgid "CourrierFile"
+msgstr ""
+
+#. Default: "Meetingcd"
+msgid "Meetingcd"
+msgstr ""
+
 #. Default: "MeetingCollege"
 msgid "MeetingCollege"
 msgstr ""
@@ -19,6 +27,10 @@ msgstr ""
 #. Default: "MeetincCouncil"
 msgid "MeetingCouncil"
 msgstr ""
+
+#. Default: "MeetingItemcd"
+msgid "MeetingItemcd"
+msgstr "Point Comité de Direction"
 
 #. Default: "MeetingItemCollege"
 msgid "MeetingItemCollege"
@@ -28,239 +40,170 @@ msgstr ""
 msgid "MeetingItemCouncil"
 msgstr ""
 
-# various
-# MeetingItem
-#. Default: "Decision"
-msgid "PloneMeeting_label_decision"
+#. Default: "MeetingItemrcc"
+msgid "MeetingItemrcc"
+msgstr "Rapport d'Activité"
+
+#. Default: "Meetingrcc"
+msgid "Meetingrcc"
 msgstr ""
 
-#. Default: "accept but modify"
-msgid "accept_but_modify"
+# Workflow states
+#. Default: "Accepted and closed"
+msgid "accepted_and_closed"
 msgstr ""
 
-#. Default: "Accepted but modified"
+#. Default: "Accepted with modifications"
 msgid "accepted_but_modified"
 msgstr ""
 
+#. Default: "Accepted with modifications and closed"
+msgid "accepted_but_modified_and_closed"
+msgstr ""
+
+#. Default: "Closed"
+msgid "closed"
+msgstr ""
+
+#. Default: "Delayed and closed"
+msgid "delayed_and_closed"
+msgstr ""
+
+#. Default: "Published (frozen)"
+msgid "frozen"
+msgstr ""
+
+#. Default: "Frozen"
+msgid "itemfrozen"
+msgstr ""
+
+#: Default: "Not processed"
+msgid "not_processed"
+msgstr ""
+
+#. Default: "Pre accepted"
+msgid "pre_accepted"
+msgstr ""
+
+#: Default: "Processed"
+msgid "processed"
+msgstr ""
+
+#. Default: "Refused and closed"
+msgid "refused_and_closed"
+msgstr ""
+
 # Workflow transitions
-#. Default: "Ask advices"
-msgid "ask_advices_by_itemcreator"
+#. Default: "Accept and close"
+msgid "accept_and_close"
 msgstr ""
 
-msgid "backToProposed"
+#. Default: "Accept but modify"
+msgid "accept_but_modify"
 msgstr ""
 
-msgid "backToProposedToDivisionHead"
+#. Default: "Accept with modifications and close"
+msgid "accept_but_modify_and_close"
 msgstr ""
 
-msgid "backToProposedToOfficeManager"
+#. Default: "Back to 'Accepted'"
+msgid "backToAccepted"
 msgstr ""
 
-msgid "backToProposedToServiceHead"
+#. Default: "Back to 'Accepted with modifications'"
+msgid "backToAcceptedButModified"
 msgstr ""
 
-msgid "return_to_service"
+#. Default: "Back to 'Delayed'"
+msgid "backToDelayed"
 msgstr ""
 
-msgid "return_to_secretary"
+#. Default: "Back to 'Frozen'"
+msgid "backToFrozen"
 msgstr ""
 
-#. Default: "Decisions"
-msgid "decisions"
+#. Default: "Back to 'Frozen'"
+msgid "backToItemFrozen"
+msgstr ""
+
+#. Default: "Back to 'Refused'"
+msgid "backToRefused"
+msgstr ""
+
+#. Default: "Close PV"
+msgid "Closewritepv"
+msgstr ""
+
+#. Default: "Delay and close"
+msgid "delay_and_close"
 msgstr ""
 
 #. Default: "Freeze"
 msgid "freeze"
 msgstr ""
 
-#. Default: "Frozen"
-msgid "frozen"
+#. Default: "Freeze"
+msgid "itemfreeze"
 msgstr ""
 
-#. Default: "Frozen"
-msgid "itemfrozen"
+#. Default: "Reopen PV"
+msgid "Openwritepv"
 msgstr ""
 
-#. Default: "Description"
-msgid "meeting_item_description"
+#. Default: "Pre accept"
+msgid "pre_accept"
 msgstr ""
 
-msgid "propose"
+#. Default: "Process"
+msgid "process"
 msgstr ""
 
-msgid "proposeToDivisionHead"
+#. Default: "Refuse and close"
+msgid "refuse_and_close"
 msgstr ""
 
-msgid "proposeToOfficeManager"
+# User data
+#. Default: "Male"
+msgid "Male"
 msgstr ""
 
-msgid "proposeToServiceHead"
+#. Default: "Female"
+msgid "Female"
 msgstr ""
 
-#. Default: "Proposed to director"
-msgid "proposed"
+#. Default: "Gender"
+msgid "label_gender"
 msgstr ""
 
-#. Default: "Proposed to division head"
-msgid "proposed_to_divisionhead"
+#. Default: "Your gender"
+msgid "help_gender"
 msgstr ""
 
-#. Default: "Proposed to office manager"
-msgid "proposed_to_officemanager"
+#. Default: "Function"
+msgid "label_function"
 msgstr ""
 
-#. Default: "Proposed to service head"
-msgid "proposed_to_servicehead"
+#. Default: "Your function inside the company"
+msgid "help_function"
 msgstr ""
 
-msgid "remove"
+#. Default: "Listed in searches"
+msgid "label_listed"
 msgstr ""
 
-#. Default: "Removed from meeting"
-msgid "removed"
+#. Default: "Determines if your user name is listed in user searches done on this site."
+msgid "help_listed"
 msgstr ""
 
-#. Default: "Validate"
-msgid "validate"
+# Roles
+#. Default: "Meeting Mail Viewer"
+msgid "MeetingMailViewer"
 msgstr ""
 
-#. Default: "Validated"
-msgid "validated"
+#. Default: "Meeting Pre Reviewer"
+msgid "MeetingPreReviewer"
 msgstr ""
 
-#. Default: "send back"
-msgid "backToItemCreated"
-msgstr ""
-
-#. Default: "send back"
-msgid "backToProposedToServiceHead"
-msgstr ""
-
-#. Default: "send back"
-msgid "backToProposedToOfficeManager"
-msgstr ""
-
-#. Default: "send back"
-msgid "backToProposedToDivisionHead"
-msgstr ""
-
-#. Default: "send back"
-msgid "backToProposed"
-msgstr ""
-
-#. Default: "bo to item frozen"
-msgid "backToItemFrozen"
-msgstr ""
-
-#. Default: "send back"
-msgid "backToPresented"
-msgstr ""
-
-#. Default: "frozen"
-msgid "frozen"
-msgstr ""
-
-#. Default: "frozen"
-msgid "itemfrozen"
-msgstr ""
-
-#. Default: "Create a plonmeeting item from a plonegov item"
-msgid "create_to_meeting-config-council_from_meeting-config-college"
-msgstr ""
-
-#. Default: "The meeting config you try to send the item to does not exist!"
-msgid "sendtocouncil_error_no_existing_meetingconfig"
-msgstr ""
-
-#. Default: "The creator of this item does not exist in the meeting config you try to send the item to!"
-msgid "sendtocouncil_error_no_corresponding_meetingconfigfolder"
-msgstr ""
-
-#. Default: "The item has been sent to the council."
-msgid "sendto_meeting-config-council_success"
-msgstr ""
-
-#. Default: "The item has been sent to the college."
-msgid "sendto_meeting-config-college_success"
-msgstr ""
-
-#. Default: "Some items are still under corrections in services"
-msgid "some_item_still_in_service"
-msgstr ""
-
-#. Default: "Create an item council from an item college" 
-msgid "create_to_meeting-config-council_from_meeting-config-college" 
-msgstr ""
-
-#. Default: "Accepted but modified On Closed Meeting"
-msgid "accepted_but_modified_closed"
-msgstr ""
-
-#. Default: "Accepted On Closed Meeting"
-msgid "accepted_closed"
-msgstr ""
-
-#. Default: "Delayed On Closed Meeting"
-msgid "delayed_closed"
-msgstr ""
-
-#. Default: "Accepted but modified On Closed Meeting"
-msgid "accept_but_modify_close"
-msgstr ""
-
-#. Default: "Accepted On Closed Meeting"
-msgid "accept_close"
-msgstr ""
-
-#. Default: "Delay On Closed Meeting"
-msgid "delay_close"
-msgstr ""
-
-
-#. Default: "Back to Accepted"
-msgid "backToItemAccepted"
-msgstr ""
-
-#. Default: "Back to Accepted But Modified"
-msgid "backToItemAcceptedButModified"
-msgstr ""
-
-#. Default: "Back to Delayed"
-msgid "backToItemDelayed"
-msgstr ""
-
-#. Default: "Returned to advise"
-msgid "returned_to_advise"
-msgstr ""
-
-#. Default: "Return to advise"
-msgid "return_to_advise"
-msgstr ""
-
-#. Default: "Return to proposing group from returned to advise"
-msgid "backTo_returned_to_proposing_group_from_returned_to_advise"
-msgstr ""
-
-#. Default: "Validate item by DG"
-msgid "itemValidateByDG"
-msgstr ""
-
-#. Default: "Back to DG the item"
-msgid "backToValidateByDG"
-msgstr ""
-
-#. Default: "Validate item by DG"
-msgid "validateByDG"
-msgstr ""
-
-#. Default: "Back to DG the item"
-msgid "backToValidateByDG"
-msgstr ""
-
-#. Default: "Back to 'validated by DG'"
-msgid "backToItemValidatedByDG"
-msgstr ""
-
-#. Default: "Validated By DG"
-msgid "validated_by_dg"
+#. Default: "Meeting PV Writer"
+msgid "MeetingPvWriterer"
 msgstr ""

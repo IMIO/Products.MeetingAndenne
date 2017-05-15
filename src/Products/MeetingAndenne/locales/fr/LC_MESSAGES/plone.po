@@ -15,6 +15,11 @@ msgstr ""
 "Domain: plone\n"
 "X-is-fallback-for: fr-be fr-ca fr-lu fr-mc fr-ch fr-fr\n"
 
+# Mails
+#. Default: "CourrierFile"
+msgid "CourrierFile"
+msgstr "Courrier"
+
 # Meeting
 #. Default: "MeetingCollege"
 msgid "MeetingCollege"
@@ -78,9 +83,17 @@ msgstr "Arrêté"
 msgid "itemfrozen"
 msgstr "Arrêté"
 
+#: Default: "Not processed"
+msgid "Non traité"
+msgstr ""
+
 #. Default: "Pre accepted"
 msgid "pre_accepted"
 msgstr "Accepté provisoirement"
+
+#: Default: "Processed"
+msgid "processed"
+msgstr "Traité"
 
 #. Default: "Refused and closed"
 msgid "refused_and_closed"
@@ -91,7 +104,7 @@ msgstr "Refusé et PV cloturé"
 msgid "accept_and_close"
 msgstr "Clôturer le PV en écriture"
 
-#. Default: "Accept with modifications"
+#. Default: "Accept but modify"
 msgid "accept_but_modify"
 msgstr "Accepter avec modifications"
 
@@ -147,6 +160,56 @@ msgstr "Réouvrir le droit d'écriture du PV"
 msgid "pre_accept"
 msgstr "Accepter provisoirement"
 
+#. Default: "Process"
+msgid "process"
+msgstr "Traiter"
+
 #. Default: "Refuse and close"
 msgid "refuse_and_close"
 msgstr "Clôturer le PV en écriture"
+
+# User data
+#. Default: "Male"
+msgid "Male"
+msgstr "Homme"
+
+#. Default: "Female"
+msgid "Female"
+msgstr "Femme"
+
+#. Default: "Gender"
+msgid "label_gender"
+msgstr "Sexe"
+
+#. Default: "Your gender"
+msgid "help_gender"
+msgstr "Votre sexe."
+
+#. Default: "Function"
+msgid "label_function"
+msgstr "Fonction"
+
+#. Default: "Your function inside the company"
+msgid "help_function"
+msgstr "Votre fonction dans l'entreprise."
+
+#. Default: "Listed in searches"
+msgid "label_listed"
+msgstr "Apparaître dans la liste des utilisateurs"
+
+#. Default: "Determines if your user name is listed in user searches done on this site."
+msgid "help_listed"
+msgstr "Indique si l'utilisateur apparaît dans la liste publique des utilisateurs du site."
+
+# Roles
+#. Default: "Meeting Mail Viewer"
+msgid "MeetingMailViewer"
+msgstr ""
+
+#. Default: "Meeting Pre Reviewer"
+msgid "MeetingPreReviewer"
+msgstr ""
+
+#. Default: "Meeting PV Writer"
+msgid "MeetingPvWriterer"
+msgstr ""

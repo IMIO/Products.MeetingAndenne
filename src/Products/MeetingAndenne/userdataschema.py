@@ -5,7 +5,7 @@ from zope import schema
 from zope.schema.vocabulary import SimpleVocabulary, SimpleTerm
 from zope.interface import implements
 from zope.i18nmessageid import MessageFactory
-_ = MessageFactory("PloneMeeting")
+from Products.CMFPlone import PloneMessageFactory as _
 
 gender_options = SimpleVocabulary([
     SimpleTerm( value = 'homme', title = _(u'Male') ),

@@ -1,5 +1,4 @@
 from zope.component import getMultiAdapter
-from zope.i18n import translate
 
 from plone.memoize.instance import memoize
 
