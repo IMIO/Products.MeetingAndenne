@@ -140,7 +140,6 @@
       <metal:field use-macro="python:here.widget('budgetInfos', mode='edit')"/>
 
       <tal:comment replace="nothing">Training fees and payment specific fields</tal:comment>
-      <metal:field use-macro="python:here.widget('training_registrationFee', mode='edit')"/>
       <metal:field use-macro="python:here.widget('training_syllabusCosts', mode='edit')"/>
       <metal:field use-macro="python:here.widget('training_travelExpenses', mode='edit')"/>
       <metal:field use-macro="python:here.widget('training_parkingFees', mode='edit')"/>

@@ -309,3 +309,203 @@ msgstr "Validé par le DG"
 #. Default: "Description"
 msgid "PloneMeeting_label_itemDescription"
 msgstr "Note dactylo"
+
+#. Default: "Description"
+msgid "label_listed"
+msgstr "List qui marche"
+
+#. Default: "Description"
+msgid "help_listed"
+msgstr "List qui marche a balle de guerre"
+
+#. Default: "Type"
+msgid "MeetingAndenne_label_training_budgetRelated"
+msgstr "La formation est payante - Je remplis les champs suivants (si la formation est gratuite, il y a lieu de décocher cette case)"
+
+#. Default: "Type"
+msgid "MeetingAndenne_label_training_type"
+msgstr "Type d'événement"
+
+#. Default: "Purpose"
+msgid "MeetingAndenne_label_training_purpose"
+msgstr "Objet de l'événement/formation (exemple: L'inflence du soleil sur le réchauffement climatique)"
+
+#. Default: "Startdate"
+msgid "MeetingAndenne_label_training_startDate"
+msgstr "Date et heure du début de l'événement/formation"
+
+#. Default: "Enddate"
+msgid "MeetingAndenne_label_training_endDate"
+msgstr "Date et heure de fin de l'événement/formation"
+
+#. Default: "Periodicity"
+msgid "MeetingAndenne_label_training_periodicity"
+msgstr "Périodicité de l'événement, si nécessaire (exemple1: tous les lundi. Exemple2: le lundi 2 juin et vendredi 6 juin)"
+
+#. Default: "Organiser"
+msgid "MeetingAndenne_label_training_organiser"
+msgstr "Nom de l'organisateur de l'événement/formation (exemple: le centre de formation technofutur)"
+
+#. Default: "Place"
+msgid "MeetingAndenne_label_training_place"
+msgstr "Lieu et adresse de l'événement/formation (exemple : Moulins de Beez, route de namur, 4 à 5000 Jambes)"
+
+#. Default: "Users"
+msgid "MeetingAndenne_label_training_users"
+msgstr "Nom des personne(s) participant(s) à l'événement/formation"
+
+#. Default: "Additionalusers"
+msgid "MeetingAndenne_label_training_additionalUsers"
+msgstr "Nom et fonction des personne(s) supplémentaire(s) participant(s) à l'événement/formation ne se trouvant pas dans la liste ci-dessus (exemple: Jeanne Dupont, Accueillante extrascolaire)"
+
+#. Default: "Description"
+msgid "MeetingAndenne_label_training_description"
+msgstr "Description de l'événement/formation"
+
+#. Default: "Syllabuscosts"
+msgid "MeetingAndenne_label_training_syllabusCosts"
+msgstr "Frais supplémentaires relatifs aux syllabi (EUR TVAC)"
+
+#. Default: "Travelexpenses"
+msgid "MeetingAndenne_label_training_travelExpenses"
+msgstr "Frais supplémentaires relatifs aux déplacements (EUR TVAC)"
+
+#. Default: "Parkingfees"
+msgid "MeetingAndenne_label_training_parkingFees"
+msgstr "Frais supplémentaires relatifs aux stationnements (EUR TVAC)"
+
+#. Default: "Accomodationexpenses"
+msgid "MeetingAndenne_label_training_accomodationExpenses"
+msgstr "Frais supplémentaires relatifs aux séjours (EUR TVAC)"
+
+#. Default: "Otherfees"
+msgid "MeetingAndenne_label_training_otherFees"
+msgstr "Frais supplémentaires autres (à preciser, EUR TVAC)"
+
+#. Default: "Paymentterms"
+msgid "MeetingAndenne_label_training_paymentTerms"
+msgstr "Modalités de payement"
+
+#. Default: "Accountnumber"
+msgid "MeetingAndenne_label_training_accountNumber"
+msgstr "sur le numéro de compte: "
+
+#. Default: "Accountname"
+msgid "MeetingAndenne_label_training_accountName"
+msgstr "ouvert au nom de "
+
+#. Default: "Acceptancegiro"
+msgid "MeetingAndenne_label_training_acceptanceGiro"
+msgstr "avec la communication suivante: "
+
+#. Default: "training"
+msgid "a_training"
+msgstr "une formation"
+
+#. Default: "workshop"
+msgid "a_workshop"
+msgstr "un atelier"
+
+#. Default: "seminar"
+msgid "a_seminar"
+msgstr "un séminaire"
+
+#. Default: "workSession"
+msgid "a_work_session"
+msgstr "une réunion de travail"
+
+#. Default: "informationSession"
+msgid "an_information_session"
+msgstr "une séance d'information"
+
+#. Default: "symposium"
+msgid "a_symposium"
+msgstr "un colloque"
+
+#. Default: "show"
+msgid "a_show"
+msgstr "un salon"
+
+#. Default: "after"
+msgid "payment_after"
+msgstr "Le paiement se fera a posteriori par les services financiers, via la réception de la facture"
+
+#. Default: "before"
+msgid "payment_before"
+msgstr "Le paiement se fera préalablement à la formation, par la DSF, "
+
+#. Default: ""
+msgid "training_description"
+msgstr "Cette formation à pour but..."
+
+#. Default: ""
+msgid "MeetingAndenne_training_description1"
+msgstr "<p>Du ${training_startDate}, au ${training_endDate} ${training_periodicity} ${training_organiser} organise ${training_type} sur le thème <i>${training_purpose}</i>.</p>"
+
+#. Default: ""
+msgid "MeetingAndenne_training_description2"
+msgstr "<p>Les frais d'inscription s'élèvent à %(training_price)s EUR TVAC; la dépense peut etre imputée sur l'article budgétaire %(training_budget)s.</p>"
+
+#. Default: ""
+msgid "MeetingAndenne_training_description2free"
+msgstr "<p>Cet événement est gratuit.</p>"
+
+#. Default: ""
+msgid "MeetingAndenne_training_description3"
+msgstr "<p>En plus de ces frais, des frais de surcoût devront être pris en charge par la Ville, à savoir : </p>"
+
+#. Default: ""
+msgid "MeetingAndenne_training_description4"
+msgstr "<p>Je remercie donc le Collège d'autoriser la participation à cette journée.</p>"
+
+#. Default: ""
+msgid "MeetingAndenne_training_decision1"
+msgstr "<p>a) Le Collège communal autorise %(training_users)s, à participer à %(training_type)s sur le thème <i>%(training_purpose)s</i>. Cet événement est organisé par %(training_organiser)s et se tiendra du %(training_startDate)s au %(training_endDate)s %(training_periodicity)s à l'endroit suivant: %(training_place)s.</p>"
+
+#. Default: ""
+msgid "MeetingAndenne_training_decision2"
+msgstr "<p>b) Les frais d'inscription s'élèvent à %(training_price)s EUR TVAC; la dépense sera imputée sur l'article budgétaire %(training_budget)s.</p>"
+
+#. Default: ""
+msgid "MeetingAndenne_training_decision2free"
+msgstr "<p>b) Cet événement est gratuit.</p>"
+
+#. Default: ""
+msgid "MeetingAndenne_training_decision3"
+msgstr "<p>c) En plus de ces frais, le Collège prend acte que des frais de surcoût seront pris en charge par la Ville, à savoir : </p>"
+
+#. Default: ""
+msgid "MeetingAndenne_training_decision4"
+msgstr "<p>d) Ce déplacement est à considérer comme mission de service; les frais de déplacement seront pris en charge par la Ville sur base du tarif réglementaire et suivant les modalités d’usage.</p>"
+
+#. Default: ""
+msgid "MeetingAndenne_training_syllabusCosts"
+msgstr "<p>Syllabi : %(training_syllabusCosts)s EUR TVAC</p>"
+
+#. Default: ""
+msgid "MeetingAndenne_training_travelExpenses"
+msgstr "<p>Déplacement : %(training_travelExpenses)s EUR TVAC</p>"
+
+#. Default: ""
+msgid "MeetingAndenne_training_parkingFees"
+msgstr "<p>Stationnement : %(training_parkingFees)s EUR TVAC</p>"
+
+#. Default: ""
+msgid "MeetingAndenne_training_accomodationExpenses"
+msgstr "<p>Séjour : %(training_accomodationExpenses)s EUR TVAC</p>"
+
+#. Default: ""
+msgid "MeetingAndenne_training_otherFees"
+msgstr "<p>Autres : %(training_otherFees)s EUR TVAC</p>"
+
+#. Default: ""
+msgid "MeetingAndenne_training_accountNumber"
+msgstr "sur le numéro de compte: "
+
+#. Default: ""
+msgid "MeetingAndenne_training_accountName"
+msgstr "ouvert au nom de "
+
+#. Default: ""
+msgid "MeetingAndenne_training_acceptanceGiro"
+msgstr "avec la communication suivante: "

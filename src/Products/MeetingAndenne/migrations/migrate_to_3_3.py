@@ -258,6 +258,9 @@ class Migrate_To_3_3(Migrator):
                 if hasattr(item, oldName):
                     delattr(item, oldName)
 
+            if hasattr(item, 'training_registrationFee'):
+                delattr(item, 'training_registrationFee')
+
         logger.info('Done.')
 
     def _migrateMailRoles(self):

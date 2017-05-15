@@ -144,16 +144,6 @@ schema = Schema((
     ),
 
     StringField(
-        name='training_registrationFee',
-        widget=StringWidget(
-            size= 100,
-            label='Registrationfee',
-            label_msgid='MeetingAndenne_label_training_registrationFee',
-            i18n_domain='PloneMeeting',
-        ),
-    ),
-
-    StringField(
         name='training_syllabusCosts',
         widget=StringWidget(
             size= 100,
@@ -422,7 +412,6 @@ class MeetingItemFormation(CustomMeetingItemAndenne):
 
             budget_array = self.extractBudget()
             price = budget_array[0]
-            registrationFee = self.context.getTraining_registrationFee()
             budget = budget_array[1]
             description3 = ''
             decision3 = ''
@@ -452,7 +441,6 @@ class MeetingItemFormation(CustomMeetingItemAndenne):
                 decision2 = self.context.translate('MeetingAndenne_training_decision2', domain='PloneMeeting').encode('utf-8') % \
                                 { 'training_price': price, 'training_budget': budget }
 
-                registrationFee = self.context.getTraining_registrationFee()
                 syllabusCosts = self.context.getTraining_syllabusCosts()
                 travelExpenses = self.context.getTraining_travelExpenses()
                 parkingFees = self.context.getTraining_parkingFees()
