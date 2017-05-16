@@ -136,6 +136,8 @@ schema = Schema((
     TextField(
         name='training_description',
         default_method="getTrainingDescription",
+        default_content_type='text/plain',
+        allowable_content_types=('text/plain',),
         widget=TextAreaWidget(
             label='Description',
             label_msgid='MeetingAndenne_label_training_description',

@@ -15,422 +15,264 @@ msgstr ""
 "Domain: PloneMeeting\n"
 "X-is-fallback-for: fr-be fr-ca fr-lu fr-mc fr-ch fr-fr\n"
 
-# portal_tabs
-#. Default: "College"
-msgid "Meeting config Seraing College"
-msgstr "Collège communal"
-
-#. Default: "Council"
-msgid "Meeting config Seraing Council"
-msgstr "Conseil communal"
-
-#. Default: "If you don't fill this field, meeting assembly will be used for this item."
-msgid "MeetingSeraing_descr_assembly"
-msgstr "Laissez ce champ vide pour utiliser l'assemblée qui sera définie sur la séance"
-
-
-#. Default: "Transcription of interventions"
-msgid "MeetingSeraing_descr_interventions"
-msgstr "Retranscription des interventions"
-
-# MeetingGroup
-#. Default: "Leave empty to use the signatures defined on the meeting"
-msgid "MeetingSeraing_descr_signatures"
-msgstr "Si vous ne remplissez pas le champ, les signatures certifiées définies sur la configuration de séance seront utilisées.  Si vous utilisez ce champ, il est obligatoire de définir 12 lignes (les 6 premières pour le collège et les 6 dernières pour le conseil).  Si une signature ne doit pas être surchagée, utilisez des tirets '-'."
-
-#. Default: "Deliberation"
-msgid "MeetingSeraing_label_councildecision"
-msgstr "Délibération"
-
-#. Default: "Interventions"
-msgid "MeetingSeraing_label_interventions"
-msgstr "Interventions"
-
-#. Default: "Assembly which are specific to this meeting item"
-msgid "MeetingSeraing_label_itemAssembly"
-msgstr "Assemblée spécifique liée à ce point"
-
-#. Default: "Premeeting observations"
-msgid "MeetingSeraing_label_meetingcouncilobservations"
-msgstr "Avant-séance"
-
-# import what was done in MeetingCommunes
-# MeetingItem
-#. Default: "Decision"
-msgid "PloneMeeting_label_decision"
-msgstr "Décision"
-
-# object_buttons
-#. Default: "Send to council"
-msgid "Send to council"
-msgstr "Envoyer au Conseil communal"
-
-#. Default: "Sent to council"
-msgid "Sent to council"
-msgstr "Envoyé au Conseil communal"
-
-#. Default: "Please as you defined an item initiator, check if the linked category should not be 'Points conseillers'. If not, just ignore this message, it will not be displayed anymore when the item will be validated."
-msgid "check_intitiator_and_category"
-msgstr "Attention, en général si vous sélectionnez une personne 'A l'initative de ce point', la catégorie 'Points conseillers' doit être également sélectionnée.  Vérifiez vos données, si elles sont justes, ignorez cet avertissement, il disparaîtra une fois le point 'validé'."
-
-#. Default: "Default value for the item decision field"
-msgid "default_meetingitem_decision"
-msgstr "Définissez ici le texte prédéfini qui sera présent dans le champ 'Délibération/Extrait du Procès-verbal' chaque fois qu'un utilisateur crée un nouveau point."
-
-# Suffix
-#. Default: "division heads"
-msgid "divisionheads"
-msgstr "chefs de division"
-
-#. Default: "Welcome to HubSessions!"
+#. Default: "Welcome to PloneMeeting!"
 msgid "hs_welcome_title"
-msgstr "Bienvenue sur PloneMeeting!"
+msgstr "Bienvenue sur ANDANA!"
 
+# CourrierFile
+#. Default: "Observations"
+msgid "CourrierFile_label_description"
+msgstr "Observations"
+
+#. Default: "for mail receivers"
+msgid "CourrierFile_label_description_descr"
+msgstr "pour les destinataires du courrier"
+
+#. Default: "Tell which users can see the document (read-only)"
+msgid "dest_user_item_descr"
+msgstr "Indiquez les utilisateurs qui pourront voir le document (en lecture seule)"
+
+#. Default: "Mail sender"
+msgid "MeetingAndenne_label_destOrigin"
+msgstr "Expéditeur du courrier"
+
+#. Default: "Mail receiver"
+msgid "MeetingAndenne_label_destUsers"
+msgstr "Destinataire(s)"
+
+#. Default: "Internal mail reference"
+msgid "MeetingAndenne_label_refCourrier"
+msgstr "Référence interne du courrier"
+
+#. Default: "Mail type"
+msgid "MeetingAndenne_label_typeCourrier"
+msgstr "Type de courrier"
+
+# Meeting
+#. Default: "Decision"
+msgid "decision"
+msgstr "Extrait du Procès-verbal"
+
+#. Default: "Decisions"
+msgid "decisions"
+msgstr "Procès-verbal"
+
+#. Default: "Late presented items"
+msgid "late_presented_items"
+msgstr "Procès-verbal complémentaire"
+
+#. Default: "Post observations"
+msgid "MeetingAndenne_label_postObservations"
+msgstr "Observations après séance"
+
+#. Default: "Pre observations"
+msgid "PloneMeeting_meetingObservations"
+msgstr "Observations avant séance"
+
+#. Default: "Treat user"
+msgid "pm_treatuser"
+msgstr "Agent traitant"
+
+#. Default: "Presented items"
+msgid "presented_items"
+msgstr "Procès-verbal de base"
+
+# MeetingConfig
+#. Default: "Use prevalidation with this group"
+msgid "MeetingAndenne_label_usePrevalidation"
+msgstr "Utiliser l'état pré-validé avec ce groupe"
+
+# MeetingItem
 #. Default: "Accepted but modified"
 msgid "icon_help_accepted_but_modified"
-msgstr "Accepté provisoirement"
-
-#. Default: "Item in council"
-msgid "icon_help_item_in_council"
-msgstr "En Conseil communal"
-
-#. Default: "Proposed to director"
-msgid "icon_help_proposed_to_director"
-msgstr "Proposé au directeur"
-
-#. Default: "Proposed to division head"
-msgid "icon_help_proposed_to_divisionhead"
-msgstr "Proposé au chef de division"
-
-#. Default: "Proposed to office manager"
-msgid "icon_help_proposed_to_officemanager"
-msgstr "Proposé au chef de bureau"
-
-#. Default: "Proposed to service head"
-msgid "icon_help_proposed_to_servicehead"
-msgstr "Proposé au chef de service"
-
-#. Default: "Assembly"
-msgid "listingheader_premeeting_assembly"
-msgstr "Assemblée"
-
-#. Default: "Date"
-msgid "listingheader_premeeting_date"
-msgstr "Date"
-
-#. Default: "Place"
-msgid "listingheader_premeeting_place"
-msgstr "Lieu"
-
-# Suffix
-#. Default: "office managers"
-msgid "officemanagers"
-msgstr "chefs de bureau"
-
-#. Default: "MeetingItemCollege"
-msgid "predecessor_MeetingItemCollege"
-msgstr "Collège"
-
-#. Default: "MeetingItemCouncil"
-msgid "predecessor_MeetingItemCouncil"
-msgstr "Conseil"
-
-#. Default: "Add [[ ]] around absent people (like [[Mister Sample Peter]])"
-msgid "premeeting_assembly_2_descr"
-msgstr "Ajoutez des double crochets [[ ]] autour des personnes absentes, par exemple : [[Mr. Untel Didier]]"
-
-#. Default: "Add [[ ]] around absent people (like [[Mister Sample Peter]])"
-msgid "premeeting_assembly_3_descr"
-msgstr "Ajoutez des double crochets [[ ]] autour des personnes absentes, par exemple : [[Mr. Untel Didier]]"
-
-#. Default: "Add [[ ]] around absent people (like [[Mister Sample Peter]])"
-msgid "premeeting_assembly_4_descr"
-msgstr "Ajoutez des double crochets [[ ]] autour des personnes absentes, par exemple : [[Mr. Untel Didier]]"
-
-#. Default: "Add [[ ]] around absent people (like [[Mister Sample Peter]])"
-msgid "premeeting_assembly_5_descr"
-msgstr "Ajoutez des double crochets [[ ]] autour des personnes absentes, par exemple : [[Mr. Untel Didier]]"
-
-#. Default: "Add [[ ]] around absent people (like [[Mister Sample Peter]])"
-msgid "premeeting_assembly_6_descr"
-msgstr "Ajoutez des double crochets [[ ]] autour des personnes absentes, par exemple : [[Mr. Untel Didier]]"
-
-#. Default: "Add [[ ]] around absent people (like [[Mister Sample Peter]])"
-msgid "premeeting_assembly_7_descr"
-msgstr "Ajoutez des double crochets [[ ]] autour des personnes absentes, par exemple : [[Mr. Untel Didier]]"
-
-#. Default: "Add [[ ]] around absent people (like [[Mister Sample Peter]])"
-msgid "premeeting_assembly_descr"
-msgstr "Ajoutez des double crochets [[ ]] autour des personnes absentes, par exemple : [[Mr. Untel Didier]]"
-
-# Suffix
-#. Default: "reviewers"
-msgid "reviewers"
-msgstr "directeurs"
-
-#. Default: "items to validate"
-msgid "searchitemstovalidate"
-msgstr "points à valider"
-
-# searches
-#. Default: "proposed items"
-msgid "searchproposeditems"
-msgstr "points proposés"
-
-#. Default: "validated items"
-msgid "searchvalidateditems"
-msgstr "points validés"
-
-# Suffix
-#. Default: "service heads"
-msgid "serviceheads"
-msgstr "chefs de service"
-
-#. Default: "Please enter 12 lines for signatures delegations"
-msgid "signatures_length_error"
-msgstr "Renseignez 12 lignes pour les signatures.  Si une signature ne doit pas être surchargée (si la signature définie dans la configuration de séance dans le champ 'Signatures certifiées' doit être utilisée), renseignez un tiret (-)."
-
-#. Default: "Removed"
-msgid "icon_help_removed"
-msgstr "Retiré de la séance"
-
-#. Default: "This item must be print in meeting"
-msgid "PloneMeeting_label_item_print_in_meeting"
-msgstr "Ce point sera à signer sur séance."
-
-#. Default: "To print in meeting"
-msgid "item_print_in_meeting_descr"
-msgstr "Point à signer sur séance."
-
-#. Default: "Power editors"
-msgid "powereditors"
-msgstr "Super éditeurs"
-
-#. Default: "To print in meeting"
-msgid "icon_help_to_print"
-msgstr "A imprimer en séance."
-
-#. Default: "Alderman of the following services (departments)" 
-msgid "MeetingCommunes_label_echevinServices" 
-msgstr "Echevins des services suivants"
-
-#. Default: "Choose proposing group for cdld advice"
-msgid "MeetingCommunes_descr_cdldProposingGroup"
-msgstr "Choisir les groupes donneurs d'avis qui seront repris dans la synthèse CDLD (avis DF)"
-
-#. Default: "If the group is responsible of other groups, select them here above, either do not select any elements of the list."
-msgid "MeetingCommunes_descr_echevinServices"
-msgstr "Si ce groupe est responsable d'autres groupes, selectionnez les ci-dessous."
- 
-#. Default: "Proposing group to keep for CDLD synthesis"
-msgid "MeetingCommunes_label_cdldProposingGroup"
-msgstr "Groupes proposants à garder pour la synthèse des avis pour le CDLD (avis DF)"
-
-#. Default: "Initialize the item decision when deciding meeting"
-msgid "MeetingCommunes_label_initItemDecisionIfEmptyOnDecide"
-msgstr "Initialiser le champ décision des points lorsque la séance passe 'En rédaction du PV'?"
-
-#. Default: "cdld synthesis"
-msgid "searchcdlditems"
-msgstr "Synthèse Avis DF"
-
-#. Default: "Observations"
-msgid "PloneMeeting_itemObservations"
-msgstr "Instructions"
-
-#. Default: "PV Note" 
-msgid "MeetingSeraing_label_pvNote" 
-msgstr "Note de pv"
-
-#. Default: "Note in pv" 
-msgid "MeetingSeraing_descr_pvNote" 
-msgstr "Cette zone sera reprise dans le pv."
-
-#. Default: "DG Note" 
-msgid "MeetingSeraing_label_dgnote" 
-msgstr "Note personnelle du DG"
-
-#. Default: "Personal Note for DG" 
-msgid "MeetingSeraing_descr_dgnote" 
-msgstr "Cette zone n'est visible que par les gestionnaires de séances et les administrateurs du système."
-
-#. Default: "Motivation help field" 
-msgid "MeetingSeraing_descr_motivation" 
-msgstr "N'oubliez-pas d'adapter les TEXTES LEGAUX / REGLEMENTAIRES SI NECESSAIRE"
-
-#. Default: "Accepted but modified On Closed Meeting"
-msgid "icon_help_accepted_but_modified_closed"
 msgstr "Accepté avec modifications"
 
-#. Default: "Accepted On Closed Meeting"
-msgid "icon_help_accepted_closed"
-msgstr "Accepté"
-
-#. Default: "Returned to advise"
-msgid "icon_help_returned_to_advise"
-msgstr "Retourné pour avis"
-
-#. Default: "Detailed description"
-msgid "PloneMeeting_label_detailedDescription"
-msgstr "Note de synthèse"
-
-#. Default: "Return to advise"
-msgid "wa_returned_to_advise"
-msgstr "Renoyer pour avis"
-
-#. Default: "Late"
-msgid "icon_help_late"
-msgstr "Supplémentaire"
-
-#. Default: "Late"
-msgid "list_type_late"
-msgstr "Supplémentaires"
-
-#. Default: "Follow list type"
-msgid "on_list_type"
-msgstr "Par type de point (normal, supplémentaire)"
-
-#. Default: "Deadline for validating late items"
-msgid "PloneMeeting_label_deadlineFreeze"
-msgstr "Echéance pour valider les points supplémentaires"
-
-#. Default: "Default deadline for validating late items for a given meeting"
-msgid "PloneMeeting_label_freezeDeadlineDefault"
-msgstr "Echéance par défaut pour valider les points supplémentaires pour une séance donnée"
-
-#. Default: "Items presented tardily"
-msgid "late_presented_items"
-msgstr "Points supplémentaires présentés"
-
-#. Default: "Validated By DG"
-msgid "icon_help_validated_by_dg"
-msgstr "Validé par le DG"
+#. Default: "Pre-accepted"
+msgid "icon_help_preaccepted"
+msgstr "Accepté provisoirement"
 
 #. Default: "Description"
-msgid "PloneMeeting_label_itemDescription"
-msgstr "Note dactylo"
+msgid "meeting_item_description"
+msgstr "Description dans l'Ordre du jour"
 
-#. Default: "Description"
-msgid "label_listed"
-msgstr "List qui marche"
+#. Default: "This file is a scanned document"
+msgid "needs_ocr"
+msgstr "Le document doit être OCR-isé"
 
-#. Default: "Description"
-msgid "help_listed"
-msgstr "List qui marche a balle de guerre"
+#. Default: "Check this box if this file corresponds to a scanned document. If it is the case, we will perform a specific treatment on it (called 'OCR-ization') to retrieve the text from the scanned document. This way, it will be possible to perform searches in the content of the file, based on keywords."
+msgid "needs_ocr_descr"
+msgstr "Si cette case est cochée, nous allons appliquer au document un traitement spécifique (appelé 'OCR-isation') qui permettra de récupérer le texte au sein du document. De cette façon, il sera possible d'y effectuer des recherches sur base de mots-clé."
 
-#. Default: "Type"
+#. Default: "Creation date"
+msgid "PloneMeeting_label_creationDate"
+msgstr "Date de création"
+
+#. Default: "Decision"
+msgid "PloneMeeting_label_decision"
+msgstr "Proposition de décision"
+
+#. Default: "Meeting"
+msgid "presented_in_meeting"
+msgstr "Séance dans laquelle ce point est présenté"
+
+#. Default: "Is confidential"
+msgid "MeetingAndenne_label_isConfidential"
+msgstr "CONFIDENTIEL (le point ne sera vu que par vous, votre chef de service et le secrétaire communal)"
+
+#. Default: "Deliberation project"
+msgid "MeetingAndenne_label_projetpv"
+msgstr "Proposition de déliberation (Projet)"
+
+#. Default: "Decision and deliberation proposals"
+msgid "MeetingAndenne_label_proposition"
+msgstr "Proposition de décision et projet de délibération"
+
+#. Default: "PV - Deliberation"
+msgid "MeetingAndenne_label_pv"
+msgstr "Procès verbal - Déliberation"
+
+#. Default: "Internal document reference"
+msgid "MeetingAndenne_label_refDoc"
+msgstr "Référence interne du document"
+
+#. Default: "PV - Decision"
+msgid "MeetingAndenne_label_textpv"
+msgstr "Procès verbal - Décision (Texte)"
+
+#. Default: "Treat user"
+msgid "MeetingAndenne_label_treatUser"
+msgstr "Agent traitant (ayant la signature du point)"
+
+#. Default: "Typing user"
+msgid "MeetingAndenne_label_typingUser"
+msgstr "Agent dactylographiant"
+
+#. Default: "Verifying user"
+msgid "MeetingAndenne_label_verifUser"
+msgstr "Agent vérificateur"
+
+#. Default: "Your reference"
+msgid "MeetingAndenne_label_yourrefDoc"
+msgstr "Référence rappel (Vos références)"
+
+#. Default: "Budgetary informations"
+msgid "PloneMeeting_label_budgetInfos"
+msgstr "Données budgétaires"
+
+# MeetingItemFormation
+#. Default: "There is a charge for this training - I fill the following fields in (if the training is free of charge, you should untick this box"
 msgid "MeetingAndenne_label_training_budgetRelated"
 msgstr "La formation est payante - Je remplis les champs suivants (si la formation est gratuite, il y a lieu de décocher cette case)"
 
-#. Default: "Type"
+#. Default: "Event type"
 msgid "MeetingAndenne_label_training_type"
 msgstr "Type d'événement"
 
-#. Default: "Purpose"
+#. Default: "Event purpose"
 msgid "MeetingAndenne_label_training_purpose"
 msgstr "Objet de l'événement/formation (exemple: L'inflence du soleil sur le réchauffement climatique)"
 
-#. Default: "Startdate"
+#. Default: "Event start date"
 msgid "MeetingAndenne_label_training_startDate"
 msgstr "Date et heure du début de l'événement/formation"
 
-#. Default: "Enddate"
+#. Default: "Event end date"
 msgid "MeetingAndenne_label_training_endDate"
 msgstr "Date et heure de fin de l'événement/formation"
 
-#. Default: "Periodicity"
+#. Default: "Event periodicity"
 msgid "MeetingAndenne_label_training_periodicity"
 msgstr "Périodicité de l'événement, si nécessaire (exemple1: tous les lundi. Exemple2: le lundi 2 juin et vendredi 6 juin)"
 
-#. Default: "Organiser"
+#. Default: "Event organiser"
 msgid "MeetingAndenne_label_training_organiser"
 msgstr "Nom de l'organisateur de l'événement/formation (exemple: le centre de formation technofutur)"
 
-#. Default: "Place"
+#. Default: "Event place"
 msgid "MeetingAndenne_label_training_place"
 msgstr "Lieu et adresse de l'événement/formation (exemple : Moulins de Beez, route de namur, 4 à 5000 Jambes)"
 
-#. Default: "Users"
+#. Default: "Participationg users"
 msgid "MeetingAndenne_label_training_users"
 msgstr "Nom des personne(s) participant(s) à l'événement/formation"
 
-#. Default: "Additionalusers"
+#. Default: "Additional users"
 msgid "MeetingAndenne_label_training_additionalUsers"
 msgstr "Nom et fonction des personne(s) supplémentaire(s) participant(s) à l'événement/formation ne se trouvant pas dans la liste ci-dessus (exemple: Jeanne Dupont, Accueillante extrascolaire)"
 
-#. Default: "Description"
+#. Default: "Event description"
 msgid "MeetingAndenne_label_training_description"
 msgstr "Description de l'événement/formation"
 
-#. Default: "Syllabuscosts"
+#. Default: "Syllabus costs"
 msgid "MeetingAndenne_label_training_syllabusCosts"
 msgstr "Frais supplémentaires relatifs aux syllabi (EUR TVAC)"
 
-#. Default: "Travelexpenses"
+#. Default: "Travel expenses"
 msgid "MeetingAndenne_label_training_travelExpenses"
 msgstr "Frais supplémentaires relatifs aux déplacements (EUR TVAC)"
 
-#. Default: "Parkingfees"
+#. Default: "Parking fees"
 msgid "MeetingAndenne_label_training_parkingFees"
 msgstr "Frais supplémentaires relatifs aux stationnements (EUR TVAC)"
 
-#. Default: "Accomodationexpenses"
+#. Default: "Accomodation expenses"
 msgid "MeetingAndenne_label_training_accomodationExpenses"
 msgstr "Frais supplémentaires relatifs aux séjours (EUR TVAC)"
 
-#. Default: "Otherfees"
+#. Default: "Other fees"
 msgid "MeetingAndenne_label_training_otherFees"
 msgstr "Frais supplémentaires autres (à preciser, EUR TVAC)"
 
-#. Default: "Paymentterms"
+#. Default: "Payment terms"
 msgid "MeetingAndenne_label_training_paymentTerms"
 msgstr "Modalités de payement"
 
-#. Default: "Accountnumber"
+#. Default: "Account number"
 msgid "MeetingAndenne_label_training_accountNumber"
 msgstr "sur le numéro de compte: "
 
-#. Default: "Accountname"
+#. Default: "Account name"
 msgid "MeetingAndenne_label_training_accountName"
 msgstr "ouvert au nom de "
 
-#. Default: "Acceptancegiro"
+#. Default: "Acceptance giro"
 msgid "MeetingAndenne_label_training_acceptanceGiro"
 msgstr "avec la communication suivante: "
 
-#. Default: "training"
+#. Default: "a training"
 msgid "a_training"
 msgstr "une formation"
 
-#. Default: "workshop"
+#. Default: "a workshop"
 msgid "a_workshop"
 msgstr "un atelier"
 
-#. Default: "seminar"
+#. Default: "a seminar"
 msgid "a_seminar"
 msgstr "un séminaire"
 
-#. Default: "workSession"
+#. Default: "a workSession"
 msgid "a_work_session"
 msgstr "une réunion de travail"
 
-#. Default: "informationSession"
+#. Default: "an information session"
 msgid "an_information_session"
 msgstr "une séance d'information"
 
-#. Default: "symposium"
+#. Default: "a symposium"
 msgid "a_symposium"
 msgstr "un colloque"
 
-#. Default: "show"
+#. Default: "a show"
 msgid "a_show"
 msgstr "un salon"
 
-#. Default: "after"
+#. Default: "The payment will be done after the event"
 msgid "payment_after"
 msgstr "Le paiement se fera a posteriori par les services financiers, via la réception de la facture"
 
-#. Default: "before"
+#. Default: "The payment will be done before the event"
 msgid "payment_before"
 msgstr "Le paiement se fera préalablement à la formation, par la DSF, "
 
@@ -509,3 +351,95 @@ msgstr "ouvert au nom de "
 #. Default: ""
 msgid "MeetingAndenne_training_acceptanceGiro"
 msgstr "avec la communication suivante: "
+
+# Portlets
+#. Default: "create a mail"
+msgid "create_mail_file"
+msgstr "Créer un courrier"
+
+#. Default: "Add mail portlet"
+msgid "Add Mail Portlet"
+msgstr "Ajout d'un portlet 'Courrier'"
+
+#. Default: "Edit mail portlet"
+msgid "Edit Mail Portlet"
+msgstr "Édition d'un portlet 'Courrier'"
+
+#. Default: "Mail"
+msgid "Mail"
+msgstr "Courrier"
+
+#. Default: "Mails"
+msgid "mail_portlet_title"
+msgstr "Courriers"
+
+#. Default: "Decisions"
+msgid "portletdecisions_title"
+msgstr "Procès-verbaux"
+
+#. Default: "Meetings"
+msgid "portletmeetings_title"
+msgstr "Ordres du jour"
+
+#. Default: "This portlet shows mails."
+msgid "This portlet shows mails."
+msgstr "Ce portlet affiche les contrôles employés pour la gestion des courriers."
+
+# Presents
+#. Default: "This person has joined the meeting while discussing this item."
+msgid "arrived_now"
+msgstr "Cette personne a rejoint la séance pendant la discussion sur ce point."
+
+#. Default: "Note this person as joining the meeting TEMPORARILY, WHILE this item is discussed."
+msgid "person_present_descr"
+msgstr "Noter cette personne comme présente TEMPORAIREMENT dans la séance, PENDANT la discussion sur ce point."
+
+#. Default: "Note this person as joining the meeting FROM THIS POINT, until the END of the meeting."
+msgid "person_welcome_descr"
+msgstr "Noter cette personne comme présente À PARTIR DE CE POINT, jusqu'à la FIN de la séance."
+
+# Searches
+#. Default: "No mail found"
+msgid "search_CourrierFile_empty"
+msgstr "Pas de courrier trouvé"
+
+#. Default: "all decisions"
+msgid "searchalldecisions"
+msgstr "Tous les PVs"
+
+#. Default: "Mails to service"
+msgid "searchallmailsingroup"
+msgstr "Courriers du service"
+
+#. Default: "Scanned mails"
+msgid "searchmailrobot"
+msgstr "Courriers scannés"
+
+#. Default: "My mails"
+msgid "searchmymails"
+msgstr "Mes courriers"
+
+# Suffix
+#. Default: "mail viewer"
+msgid "mailviewer"
+msgstr "accès au courrier"
+
+#. Default: "mail viewers"
+msgid "mailviewers"
+msgstr "accès au courrier"
+
+#. Default: "pv writer"
+msgid "pvwriter"
+msgstr "rédacteur de PV"
+
+#. Default: "pv writers"
+msgid "pvwriters"
+msgstr "rédacteurs de PV"
+
+#. Default: "reviewer"
+msgid "reviewer"
+msgstr "chef de service"
+
+#. Default: "reviewers"
+msgid "reviewers"
+msgstr "chefs de service"

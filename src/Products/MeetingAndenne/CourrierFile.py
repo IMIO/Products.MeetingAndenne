@@ -90,19 +90,17 @@ schema = Schema((
             sqize= 100,
             label='Refdoc',
             label_msgid='MeetingAndenne_label_refCourrier',
-            i18n_domain='MeetingAndenne',
+            i18n_domain='PloneMeeting',
         ),
         searchable=True,
-        index="FieldIndex"
     ),
 
     StringField(
         name='typecourrier',
-        index="FieldIndex",
         widget=SelectionWidget(
             label='Typecourrier',
-            label_msgid='MeetingAndenne_label_type',
-            i18n_domain='MeetingAndenne',
+            label_msgid='MeetingAndenne_label_typeCourrier',
+            i18n_domain='PloneMeeting',
         ),
         vocabulary=MAIL_TYPES
     ),
@@ -113,22 +111,20 @@ schema = Schema((
             size= 100,
             label='Destorigin',
             label_msgid='MeetingAndenne_label_destOrigin',
-            i18n_domain='MeetingAndenne',
+            i18n_domain='PloneMeeting',
         ),
         searchable=True,
-        index="FieldIndex"
     ),
 
     LinesField(
         name='destUsers',
-        index="FieldIndex:brains",
         widget=MultiSelectionWidget(
             size=10,
             description="destUseritem",
             description_msgid="dest_user_item_descr",
             label='Destusers',
-            label_msgid='Courrier_label_destUsers',
-            i18n_domain='MeetingAndenne',
+            label_msgid='MeetingAndenne_label_destUsers',
+            i18n_domain='PloneMeeting',
         ),
         enforceVocabulary=True,
         multiValued=1,
@@ -142,9 +138,11 @@ schema = Schema((
 
 CourrierFile_schema = ATBlobSchema.copy() + schema.copy()
 CourrierFile_schema['relatedItems'].widget.visible=False
-CourrierFile_schema['description'].widget.label_msgid='Courrier_label_description'
+CourrierFile_schema['description'].widget.description='Descriptionitem'
+CourrierFile_schema['description'].widget.description_msgid='CourrierFile_label_description_descr'
+CourrierFile_schema['description'].widget.label='Description'
+CourrierFile_schema['description'].widget.label_msgid='CourrierFile_label_description'
 CourrierFile_schema['description'].widget.i18n_domain='PloneMeeting'
-CourrierFile_schema['description'].widget.description_msgid='Courrier_label_description_descr'
 CourrierFile_schema.moveField('refcourrier',pos='top')
 CourrierFile_schema.moveField('typecourrier',pos=4)
 CourrierFile_schema.moveField('destOrigin',pos=3)

@@ -30,7 +30,7 @@ msgstr ""
 
 #. Default: "MeetingItemcd"
 msgid "MeetingItemcd"
-msgstr "Point Comité de Direction"
+msgstr "Point ComitÃ© de Direction"
 
 #. Default: "MeetingItemCollege"
 msgid "MeetingItemCollege"
@@ -42,7 +42,7 @@ msgstr ""
 
 #. Default: "MeetingItemrcc"
 msgid "MeetingItemrcc"
-msgstr "Rapport d'Activité"
+msgstr "Rapport d'ActivitÃ©"
 
 #. Default: "Meetingrcc"
 msgid "Meetingrcc"
@@ -77,7 +77,7 @@ msgstr ""
 msgid "itemfrozen"
 msgstr ""
 
-#: Default: "Not processed"
+#. Default: "Not processed"
 msgid "not_processed"
 msgstr ""
 
@@ -85,7 +85,7 @@ msgstr ""
 msgid "pre_accepted"
 msgstr ""
 
-#: Default: "Processed"
+#. Default: "Processed"
 msgid "processed"
 msgstr ""
 
@@ -114,6 +114,14 @@ msgstr ""
 msgid "backToAcceptedButModified"
 msgstr ""
 
+#. Default: "Back to 'Created'"
+msgid "backToCreated"
+msgstr ""
+
+#. Default: "Back to 'Decided'"
+msgid "backToDecided"
+msgstr ""
+
 #. Default: "Back to 'Delayed'"
 msgid "backToDelayed"
 msgstr ""
@@ -122,8 +130,16 @@ msgstr ""
 msgid "backToFrozen"
 msgstr ""
 
+#. Default: "Back to 'Created'"
+msgid "backToItemCreated"
+msgstr ""
+
 #. Default: "Back to 'Frozen'"
 msgid "backToItemFrozen"
+msgstr ""
+
+#. Default: "Back to 'Proposed'"
+msgid "backToProposed"
 msgstr ""
 
 #. Default: "Back to 'Refused'"

@@ -15,7 +15,7 @@ msgstr ""
 "Domain: PloneMeeting\n"
 "X-is-fallback-for: fr-be fr-ca fr-lu fr-mc fr-ch fr-fr\n"
 
-#. Default: "The PV is now closed"
+#. Default: "The PV is now closed."
 msgid "accept_and_close_done_descr"
 msgstr "Le procès-verbal est maintenant clôturé."
 
@@ -23,9 +23,17 @@ msgstr "Le procès-verbal est maintenant clôturé."
 msgid "accept_but_modify_done_descr"
 msgstr "Le point a été accepté avec modifications."
 
-#. Default: "The PV is now closed"
+#. Default: "The PV is now closed."
 msgid "accept_but_modify_and_close_done_descr"
 msgstr "Le procès-verbal est maintenant clôturé."
+
+#. Default: "You just canceled the fact that the decision linked to this item, that is accepted with modifications, is confirmed."
+msgid "backToAcceptedButModified_done_descr"
+msgstr "Vous pouvez à nouveau modifier le procès-verbal sur ce point."
+
+#. Default: "You just canceled the fact that the decision linked to this item, that is accepted, is confirmed."
+msgid "backToAccepted_done_descr"
+msgstr "Vous pouvez à nouveau modifier le procès-verbal sur ce point."
 
 #. Default: "The publication of the meeting agenda has been canceled."
 msgid "backToCreated_done_descr"
@@ -35,9 +43,17 @@ msgstr "Vous venez d'annuler l'arrêt de l'ordre du jour."
 msgid "backToDecided_done_descr"
 msgstr "Vous pouvez à nouveau modifier le procès-verbal."
 
+#. Default: "The archiving of this item and its decision has been canceled."
+msgid "backToDelayed_done_descr"
+msgstr "Vous pouvez à nouveau modifier le procès-verbal."
+
 #. Default: "The publication of temporary decisions has been canceled."
 msgid "backToFrozen_done_descr"
 msgstr "Vous ne pouvez plus rédiger le Procès-verbal pour l'instant."
+
+#. Default: "The archiving of this item and its decision has been canceled."
+msgid "backToRefused_done_descr"
+msgstr "Vous pouvez à nouveau modifier le procès-verbal."
 
 #. Default: "The definitive decisions have been published for this meeting."
 msgid "close_done_descr"
@@ -47,11 +63,7 @@ msgstr "Le procès-verbal est maintenant clôturé, tous les points pour lesquel
 msgid "decide_done_descr"
 msgstr "Vous pouvez maintenant rédiger le Procès-verbal de cette séance."
 
-#. Default: "The item has been delayed.  It has been duplicated for the corresponding proposing group so it can propose it again easily."
-msgid "delay_done_descr"
-msgstr "Le point a été reporté. Il a été dupliqué chez le service proposant afin qu'il puisse facilement le proposer à nouveau."
-
-#. Default: "The PV is now closed"
+#. Default: "The PV is now closed."
 msgid "delay_and_close_done_descr"
 msgstr "Le procès-verbal est maintenant clôturé."
 
@@ -63,7 +75,7 @@ msgstr "L'ordre du jour vient d'être arrêté."
 msgid "itemfreeze_done_descr"
 msgstr "Le point a été arrêté."
 
-#. Default: "The item has been pre accepted"
+#. Default: "The item has been pre accepted."
 msgid "pre_accept_done_descr"
 msgstr "Le point a été accepté provisoirement."
 
@@ -71,7 +83,6 @@ msgstr "Le point a été accepté provisoirement."
 msgid "refuse_done_descr"
 msgstr "La point a été refusé."
 
-#. Default: "The PV is now closed"
+#. Default: "The PV is now closed."
 msgid "refuse_and_close_done_descr"
 msgstr "Le procès-verbal est maintenant clôturé."
-

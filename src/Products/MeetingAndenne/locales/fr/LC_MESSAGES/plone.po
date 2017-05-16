@@ -83,15 +83,15 @@ msgstr "Arrêté"
 msgid "itemfrozen"
 msgstr "Arrêté"
 
-#: Default: "Not processed"
-msgid "Non traité"
-msgstr ""
+#. Default: "Not processed"
+msgid "not_processed"
+msgstr "Non traité"
 
 #. Default: "Pre accepted"
 msgid "pre_accepted"
 msgstr "Accepté provisoirement"
 
-#: Default: "Processed"
+#. Default: "Processed"
 msgid "processed"
 msgstr "Traité"
 
@@ -120,6 +120,14 @@ msgstr "Réouvrir le PV en écriture"
 msgid "backToAcceptedButModified"
 msgstr "Réouvrir le PV en écriture"
 
+#. Default: "Back to 'Created'"
+msgid "backToCreated"
+msgstr "Corriger l'ordre du jour"
+
+#. Default: "Back to 'Decided'"
+msgid "backToDecided"
+msgstr "Réouvrir le PV en écriture"
+
 #. Default: "Back to 'Delayed'"
 msgid "backToDelayed"
 msgstr "Réouvrir le PV en écriture"
@@ -128,9 +136,17 @@ msgstr "Réouvrir le PV en écriture"
 msgid "backToFrozen"
 msgstr "Remettre en 'Arrêté'"
 
+#. Default: "Back to 'Created'"
+msgid "backToItemCreated"
+msgstr "Renvoyer au créateur"
+
 #. Default: "Back to 'Frozen'"
 msgid "backToItemFrozen"
-msgstr "Remettre en 'Arrêté'"
+msgstr "Corriger la décision"
+
+#. Default: "Back to 'Proposed'"
+msgid "backToProposed"
+msgstr "Renvoyer au créateur"
 
 #. Default: "Back to 'Refused'"
 msgid "backToRefused"

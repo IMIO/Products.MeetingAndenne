@@ -11,16 +11,24 @@ msgstr ""
 "Preferred-Encodings: utf-8 latin1\n"
 "Domain: imio.actionspanel\n"
 
-#. Default: "The PV is now closed"
+#. Default: "The PV is now closed."
 msgid "accept_and_close_done_descr"
 msgstr ""
 
-#. Default: "The PV is now closed"
+#. Default: "The PV is now closed."
 msgid "accept_but_modify_and_close_done_descr"
 msgstr ""
 
 #. Default: "The item has been accepted with modifications."
 msgid "accept_but_modify_done_descr"
+msgstr ""
+
+#. Default: "You just canceled the fact that the decision linked to this item, that is accepted with modifications, is confirmed."
+msgid "backToAcceptedButModified_done_descr"
+msgstr ""
+
+#. Default: "You just canceled the fact that the decision linked to this item, that is accepted, is confirmed."
+msgid "backToAccepted_done_descr"
 msgstr ""
 
 #. Default: "The publication of the meeting agenda has been canceled."
@@ -31,8 +39,16 @@ msgstr ""
 msgid "backToDecided_done_descr"
 msgstr ""
 
+#. Default: "The archiving of this item and its decision has been canceled."
+msgid "backToDelayed_done_descr"
+msgstr ""
+
 #. Default: "The publication of temporary decisions has been canceled."
 msgid "backToFrozen_done_descr"
+msgstr ""
+
+#. Default: "The archiving of this item and its decision has been canceled."
+msgid "backToRefused_done_descr"
 msgstr ""
 
 #. Default: "The definitive decisions have been published for this meeting."
@@ -43,12 +59,8 @@ msgstr ""
 msgid "decide_done_descr"
 msgstr ""
 
-#. Default: "The PV is now closed"
+#. Default: "The PV is now closed."
 msgid "delay_and_close_done_descr"
-msgstr ""
-
-#. Default: "The item has been delayed.  It has been duplicated for the corresponding proposing group so it can propose it again easily."
-msgid "delay_done_descr"
 msgstr ""
 
 #. Default: "The meeting has been frozen."
@@ -59,11 +71,11 @@ msgstr ""
 msgid "itemfreeze_done_descr"
 msgstr ""
 
-#. Default: "The item has been pre accepted"
+#. Default: "The item has been pre accepted."
 msgid "pre_accept_done_descr"
 msgstr ""
 
-#. Default: "The PV is now closed"
+#. Default: "The PV is now closed."
 msgid "refuse_and_close_done_descr"
 msgstr ""
 

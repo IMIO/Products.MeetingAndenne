@@ -132,6 +132,17 @@
     border: 2px solid green;
 }
 
+.state-accepted_but_modified_and_closed, .label-state-accepted_but_modified_and_closed {
+    color: green !important;
+}
+#plone-contentmenu-workflow .state-accepted_but_modified_and_closed {
+    border-radius: 0.5em 0.5em 0.5em 0.5em;
+    background-color: green;
+    padding: 0 0.5em;
+    color: white !important;
+    border: 2px solid green;
+}
+
 .state-delayed_and_closed, .label-state-delayed_and_closed {
     color: grey !important;
 }

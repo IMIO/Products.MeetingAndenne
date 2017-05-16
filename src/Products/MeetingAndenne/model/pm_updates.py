@@ -120,7 +120,7 @@ def update_item_schema(baseSchema):
                 name='isconfidential',
                 widget=BooleanWidget(
                     label='IsConfidential',
-                    label_msgid='MeetingAndenne_label_IsConfidential',
+                    label_msgid='MeetingAndenne_label_isConfidential',
                     i18n_domain='PloneMeeting',
                 ),
                 searchable=True,

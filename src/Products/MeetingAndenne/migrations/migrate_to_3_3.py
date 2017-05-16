@@ -168,29 +168,6 @@ class Migrate_To_3_3(Migrator):
                 cfg.setOnMeetingTransitionItemTransitionToTrigger(newValue)
         logger.info('Done.')
 
-    def _addCDLDTopics(self):
-        '''
-          Add CDLD topics for synthesis of all advice.'''
-        logger.info('Adding CDLD topics...')
-        # add some extra topics to each MeetingConfig
-        topicsInfo = (
-            # Items for cdld synthesis
-            ('searchcdlditems',
-            (('Type', 'ATPortalTypeCriterion', ('MeetingItem',)),
-             ),
-            'created',
-            'searchCDLDItems',
-            "python: '%s_budgetimpacteditors' % here.portal_plonemeeting.getMeetingConfig(here)"
-            ".getId() in member.getGroups() or here.portal_plonemeeting.isManager(here)", ),
-        )
-
-        site = self.portal
-        for cfg in site.portal_plonemeeting.objectValues('MeetingConfig'):
-            if cfg.id != 'meeting-config-college':
-                continue
-            cfg.createTopics(topicsInfo)
-        logger.info('Done.')
-
     def _addMissingRolesAndGroups(self):
         '''Add missing global roles and Plone groups related to MeetingAndenne.'''
         logger.info('Adding missing global roles and Plone groups related to MeetingAndenne...')
@@ -612,7 +589,6 @@ class Migrate_To_3_3(Migrator):
         logger.info('Migrating to MeetingAndenne 3.3...')
         self._migrateItemDecisionReportTextAttributeOnConfigs()
         self._updateOnMeetingTransitionItemTransitionToTrigger()
-        self._addCDLDTopics()
         self._addMissingRolesAndGroups()
         self._addMeetingFormationType()
         self._migrateMeetingItemFormations()
@@ -648,26 +624,25 @@ def migrate(context):
 
        1)  Remove obsolete attribute 'itemDecisionReportText' from every meetingConfigs
        2)  Migrate onMeetingTransitionItemTransitionToTrigger
-       3)  Add topics for CDLD synthesis
-       4)  Add missing global roles and Plone groups related to MeetingAndenne
-       5)  Add the template used to create MeetingItemFormation objects
-       6)  Migrate MeetingItemFormation objects
-       7)  Migrate mail roles
-       8)  Remove unused global roles
-       9)  Remove unused users present in portal_membership and acl_users
-       10) Remove useless mail topics added by PloneMeeting migration
-       11) Remove useless fck_editor properties object
-       12) Rename some categories if they exist and change related MeetingItems
-       13) Rename some groups if they exist and change related MeetingItems
-       14) Set CKeditor as default editor for everybody and remove useless properties
-       15) Change ploneMeeting configuration
-       16) Change various meetingConfigs properties
-       17) Modify the default view and redirection method of mail folder
-       18) Modify the local roles of every mail file
-       19) Create the topics used for mail management
-       20) Recreate the used POD templates
-       21) Make sure Plone groups linked to a MeetingGroup have a consistent title
-       22) Reinstall Products.MeetingAndenne so skin and so on are correct
+       3)  Add missing global roles and Plone groups related to MeetingAndenne
+       4)  Add the template used to create MeetingItemFormation objects
+       5)  Migrate MeetingItemFormation objects
+       6)  Migrate mail roles
+       7)  Remove unused global roles
+       8)  Remove unused users present in portal_membership and acl_users
+       9)  Remove useless mail topics added by PloneMeeting migration
+       10) Remove useless fck_editor properties object
+       11) Rename some categories if they exist and change related MeetingItems
+       12) Rename some groups if they exist and change related MeetingItems
+       13) Set CKeditor as default editor for everybody and remove useless properties
+       14) Change ploneMeeting configuration
+       15) Change various meetingConfigs properties
+       16) Modify the default view and redirection method of mail folder
+       17) Modify the local roles of every mail file
+       18) Create the topics used for mail management
+       19) Recreate the used POD templates
+       20) Make sure Plone groups linked to a MeetingGroup have a consistent title
+       21) Reinstall Products.MeetingAndenne so skin and so on are correct
     '''
     Migrate_To_3_3(context).run()
 # ------------------------------------------------------------------------------
