@@ -221,7 +221,7 @@ def update_group_schema(baseSchema):
                 name='usePrevalidation',
                 widget=BooleanField._properties['widget'](
                     label='Useprevalidation',
-                    label_msgid='Meetingandenne_label_usePrevalidation',
+                    label_msgid='MeetingAndenne_label_usePrevalidation',
                     i18n_domain='PloneMeeting',
                 ),
                 default=False
