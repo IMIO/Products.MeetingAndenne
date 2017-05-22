@@ -24,6 +24,14 @@ msgstr ""
 msgid "CourrierFile_label_description_descr"
 msgstr ""
 
+#. Default: "You have received a mail in the A.N.D.A.N.A. application. You can directely view it by clicking on the following link and logging in: "
+msgid "CourrierFile_mail_body"
+msgstr ""
+
+#. Default: "A.N.D.A.N.A. - Mail reception notification"
+msgid "CourrierFile_mail_subject"
+msgstr ""
+
 #. Default: "Tell which users can see the document (read-only)"
 msgid "dest_user_item_descr"
 msgstr ""
@@ -113,6 +121,10 @@ msgstr ""
 
 #. Default: "Is confidential"
 msgid "MeetingAndenne_label_isConfidential"
+msgstr ""
+
+#. Default: "Presents for the item"
+msgid "MeetingAndenne_label_itemPresents"
 msgstr ""
 
 #. Default: "Deliberation project"

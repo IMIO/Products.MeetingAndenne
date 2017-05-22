@@ -28,6 +28,15 @@ msgstr "Observations"
 msgid "CourrierFile_label_description_descr"
 msgstr "pour les destinataires du courrier"
 
+#. Default: "You have received a mail in the A.N.D.A.N.A. application. You can directely view it by clicking on the following link and logging in: "
+msgid "CourrierFile_mail_body"
+msgstr "Vous avez reçu un courrier entrant dans l'application A.N.D.A.N.A. Vous pouvez le consulter directement en cliquant sur le lien suivant et en vous identifiant :\n"
+"\n"
+
+#. Default: "A.N.D.A.N.A. - Mail reception notification"
+msgid "CourrierFile_mail_subject"
+msgstr "A.N.D.A.N.A. - Notification de réception de courrier"
+
 #. Default: "Tell which users can see the document (read-only)"
 msgid "dest_user_item_descr"
 msgstr "Indiquez les utilisateurs qui pourront voir le document (en lecture seule)"
@@ -118,6 +127,10 @@ msgstr "Séance dans laquelle ce point est présenté"
 #. Default: "Is confidential"
 msgid "MeetingAndenne_label_isConfidential"
 msgstr "CONFIDENTIEL (le point ne sera vu que par vous, votre chef de service et le secrétaire communal)"
+
+#. Default: "Presents for the item"
+msgid "MeetingAndenne_label_itemPresents"
+msgstr "Présents pour ce point"
 
 #. Default: "Deliberation project"
 msgid "MeetingAndenne_label_projetpv"

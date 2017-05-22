@@ -16,6 +16,7 @@ __docformat__ = 'plaintext'
 from AccessControl import ClassSecurityInfo
 from Products.Archetypes.atapi import *
 from zope.interface import implements
+from zope.i18n import translate
 import interfaces
 
 from Products.CMFDynamicViewFTI.browserdefault import BrowserDefaultMixin
@@ -40,17 +41,12 @@ from Products.CMFPlone.CatalogTool import getObjSize
 from Products.MailHost.MailHost import MailHostError
 from Products.MimetypesRegistry.common import MimeTypeException
 from collective.documentviewer.async import asyncInstalled
-from Products.PloneMeeting.utils import getCustomAdapter, _getEmailAddress, \
-                                        SENDMAIL_ERROR, ENCODING_ERROR, MAILHOST_ERROR
+from Products.PloneMeeting.utils import getCustomAdapter, SENDMAIL_ERROR, ENCODING_ERROR, MAILHOST_ERROR
 
 from DateTime import DateTime
 from Products.MeetingAndenne.config import *
 from Products.MeetingAndenne.utils import *
 
-### OLD ###
-#import time, unicodedata, socket
-#from Products.PloneMeeting.utils import _getEmailAddress, getOsTempFolder, \
-#     HubSessionsMarshaller, SENDMAIL_ERROR, ENCODING_ERROR, MAILHOST_ERROR
 
 import logging
 logger = logging.getLogger( 'MeetingAndenne' )
@@ -306,26 +302,21 @@ class CourrierFile(ATBlob, BrowserDefaultMixin):
     def sendMailIfRelevant(self):
         # Send a mail to selected DestUsers.
         portal = self.portal_url.getPortalObject()
-        enc = self.portal_properties.site_properties.getProperty( 'default_charset' )
 
-        subjectLabel = 'Courrier_mail_subject'
-        subject = self.utranslate( subjectLabel, domain="PloneMeeting" )
-        subject = subject.encode( enc )
+        subject = translate('CourrierFile_mail_subject', domain='PloneMeeting', context=self.REQUEST)
 
-        bodyLabel = 'Courrier_mail_body'
-        body = self.utranslate( bodyLabel, domain="PloneMeeting" ) + "<a href='http://andana.andenne.be:8080/commune/gestion-courrier/courrierall/" + self.getId() + "/view'>http://andana.andenne.be:8080/commune/gestion-courrier/courrierall/" + self.getId() + "/view</a>"
-        body = body.encode( enc )
+        host = self.unrestrictedTraverse('@@plone_portal_state').navigation_root_url()
+        link = "%s/gestion-courrier/courrierall/%s/view" % (host, self.getId())
+        body = translate('CourrierFile_mail_body', domain='PloneMeeting', context=self.REQUEST) + link
 
-        fromAddress = _getEmailAddress( "ANDANA", portal.getProperty( 'email_from_address' ), enc )
+        fromAddress = ("ANDANA <%s>" % portal.getProperty('email_from_address'))
         destUsers = self.getDestUsers()
         if destUsers:
             for destUser in destUsers:
-                ploneUser = self.portal_membership.getMemberById( destUser )
-                recipient = _getEmailAddress( ploneUser.getProperty( 'fullname' ), ploneUser.getProperty( 'email' ), enc )
+                ploneUser = self.portal_membership.getMemberById(destUser)
+                recipient = (ploneUser.getProperty('fullname') + ' <%s>' % ploneUser.getProperty('email'))
                 try:
-                    self.MailHost.secureSend(
-                    body, recipient, fromAddress, subject,
-                    charset = 'utf-8', subtype = 'html' )
+                    self.MailHost.send(body, recipient, fromAddress, subject, msg_type = 'text/plain', charset='utf-8')
                 except socket.error, sg:
                     logger.warn( SENDMAIL_ERROR % str( sg ) )
                     break
