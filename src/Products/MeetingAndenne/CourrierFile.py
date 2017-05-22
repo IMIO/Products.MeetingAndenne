@@ -306,7 +306,7 @@ class CourrierFile(ATBlob, BrowserDefaultMixin):
         subject = translate('CourrierFile_mail_subject', domain='PloneMeeting', context=self.REQUEST)
 
         host = self.unrestrictedTraverse('@@plone_portal_state').navigation_root_url()
-        link = "%s/gestion-courrier/courrierall/%s/view" % (host, self.getId())
+        link = "%s/gestion-courrier/courrierall/%s" % (host, self.getId())
         body = translate('CourrierFile_mail_body', domain='PloneMeeting', context=self.REQUEST) + link
 
         fromAddress = ("ANDANA <%s>" % portal.getProperty('email_from_address'))
