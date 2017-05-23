@@ -936,187 +936,6 @@ class CustomMeetingItemAndenne(MeetingItem):
                 i -= 1
         return item.Creator()
 
-#    security.declarePublic('setOcrFlag')
-#    def setOcrFlag(self):
-#        """
-#            Update a MeetingItem object setting the OCR Flag.
-#        """
-#        uploadedFiles = self.portal_catalog( portal_type='MeetingFile' )
-##        uploadedFiles = self.portal_catalog( portal_type='CourrierFile' )
-#
-#        logger.info( "Flag OCR sur les annexes" )
-#
-##        import db
-##        pdb.set_trace()
-#
-#        count = len( uploadedFiles )
-#        cpt = 1
-#        for uploadedFile in uploadedFiles:
-#
-#            logline = "Element %d / %d" % ( cpt, count )
-#            logger.info( logline )
-#
-#            if( uploadedFile.id[-4:] == ".pdf" ):
-#                fileObject = uploadedFile.getObject()
-#                fileObject.needsOcr = True
-#                fileObject.ocrLanguage = 'fra'
-#                fileObject.flaggedForOcr = False
-#                fileObject.isOcrized = False
-#
-#            cpt = cpt + 1
-#
-#            if( cpt % 100 == 0 ):
-#                transaction.get().commit( True )
-#                logger.info( "Commit partiel effectue" )
-#
-#    MeetingItem.setOcrFlag=setOcrFlag
-#
-#
-#    security.declarePublic('ocrItems')
-#    def ocrItems(self):
-#        """
-#            Update a MeetingItem object setting the extractedText attribute.
-#        """
-#        logger.info( "Traitement OCR sur les courriers" )
-#
-##        uploadedFiles = self.portal_catalog( portal_type='CourrierFile' )
-#
-#        count = len( uploadedFiles )
-#        cpt = 1
-#        updated = 0
-#        for uploadedFile in uploadedFiles:
-#
-#            logline = "Element %d / %d" % ( cpt, count )
-#            logger.info( logline )
-#
-#            if( uploadedFile.id[-4:] == ".pdf" ):
-#                fileObject = uploadedFile.getObject()
-#
-#                if( fileObject.needsOcr == True and fileObject.isOcrized == False ):
-#                    fileObject.flaggedForOcr = True
-#
-#                    fileObject.reindexObject()
-#
-#                    fileObject.isOcrized = True
-#                    fileObject.flaggedForOcr = False
-#
-#                    updated = updated + 1
-#                    logline = "%d elements traites" % ( updated )
-#                    logger.info( logline )
-#
-#            cpt = cpt + 1
-#
-#            if( updated % 100 == 0 and updated != 0 ):
-#                transaction.savepoint( optimistic = True )
-#                logger.info( "Commit partiel effectue" )
-#
-#            if( updated >= 1000 ):
-#                break
-#
-#        logger.info( "Traitement OCR sur les annexes" )
-#
-##        uploadedFiles = self.portal_catalog( portal_type='MeetingFile' )
-#
-##        count = len( uploadedFiles )
-##        cpt = 1
-##        for uploadedFile in uploadedFiles:
-#
-##            logline = "Element %d / %d - %s" % ( cpt, count, uploadedFile.getURL() )
-##            logger.info( logline )
-#
-##            fileObject = uploadedFile.getObject()
-##            if( fileObject.needsOcr == True and fileObject.isOcrized == False ):
-##                if( uploadedFile.id[-4:] == ".pdf" ):
-##                    fileObject.flaggedForOcr = True
-#
-##                    fileObject.reindexObject()
-#
-##                    fileObject.isOcrized = True
-##                    fileObject.flaggedForOcr = False
-##                else:
-##                    fileObject.reindexObject()
-#
-##                updated = updated + 1
-##                logline = "%d elements traites" % ( updated )
-##                logger.info( logline )
-#
-#            cpt = cpt + 1
-#
-##            if( updated % 100 == 0 and updated != 0 ):
-#                transaction.savepoint( optimistic = True )
-##                logger.info( "Commit partiel effectue" )
-#
-##            if( updated >= 1000 ):
-##                break
-#
-##        logger.info( "Fin de la numerisation, %d elements numerises" % (updated) )
-##        transaction.get().commit()
-#
-#    MeetingItem.ocrItems=ocrItems
-#
-#
-#
-#
-#
-#    security.declarePublic('getDefaultBudgetInfo')
-#    def getDefaultBudgetInfo(self):
-#        '''The default budget info is to be found in the config.'''
-#        meetingConfig = self.portal_plonemeeting.getMeetingConfig(self)
-#        return meetingConfig.getRawBudgetDefault()
-#
-#    #it' a monkey patch
-#    MeetingItem.getDefaultBudgetInfo=getDefaultBudgetInfo
-#
-#
-#    security.declarePublic('OnPaste')
-#    def OnPaste(self):
-#        self.context.at_post_create_script()
-#
-#    security.declarePublic('projetpvFieldIsEmpty')
-#    def projetpvFieldIsEmpty(self):
-#        '''Is the 'projetpv' field empty ? '''
-#        return kupuFieldIsEmpty(self.context.getProjetpv())
-#
-#    security.declarePublic('pvFieldIsEmpty')
-#    def pvFieldIsEmpty(self):
-#        '''Is the 'decision' field empty ? '''
-#        return kupuFieldIsEmpty(self.context.getPv())
-#
-#    security.declarePublic('textpvFieldIsEmpty')
-#    def textpvFieldIsEmpty(self):
-#        '''Is the 'decision' field empty ? '''
-#        return kupuFieldIsEmpty(self.context.getTextpv())
-
-
-#    security.declarePublic('getAttendees')
-#    def getAttendees(self, usage=None, includeDeleted=False, includeAbsents=False, includeReplacements=False):
-#        '''Returns the attendees for this item. Takes into account
-#           self.itemAbsents, excepted if p_includeAbsents is True. If a given
-#           p_usage is defined, the method returns only users having this
-#           p_usage.'''
-#        res = []
-#        if self.hasMeeting():
-#            # Prevent wrong parameters use
-#            if includeDeleted and usage:
-#                includeDeleted = False
-#            res = []
-#            meetingConfig = self.portal_plonemeeting.getMeetingConfig(self)
-#            itemAbsents = ()
-#            itemPresents = ()
-#            itemPresentsinmeeting = ()
-#            if not includeAbsents:
-#                itemAbsents = self.getItemAbsents()
-#                itemPresents=self.getItemPresents()
-#                itemPresentsinmeeting=self.getMeeting().getAttendees(False,includeDeleted=includeDeleted)
-#                for attendee in meetingConfig.getActiveMeetingUsers():
-#                    if (attendee.id in itemPresentsinmeeting or attendee.id in itemPresents ) and attendee.id not in itemAbsents:
-#                        if not usage or (usage in attendee.getUsages()):
-#                            res.append(attendee)
-#        return res
-#
-#    MeetingItem.getAttendees=getAttendees
-#    # it'a a monkey patch
-
     security.declarePublic('onDuplicate')
     def onDuplicate(self):
         '''This method is triggered when the users clicks on
@@ -1341,35 +1160,6 @@ class CustomMeetingConfigAndenne(MeetingConfig):
 
 
 # ------------------------------------------------------------------------------
-#UNSUPPORTED_FORMAT_FOR_OCR = 'File "%s" could not be OCR-ized because mime ' \
-#    'type "%s" is not a supported input format. Supported input formats ' \
-#    'are: %s; %s.'
-#DUMP_FILE_ERROR = 'Error occurred while dumping or removing file "%s" on ' \
-#    'disk. %s'
-#GS_ERROR = 'An error occurred when using Ghostscript to convert "%s". Note ' \
-#    'that program "gs" must be in path.'
-#TESSERACT_ERROR = 'An error occurred when using Tesseract to OCR-ize file ' \
-#    '"%s". Note that program "tesseract" must be in path.'
-#
-#GS_TIFF_COMMAND = 'gs -q -dNOPAUSE -dBATCH -sDEVICE=tiffg4 ' \
-#    '-sOutputFile=%s/%%04d.tif %s -c quit'
-#GS_INFO_COMMAND = 'Launching Ghoscript: %s'
-#POPPLER_COMMAND = 'pdftoppm -png %s %s'
-#POPPLER_INFO_COMMAND = 'Launching Poppler: %s'
-#POPPLER_ERROR = 'An error occurred when using Poppler to convert "%s". Note ' \
-#    'that program "pdftoppm" must be in path.'
-#TESSERACT_COMMAND = 'tesseract %s %s -l %s'
-#TESSERACT_INFO_COMMAND = 'Launching Tesseract: %s'
-#PDFTOTEXT_COMMAND = 'pdftotext %s %s'
-#PDFTOTEXT_INFO_COMMAND = 'Launching pdftotext: %s'
-#PDFTOTEXT_ERROR = 'An error occurred while converting a PDF file with ' \
-#    'pdftotext.'
-#WVTEXT_COMMAND = 'wvText %s %s'
-#WVTEXT_INFO_COMMAND = 'Launching wvText: %s'
-#WVTEXT_ERROR = 'An error occurred while converting a Word document with wvText.'
-
-
-# ------------------------------------------------------------------------------
 class CustomMeetingFileAndenne(MeetingFile):
     '''Adapter that adapts a meeting File implementing IMeetingFile to the
        interface IMeetingFileCustom.'''
@@ -1378,15 +1168,6 @@ class CustomMeetingFileAndenne(MeetingFile):
 
     def __init__(self, item):
         self.context = item
-
-#    security.declarePublic('onEdit')
-#    def onEdit(self,isCreated):
-#        print "passage dans le ON EDIT"
-#        self.flaggedForOcr = False
-#        self.isOcrized = False
-#
-#    MeetingFile.onEdit=onEdit
-#    #it'a a monkey patch because it's the only way to change the behaviour of the MeetingFile class
 
     security.declarePublic('indexExtractedText')
     def indexExtractedText(self):
@@ -1401,98 +1182,6 @@ class CustomMeetingFileAndenne(MeetingFile):
             into text. Tesseract needs to know in what p_ocrLanguage the file
             is written in'''
         return ''
-#        if not hasattr( self.aq_base, 'needsOcr' ):
-#            return ''
-#
-#        tool = self.portal_plonemeeting
-#        if not tool.getExtractTextFromFiles():
-#            return ''
-#
-#        # Extracts the text from the binary content.
-#        extractedText = ''
-#        mimeType = self.content_type
-#        if self.needsOcr:
-#            # This if is added to prevent ocr-isation on the fly (when item is created or edited)
-#            # but to allow it when an ocr script is launched during the next night.
-#            if( hasattr( self, 'flaggedForOcr' ) and self.flaggedForOcr == True ):
-#                if mimeType in self.ocrAllFormatsOk:
-#                    try:
-#                        fileName = self.dump() # Dumps me on disk first
-#                        pngFolder = None
-#                        if mimeType in self.ocrFormatsOkButConvertNeeded:
-#                            # Poppler will be used to convert the file to
-#                            # "png" format. A folder where Poppler will
-#                            # generate one png file per PDF page will be created.
-#                            pngFolder = os.path.splitext( fileName )[0] + '.folder'
-#                            os.mkdir( pngFolder )
-#                            cmd = POPPLER_COMMAND % ( fileName, pngFolder + '/file' )
-#                            logger.info( POPPLER_INFO_COMMAND % cmd )
-#                            os.system( cmd )
-#                            pngFiles = ['%s/%s' % ( pngFolder, f ) for f in \
-#                                        os.listdir( pngFolder )]
-#                            if not pngFiles:
-#                                logger.warn( POPPLER_ERROR % ( fileName ) )
-#                        else:
-#                            pngFiles = [fileName]
-#                        pngFiles.sort()
-#                        # Launch the OCR engine
-#                        for pngFile in pngFiles:
-#                            resFile = os.path.splitext( pngFile )[0]
-#                            resFilePlusExt = resFile + '.txt'
-#                            cmd = TESSERACT_COMMAND % ( pngFile, resFile,
-#                                                        self.ocrLanguage)
-#                            logger.info( TESSERACT_INFO_COMMAND % cmd )
-#                            os.system( cmd )
-#                            if not os.path.exists( resFilePlusExt ):
-#                                logger.warn( TESSERACT_ERROR % pngFile )
-#                            else:
-#                                f = file( resFilePlusExt )
-#                                extractedText += f.read()
-#                                f.close()
-#                                os.remove( resFilePlusExt )
-#                            os.remove( pngFile )
-#                        if pngFolder:
-#                            os.removedirs( pngFolder )
-#                        os.remove( fileName )
-#                    except OSError, oe:
-#                        logger.warn( DUMP_FILE_ERROR % ( self.getFilename(), str( oe ) ) )
-#                    except IOError, ie:
-#                        logger.warn( DUMP_FILE_ERROR % ( self.getFilename(), str( ie ) ) )
-#                else:
-#                    logger.warn( UNSUPPORTED_FORMAT_FOR_OCR % ( self.getFilename(),
-#                        mimeType, self.ocrFormatsOk,
-#                        self.ocrFormatsOkButConvertNeeded ) )
-#        else:
-#            fileName = self.dump() # Dumps me on disk first
-#            # Import the content of a not-to-ocr PDF file.
-#            resultFileName = os.path.splitext( fileName )[0] + '.txt'
-#            decodeNeeded = None
-#            if mimeType == 'application/pdf':
-#                cmd = PDFTOTEXT_COMMAND % ( fileName, resultFileName )
-#                logger.info( PDFTOTEXT_INFO_COMMAND % cmd )
-#                os.system( cmd )
-#                if not os.path.exists( resultFileName ):
-#                    logger.warn( PDFTOTEXT_ERROR )
-#            elif mimeType == 'application/msword':
-#                cmd = WVTEXT_COMMAND % ( fileName, resultFileName )
-#                logger.info( WVTEXT_INFO_COMMAND % cmd )
-#                os.system( cmd )
-#                decodeNeeded = 'latin-1'
-#                if not os.path.exists( resultFileName ):
-#                    logger.warn( WVTEXT_ERROR )
-#            else:
-#                logger.info( 'Unable to index content of "%s"' % self.id )
-#            # Return temporary files written on disk and return the result.
-#            os.remove( fileName )
-#            if os.path.exists( resultFileName ):
-#                f = file( resultFileName )
-#                if decodeNeeded:
-#                    extractedText += f.read().decode( decodeNeeded )
-#                else:
-#                    extractedText += f.read()
-#                f.close()
-#                os.remove( resultFileName )
-#        return extractedText
 
     MeetingFile.indexExtractedText=indexExtractedText
     #it'a a monkey patch because it's the only way to change the behaviour of the MeetingFile class
@@ -1541,33 +1230,20 @@ class CustomToolMeetingAndenne(ToolPloneMeeting):
         '''
         return meetingType in SEARCH_TYPES.keys()
 
-#    security.declarePublic('getSearchTypeFor')
-#    def getSearchTypeFor(self, meetingType):
-#        '''
-#            Returns the portal_type to be used in a search local to the given meeting type.
-#        '''
-#        return SEARCH_TYPES[meetingType]
-#
-#    security.declarePublic('getMailTypesForSearch')
-#    def getMailTypesForSearch(self):
-#        '''
-#            Returns the ids and titles of alll the available mail types for
-#            search purposes.
-#        '''
-#        return MAIL_TYPES.items()
-#
-#    security.declarePublic('listDestUsers')
-#    def listDestUsers(self):
-#        '''
-#            Lists the users that will be selectable to be in destination (view only) for this item.
-#        '''
-#        pgp = getToolByName(self.context, 'portal_membership')
-#        res = []
-#        for user in pgp.listMembers():
-#            if user.getProperty('listed'):
-#                res.append( (user.getId(), user.getProperty('fullname')) )
-#        res = sorted( res, key=lambda student: student[1] )
-#        return res
+    security.declarePublic('getSearchTypeFor')
+    def getSearchTypeFor(self, meetingType):
+        '''
+            Returns the portal_type to be used in a search local to the given meeting type.
+        '''
+        return SEARCH_TYPES[meetingType]
+
+    security.declarePublic('getMailTypesForSearch')
+    def getMailTypesForSearch(self):
+        '''
+            Returns the ids and titles of all the available mail types for
+            search purposes.
+        '''
+        return MAIL_TYPES.items()
 
 
 # ------------------------------------------------------------------------------
