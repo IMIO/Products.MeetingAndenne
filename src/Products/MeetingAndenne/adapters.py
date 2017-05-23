@@ -574,8 +574,14 @@ class CustomMeetingItemAndenne(MeetingItem):
         itemState = item.queryState()
         if itemState == 'accepted_but_modified':
             res.append(('accepted_but_modified.png', 'icon_help_accepted_but_modified'))
+        elif itemState == 'accepted_but_modified_and_closed':
+            res.append(('accepted_but_modified.png', 'icon_help_accepted_but_modified'))
+        elif itemState == 'delayed_and_closed':
+            res.append(('delayed.png', 'icon_help_delayed'))
         elif itemState == 'pre_accepted':
             res.append(('pre_accepted.png', 'icon_help_pre_accepted'))
+        elif itemState == 'refused_and_closed':
+            res.append(('refused.png', 'icon_help_refused'))
         return res
 
     ##### End Overrides MeetingCommunes MeetingItemCustom adapter ###########
@@ -865,52 +871,55 @@ class CustomMeetingItemAndenne(MeetingItem):
         self.context.setPv(self.context.replaceBr(pv))
 
         # Add local roles corresponding to the proposing group if item category is personnel or if item is confidential
-        if self.context.getCategory() == "45-personnel" or self.context.getIsconfidential()== True:
-            if self.context.getIsconfidential()==True:
-                MEETINGROLESTOADD = {'reviewers': 'MeetingReviewer'}
-                MEETINGROLESTOREMOVE = ('reviewers', 'observers', 'creators')
+        if self.context.getCategory() == "45-personnel" or self.context.getIsconfidential() == True:
+            meetingGroup = getattr(tool, self.context.getProposingGroup(), None)
+            personnelGroup = getattr(tool, "personnel", None)
+            cfg = tool.getMeetingConfig(self.context)
+            adaptations = cfg.getWorkflowAdaptations()
+
+            if self.context.getIsconfidential() == True:
+                MEETINGROLESTOREMOVE = ('prereviewers', 'reviewers', 'observers', 'creators')
+                MEETINGROLESTOADD = dict()
             else:
-                MEETINGROLESTOADD = {'reviewers': 'MeetingReviewer',
-                                     'observers': 'MeetingObserverLocal'}
-                MEETINGROLESTOREMOVE = ('reviewers', )
+                MEETINGROLESTOREMOVE = ('prereviewers', 'reviewers')
+                MEETINGROLESTOADD = { 'MeetingObserverLocal': ( personnelGroup, 'observers' ), }
+
+            if 'pre_validation_keep_reviewer_permissions' in adaptations and meetingGroup.getUsePrevalidation():
+                MEETINGROLESTOADD['MeetingReviewer'] = ( meetingGroup, 'reviewers' )
+                if self.context.getCategory() == "45-personnel":
+                    MEETINGROLESTOADD['MeetingPreReviewer'] = ( personnelGroup, 'prereviewers' )
+                    if self.context.getIsconfidential() == True:
+                        MEETINGROLESTOADD['MeetingObserverLocal'] = ( meetingGroup, 'prereviewers' )
+                else:
+                    MEETINGROLESTOADD['MeetingPreReviewer'] = ( meetingGroup, 'prereviewers' )
+            else:
+                MEETINGROLESTOADD['MeetingPreReviewer'] = ( meetingGroup, 'prereviewers' )
+                if self.context.getCategory() == "45-personnel":
+                    MEETINGROLESTOADD['MeetingReviewer'] = ( personnelGroup, 'reviewers' )
+                    if self.context.getIsconfidential() == True:
+                        MEETINGROLESTOADD['MeetingObserverLocal'] = ( meetingGroup, 'reviewers' )
+                else:
+                    MEETINGROLESTOADD['MeetingReviewer'] = ( meetingGroup, 'reviewers' )
 
             # Remove the locale roles
-            meetingGroup = getattr(tool, self.context.getProposingGroup(), None)
-            if meetingGroup:
-                for groupSuffix in MEETINGROLESTOREMOVE:
-                    groupId = meetingGroup.getPloneGroupId(groupSuffix)
-                    # If the corresponding Plone group does not exist anymore,
-                    # recreate it.
-                    ploneGroup = self.context.portal_groups.getGroupById(groupId)
-                    if not ploneGroup:
-                        meetingGroup._createPloneGroup(groupSuffix)
-                    self.context.manage_delLocalRoles((groupId, ))
-
-            if self.context.getCategory() == "45-personnel":
-                meetingGroup = getattr(tool, "personnel", None)
-
-            # Add the local roles
-            if meetingGroup:
-                for groupSuffix, role in MEETINGROLESTOADD.items():
-                    groupId = meetingGroup.getPloneGroupId(groupSuffix)
-                    # If the corresponding Plone group does not exist anymore,
-                    # recreate it.
-                    ploneGroup = self.context.portal_groups.getGroupById(groupId)
-                    if not ploneGroup:
-                        meetingGroup._createPloneGroup(groupSuffix)
-                    self.context.manage_addLocalRoles(groupId, (role, ))
-
-        # Add local roles for associated group
-        assGroups = self.context.getAssociatedGroups()
-        if assGroups:
-            for assGroup in assGroups:
-                groupId = assGroup + '_creators'
+            for groupSuffix in MEETINGROLESTOREMOVE:
+                groupId = meetingGroup.getPloneGroupId(groupSuffix)
                 # If the corresponding Plone group does not exist anymore,
                 # recreate it.
                 ploneGroup = self.context.portal_groups.getGroupById(groupId)
                 if not ploneGroup:
-                    assGroup._createPloneGroup(groupSuffix)
-                self.context.manage_addLocalRoles(groupId, ('MeetingMember', ))
+                    meetingGroup._createPloneGroup(groupSuffix)
+                self.context.manage_delLocalRoles((groupId, ))
+
+            # Add the local roles
+            for role, groupData in MEETINGROLESTOADD.items():
+                groupId = groupData[0].getPloneGroupId(groupData[1])
+                # If the corresponding Plone group does not exist anymore,
+                # recreate it.
+                ploneGroup = self.context.portal_groups.getGroupById(groupId)
+                if not ploneGroup:
+                    groupData[0]._createPloneGroup(groupData[1])
+                self.context.manage_addLocalRoles(groupId, (role, ))
 
     security.declarePublic('getLatestReviewer')
     def getLatestReviewer(self):
@@ -1378,20 +1387,20 @@ class CustomMeetingFileAndenne(MeetingFile):
 #
 #    MeetingFile.onEdit=onEdit
 #    #it'a a monkey patch because it's the only way to change the behaviour of the MeetingFile class
-#
-#    security.declarePublic('indexExtractedText')
-#    def indexExtractedText(self):
-#        ''' This method extracts text from the binary content of this object
-#            and puts it in the index that corresponds to this method. It does so
-#            only if tool.extractTextFromFiles is True.
-#
-#            If self.needsOcr is True, it does OCR recognition
-#            by calling command-line programs Poppler (pdftoppm) and Tesseract
-#            (tesseract). Poppler is used for converting a file into
-#            images and Tesseract is the OCR engine that converts those images
-#            into text. Tesseract needs to know in what p_ocrLanguage the file
-#            is written in'''
-#
+
+    security.declarePublic('indexExtractedText')
+    def indexExtractedText(self):
+        ''' This method extracts text from the binary content of this object
+            and puts it in the index that corresponds to this method. It does so
+            only if tool.extractTextFromFiles is True.
+
+            If self.needsOcr is True, it does OCR recognition
+            by calling command-line programs Poppler (pdftoppm) and Tesseract
+            (tesseract). Poppler is used for converting a file into
+            images and Tesseract is the OCR engine that converts those images
+            into text. Tesseract needs to know in what p_ocrLanguage the file
+            is written in'''
+        return ''
 #        if not hasattr( self.aq_base, 'needsOcr' ):
 #            return ''
 #
@@ -1484,18 +1493,9 @@ class CustomMeetingFileAndenne(MeetingFile):
 #                f.close()
 #                os.remove( resultFileName )
 #        return extractedText
-#
-#    MeetingFile.indexExtractedText=indexExtractedText
-#    #it'a a monkey patch because it's the only way to change the behaviour of the MeetingFile class
-#
-#    security.declarePublic('annex_print')
-#    def annex_print(self):
-#        '''Toggles the toPrint switch'''
-#        self.setToPrint(not self.getToPrint())
-#        return self.REQUEST.RESPONSE.redirect(self.getParentNode().absolute_url() + '/annexes_form')
-#
-#    MeetingFile.annex_print=annex_print
-#    #it'a a monkey patch because it's the only way to change the behaviour of the MeetingFile class
+
+    MeetingFile.indexExtractedText=indexExtractedText
+    #it'a a monkey patch because it's the only way to change the behaviour of the MeetingFile class
 
 
 # ------------------------------------------------------------------------------
@@ -1684,7 +1684,7 @@ class MeetingItemCollegeAndenneWorkflowConditions(MeetingItemWorkflowConditions)
 
     security.declarePublic('mayDecide')
     def mayDecide(self):
-        '''We may decide an item if the linked meeting is in relevant state'''
+        '''We may decide an item if the linked meeting is in relevant state.'''
         meeting = self.context.getMeeting()
         if checkPermission(ReviewPortalContent, self.context) and \
            meeting and meeting.adapted().isDecided():
@@ -1693,9 +1693,9 @@ class MeetingItemCollegeAndenneWorkflowConditions(MeetingItemWorkflowConditions)
 
     security.declarePublic('mayPrevalidate')
     def mayPrevalidate(self):
-        '''We may prevalidate an item if prevalidation workflow adaptation is
-           active, if the proposing group uses prevalidation and if the user has
-           the 'Review portal content' permission'''
+        '''We may prevalidate an item if the user has the 'Review portal content'
+           permission, prevalidation workflow adaptation is active and the
+           proposing group uses prevalidation.'''
         if not MeetingItemWorkflowConditions.mayPrevalidate(self):
             return False
 
@@ -1703,33 +1703,42 @@ class MeetingItemCollegeAndenneWorkflowConditions(MeetingItemWorkflowConditions)
         tool = getToolByName(item, 'portal_plonemeeting')
         cfg = tool.getMeetingConfig(item)
         adaptations = cfg.getWorkflowAdaptations()
-        if not 'pre_validation_keep_reviewer_permissions' in adaptations:
+        group = tool[item.getProposingGroup()]
+        if not 'pre_validation_keep_reviewer_permissions' in adaptations or not group.getUsePrevalidation():
             return False
 
-        group = tool[item.getProposingGroup()]
-        return group.getUsePrevalidation()
+        toolMembership = getToolByName(item, 'portal_membership')
+        user = toolMembership.getAuthenticatedMember()
+        if user.has_role('Manager', item):
+            return True
+
+        userMeetingGroups = tool.getGroupsForUser(suffix="prereviewers")
+        if item.getCategory() == "45-personnel":
+            return len(userMeetingGroups) > 0
+        else:
+            return group in userMeetingGroups
 
     security.declarePublic('mayValidate')
     def mayValidate(self):
         '''We may validate an item if the user has the 'Review portal content' permission
            and either the prevalidation workflow adaptation is not active or the proposing
-           group doesn't use prevalidation or the user is member of the reviewer group'''
+           group doesn't use prevalidation or the user is member of the reviewer group.'''
         if not MeetingItemWorkflowConditions.mayValidate(self):
             return False
 
         item = self.context
-        toolMembership = getToolByName(item, 'portal_membership')
-        user = toolMembership.getAuthenticatedMember()
         tool = getToolByName(item, 'portal_plonemeeting')
         cfg = tool.getMeetingConfig(item)
         adaptations = cfg.getWorkflowAdaptations()
         group = tool[item.getProposingGroup()]
         if not 'pre_validation_keep_reviewer_permissions' in adaptations or not group.getUsePrevalidation() \
-           or user.has_role('Manager', item):
+           or item.queryState() == 'prevalidated':
             return True
 
-        userMeetingGroups = tool.getGroupsForUser(suffix="reviewers")
-        return group in userMeetingGroups
+        toolMembership = getToolByName(item, 'portal_membership')
+        user = toolMembership.getAuthenticatedMember()
+        userMeetingGroups = tool.getGroupsForUser(suffix="prereviewers")
+        return group in userMeetingGroups or user.has_role('Manager', item)
 
     security.declarePublic('mayCorrect')
     def mayCorrect(self, toPrevalidated = False):
@@ -1740,16 +1749,16 @@ class MeetingItemCollegeAndenneWorkflowConditions(MeetingItemWorkflowConditions)
         if not MeetingItemWorkflowConditions.mayCorrect(self):
             return False
 
-        if not toPrevalidated:
+        item = self.context
+        if item.queryState() != 'validated':
             return True
 
-        item = self.context
         tool = getToolByName(item, 'portal_plonemeeting')
         cfg = tool.getMeetingConfig(item)
         adaptations = cfg.getWorkflowAdaptations()
         group = tool[item.getProposingGroup()]
-        return 'pre_validation_keep_reviewer_permissions' in adaptations and group.getUsePrevalidation()
-
+        prevalidation = 'pre_validation_keep_reviewer_permissions' in adaptations and group.getUsePrevalidation()
+        return prevalidation == toPrevalidated
 
 # ------------------------------------------------------------------------------
 InitializeClass(CustomMeetingAndenne)

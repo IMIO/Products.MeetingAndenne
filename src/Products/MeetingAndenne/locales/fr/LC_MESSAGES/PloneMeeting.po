@@ -433,26 +433,26 @@ msgid "searchmymails"
 msgstr "Mes courriers"
 
 # Suffix
-#. Default: "mail viewer"
+#. Default: "Mail viewer"
 msgid "mailviewer"
-msgstr "accès au courrier"
+msgstr "Accès au courrier"
 
-#. Default: "mail viewers"
+#. Default: "Mail viewers"
 msgid "mailviewers"
-msgstr "accès au courrier"
+msgstr "Accès au courrier"
 
-#. Default: "pv writer"
+#. Default: "Pv writer"
 msgid "pvwriter"
-msgstr "rédacteur de PV"
+msgstr "Rédacteur de PV"
 
-#. Default: "pv writers"
+#. Default: "Pv writers"
 msgid "pvwriters"
-msgstr "rédacteurs de PV"
+msgstr "Rédacteurs de PV"
 
-#. Default: "reviewer"
+#. Default: "Reviewer"
 msgid "reviewer"
-msgstr "chef de service"
+msgstr "Chef de service"
 
-#. Default: "reviewers"
+#. Default: "Reviewers"
 msgid "reviewers"
-msgstr "chefs de service"
+msgstr "Chefs de service"
