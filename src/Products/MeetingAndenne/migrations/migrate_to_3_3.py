@@ -90,11 +90,6 @@ topicsToRemove = { 'meeting-config-college': ['searchallitemstovalidate', 'searc
                                     'searchalldecisions']
 }
 
-topicsPropertiesToModify = { 'meeting-config-college': {
-    'searchitemstovalidate': { TOPIC_SEARCH_SCRIPT: 'searchItemsToValidateOfMyReviewerGroups', },
-    },
-}
-
 topicsToLink = { 'meeting-config-college': ['searchallitemsincopy', 'searchitemstovalidate'], }
 
 memberPropertiesToRemove = ( 'fck_skin', 'fck_path', 'fck_root', 'fck_force_paste_as_text', 'service' )
@@ -477,11 +472,6 @@ class Migrate_To_3_3(Migrator):
                 for topic in topicsToLink[mc.getId()]:
                     topicsUIDs.append(mc.topics[topic].UID())
                 mc.setToDoListTopics(topicsUIDs)
-
-            if mc.getId() in topicsPropertiesToModify:
-                for topicToModify, propertiesDict in topicsPropertiesToModify[mc.getId()].iteritems():
-                    if hasattr(mc.topics, topicToModify):
-                        mc.topics[topicToModify].manage_changeProperties(**propertiesDict)
 
             performWorkflowAdaptations(self.portal, mc, logger)
 

@@ -1059,19 +1059,20 @@ class CustomMeetingConfigAndenne(MeetingConfig):
     MeetingConfig.getTopicResults = getTopicResults
     # it'a a monkey patch because it's the only way to change the behaviour of the MeetingConfig class
 
-    security.declarePublic('searchItemsToValidateOfMyReviewerGroups')
-    def searchItemsToValidateOfMyReviewerGroups(self, sortKey, sortOrder, filterKey, filterValue, **kwargs):
-        '''Return a list of items that the user could validate.  So it returns every items the current
-           user is able to validate at any state of the validation process.  So if a user is 'prereviewer'
-           and 'reviewer' for a group, the search will return items in both states.'''
+    security.declarePublic('searchItemsToValidateOfHighestHierarchicLevel')
+    def searchItemsToValidateOfHighestHierarchicLevel(self, sortKey, sortOrder, filterKey, filterValue, **kwargs):
+        '''Return a list of items that the user can validate regarding his highest hierarchic level.
+           So if a user is 'prereviewer' and 'reviewier', the search will only return items
+           in state corresponding to his 'reviewer' role.'''
         tool = getToolByName(self, 'portal_plonemeeting')
         member = self.portal_membership.getAuthenticatedMember()
         groupIds = self.portal_groups.getGroupsForPrincipal(member)
         reviewProcessInfos = []
+        isPersonnel = False
         for groupId in groupIds:
             for reviewer_suffix, review_state in MEETINGREVIEWERS.items():
-                # current user may be able to validate at at least
-                # one level of the entire validation process, we take it into account
+                if groupId.startswith('personnel'):
+                    isPersonnel = True
                 if groupId.endswith('_%s' % reviewer_suffix):
                     groupName = groupId[:-len(reviewer_suffix) - 1]
                     # specific management for workflows using the 'pre_validation' wfAdaptation
@@ -1080,17 +1081,18 @@ class CustomMeetingConfigAndenne(MeetingConfig):
                        'pre_validation_keep_reviewer_permissions' in self.getWorkflowAdaptations()):
                         groupObj = getattr(tool, groupName)
                         if groupObj.getUsePrevalidation():
-                            reviewProcessInfos.append('%s__reviewprocess__%s' % (groupName, review_state))
                             review_state = 'prevalidated'
                     reviewProcessInfos.append('%s__reviewprocess__%s' % (groupName, review_state))
-        if not reviewProcessInfos:
-            return []
 
         params = {'portal_type': self.getItemTypeName(),
                   'reviewProcessInfo': reviewProcessInfos,
                   'sort_on': sortKey,
                   'sort_order': sortOrder
                   }
+        if isPersonnel:
+            del params['reviewProcessInfo']
+            params['getCategory'] = '45-personnel'
+            params['review_state'] = 'proposed'
         # Manage filter
         if filterKey:
             params[filterKey] = prepareSearchValue(filterValue)
@@ -1099,7 +1101,7 @@ class CustomMeetingConfigAndenne(MeetingConfig):
         # Perform the query in portal_catalog
         return self.portal_catalog(**params)
 
-    MeetingConfig.searchItemsToValidateOfMyReviewerGroups = searchItemsToValidateOfMyReviewerGroups
+    MeetingConfig.searchItemsToValidateOfHighestHierarchicLevel = searchItemsToValidateOfHighestHierarchicLevel
     # it'a a monkey patch because it's the only way to change the behaviour of the MeetingConfig class
 
     security.declarePublic('getQueryColumns')
