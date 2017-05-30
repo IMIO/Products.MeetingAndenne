@@ -31,16 +31,8 @@
 
     <table cellpadding="0" cellspacing="0" width="100%">
       <tr valign="top">
-        <tal:comment replace="nothing">Checkbox for asking OCR</tal:comment>
-        <td width="48%">
-          <input class="noborder" type="checkbox" name="needs_ocr"
-                 tal:attributes="checked python: needsOcr != None and (needsOcr == True and 'checked' or False) or True;"/>
-            <label for="needs_ocr" i18n:domain="PloneMeeting" i18n:translate="needs_ocr"></label>
-            <div class="formHelp" i18n:translate="needs_ocr_descr"></div>
-        </td>
-        <td width="4%"></td>
         <tal:comment replace="nothing">Select the OCR language</tal:comment>
-        <td width="48%"
+        <td width="100%"
             tal:define="requestValue request/ocr_language|nothing;
                         selectedValue python: requestValue and requestValue or tool.getDefaultOcrLanguage();">
           <label for="ocr_language" i18n:domain="PloneMeeting" i18n:translate="ocr_language"></label>

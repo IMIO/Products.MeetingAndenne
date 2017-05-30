@@ -50,7 +50,7 @@ from Products.PloneMeeting.interfaces import IMeetingCustom, IMeetingItemCustom,
 from Products.MeetingAndenne.interfaces import \
      IMeetingItemCollegeAndenneWorkflowActions, IMeetingItemCollegeAndenneWorkflowConditions, \
      IMeetingCollegeAndenneWorkflowActions, IMeetingCollegeAndenneWorkflowConditions, \
-     IMeetingItemFormation
+     IMeetingItemFormation, IOCRLanguageCustom
 from Products.MeetingAndenne.config import MAIL_TYPES, SEARCH_TYPES
 from Products.MeetingAndenne.SearcherAndenne import SearcherAndenne
 from Products.PloneMeeting.utils import checkPermission, getCustomAdapter, prepareSearchValue
@@ -58,9 +58,14 @@ from Products.PloneMeeting.model import adaptations
 from Products.PloneMeeting.model.adaptations import WF_DOES_NOT_EXIST_WARNING, WF_APPLIED
 from DateTime import DateTime
 
-# Some lines added for the OCR functionalities
-import os, os.path, time, unicodedata
-import transaction
+# Some imports added for the OCR functionalities
+import os, os.path, unicodedata
+import shutil
+from collective.documentviewer.iso639_2_utf8 import ISO_UTF_MAP
+from collective.documentviewer.convert import DocSplitSubProcess, DUMP_FILENAME
+from collective.documentviewer.convert import TextCheckerSubProcess, textChecker
+from collective.documentviewer.convert import Page, word_re
+
 import logging
 logger = logging.getLogger( 'MeetingAndenne' )
 
@@ -185,6 +190,105 @@ class EnhancedPersonalPreferencesPanelAdapter(PersonalPreferencesPanelAdapter):
     def set_listed(self, value):
         return self.context.setMemberProperties( {'listed': value} )
     listed = property(get_listed, set_listed)
+
+
+# ------------------------------------------------------------------------------
+class CustomOCRLanguageAdapter(object):
+    '''Adapter that returns the object language.'''
+    def __init__(self, context):
+        self.context = context
+
+    def getLanguage(self):
+        '''Returns OCR language as 3-char language code.'''
+        # First try to get the language assigned to the file
+        lang = None
+        if hasattr(self.context, 'ocrLanguage'):
+            lang = getattr(self.context, 'ocrLanguage', None)
+        if lang is None:
+            lang = self.context.REQUEST.get('ocr_language')
+        if lang is not None:
+            return lang
+
+        # Fallback to $OCR_LANGUAGE environment variable or site language
+        lang = os.environ.get('OCR_LANGUAGE')
+        if lang is None:
+            lang = getToolByName(self.context, 'portal_languages').getPreferredLanguage()
+            lang = ISO_UTF_MAP.get(lang, 'fra')
+        return lang
+
+
+# ------------------------------------------------------------------------------
+# Adapted to reflect the output of newer versions of pdffonts
+TextCheckerSubProcess.font_line_marker = '%s %s %s --- --- --- ---------' % (
+        '-' * 36, '-' * 17,'-' * 16)
+
+# Contents function is monkey patched in order to remove accents for SearchableText to be filled properly
+@property
+def contents(self): 
+    if os.path.exists(self.filepath):
+        fi = open(self.filepath)
+        text = fi.read()
+        fi.close()
+        # We replace é, à, ù,... by the NFKD unicode form which is the letter code followed by the accent code
+        text = unicodedata.normalize('NFKD', unicode(text, encoding = 'utf-8'))
+        # We replace special quotes characters (sometimes found in documents such as MS word files) and which are not ASCII
+        text = text.replace(u"\u2019", u"\u0027")
+        text = text.replace(u"\u2018", u"\u0027")
+        text = text.replace(u"\u0060", u"\u0027")
+        text = text.replace(u"\u00B4", u"\u0027")
+        text = text.replace(u"\u201C", u"\u0022")
+        text = text.replace(u"\u201D", u"\u0022")
+        # We remove non ASCII characters and replace by spaces non alphanumeric characters  
+        text = text.encode('ASCII', 'ignore')
+        text = word_re.sub(' ', text).strip()
+        return ' '.join( [word for word in text.split() if len(word) > 3] )
+    return ''
+
+Page.contents = contents
+
+# Convert function is monkey patched in order to force OCR on PDF files even if some text is already present in the file
+def convert(self, output_dir, inputfilepath=None, filedata=None,
+            converttopdf=False, sizes=(('large', 1000),), enable_indexation=True,
+            ocr=True, detect_text=True, format='gif', filename=None, language='eng'):
+        if inputfilepath is None and filedata is None:
+            raise Exception("Must provide either filepath or filedata params")
+
+        path = os.path.join(output_dir, DUMP_FILENAME)
+        if os.path.exists(path):
+            os.remove(path)
+
+        if inputfilepath is not None:
+            # copy file to be able to work with.
+            shutil.copy(inputfilepath, path)
+        else:
+            fi = open(path, 'wb')
+            fi.write(filedata)
+            fi.close()
+
+        if converttopdf:
+            self.convert_to_pdf(path, filename, output_dir)
+
+        self.dump_images(path, output_dir, sizes, format, language)
+        if enable_indexation and ocr and detect_text and textChecker is not None:
+            if textChecker.has(path):
+                logger.info('Text already present in pdf.')
+                ### patched here to force OCR on PDF files
+                file_extension = filename.split('.')[-1].lower()
+                if file_extension == 'pdf':
+                    logger.info("We'll run Tesseract though as we do not trust in pdf text.")
+                else:
+                    ocr = False
+                    logger.info('Skipping the OCR step.')
+
+        if enable_indexation:
+            self.dump_text(path, output_dir, ocr, language)
+
+        num_pages = self.get_num_pages(path)
+
+        os.remove(path)
+        return num_pages
+
+DocSplitSubProcess.convert=convert
 
 
 # ------------------------------------------------------------------------------
@@ -1185,8 +1289,8 @@ class CustomMeetingFileAndenne(MeetingFile):
             is written in'''
         return ''
 
-    MeetingFile.indexExtractedText=indexExtractedText
-    #it'a a monkey patch because it's the only way to change the behaviour of the MeetingFile class
+    MeetingFile.indexExtractedText = indexExtractedText
+    # it'a a monkey patch because it's the only way to change the behaviour of the MeetingFile class
 
 
 # ------------------------------------------------------------------------------

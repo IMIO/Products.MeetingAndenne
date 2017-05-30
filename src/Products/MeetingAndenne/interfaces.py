@@ -26,10 +26,16 @@ __docformat__ = 'plaintext'
 # ------------------------------------------------------------------------------
 from zope.interface import Interface
 from zope.publisher.interfaces.browser import IDefaultBrowserLayer
+from collective.documentviewer.interfaces import IOCRLanguage
 from Products.PloneMeeting.interfaces import \
     IMeetingItemWorkflowConditions, IMeetingItemWorkflowActions, \
     IMeetingWorkflowActions, IMeetingWorkflowConditions, \
     IMeetingItemCustom
+
+# ------------------------------------------------------------------------------
+class IOCRLanguageCustom(IOCRLanguage):
+    '''Adapter interface that returns the relevant language for Tesseract'''
+    pass
 
 # ------------------------------------------------------------------------------
 class IMeetingItemCollegeAndenneWorkflowActions(IMeetingItemWorkflowActions):

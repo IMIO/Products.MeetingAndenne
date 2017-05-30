@@ -75,6 +75,11 @@
     <implements interface="Products.ATContentTypes.interfaces.file.IFileContent" />
   </class>
 
+  <!-- Adapters for collective.documentviewer OCR detection -->
+  <adapter for="Products.PloneMeeting.interfaces.IMeetingFile"
+           factory="Products.MeetingAndenne.adapters.CustomOCRLanguageAdapter"
+           provides="Products.MeetingAndenne.interfaces.IOCRLanguageCustom"/>
+
 
   <five:deprecatedManageAddDelete class=".CourrierFile.CourrierFile" />
 

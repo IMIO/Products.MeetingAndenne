@@ -103,6 +103,13 @@
         template="templates/mail_navigate_macros.pt"
         layer="Products.MeetingAndenne.interfaces.IMeetingAndenneLayer"
         permission="zope2.View"/>
+    <browser:page
+        name="annexes-macros"
+        for="*"
+        class="Products.PloneMeeting.browser.annexes.AnnexesMacros"
+        template="templates/annexes_macros.pt"
+        layer="Products.MeetingAndenne.interfaces.IMeetingAndenneLayer"
+        permission="zope2.View"/>
 
     <!-- MeetingAndenne-specific portlets -->
     <include package="plone.app.portlets" />
