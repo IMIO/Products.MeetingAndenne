@@ -259,7 +259,7 @@ class MeetingItemFormation(CustomMeetingItemAndenne):
 
     def getExtraFieldsToCopyWhenCloning(self, cloned_to_same_mc):
         ''' Lists the fields to keep when cloning an item'''
-        return ['template']
+        return ['template', 'templateStates']
 
     security.declarePublic('getTrainingDate')
     def getTrainingDate(self):
