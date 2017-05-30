@@ -5,7 +5,10 @@ logger = logging.getLogger('MeetingAndenne')
 
 import sys
 import mimetypes
+
 from OFS.Image import File
+from zope.annotation.interfaces import IAnnotations
+
 from Products.CMFCore.utils import getToolByName
 from Products.PloneMeeting.config import MEETING_GROUP_SUFFIXES, TOPIC_TAL_EXPRESSION, \
                                          TOPIC_TYPE, TOPIC_SEARCH_SCRIPT
@@ -98,6 +101,12 @@ groupsToRename = { 'copy_of_zonet': {
     'newName': 'cabinet-du-bourgmestre-yt',
     'groupDescriptor': GroupDescriptor('cabinet-du-bourgmestre-yt', 'Cabinet du Bourgmestre (Yasémin Tuzkan)', 'cab_bg_yastuz')
     },
+}
+
+documentviewerConfig = { 'storage_location': '/var/converted_annexes',
+                         'ocr': True,
+                         'enable_indexation': True,
+                         'detect_text': True
 }
 
 # The migration class ----------------------------------------------------------
@@ -575,6 +584,19 @@ class Migrate_To_3_3(Migrator):
 
         logger.info('Done.')
 
+    def _updateDocumentViewerConfiguration(self):
+        '''Modify the configuration of the collective.documentviewer product'''
+        logger.info('Modifying the configuration of the collective.documentviewer product...')
+
+        site = self.portal
+        annotations = IAnnotations(site)
+        config = annotations.get('collective.documentviewer', None)
+        if config != None:
+            for key, value in documentviewerConfig.iteritems():
+                config[key] = value
+
+        logger.info('Done.')
+
     def run(self):
         logger.info('Migrating to MeetingAndenne 3.3...')
         self._migrateItemDecisionReportTextAttributeOnConfigs()
@@ -597,6 +619,7 @@ class Migrate_To_3_3(Migrator):
         self._createMailTopics()
         self._createPODTemplates()
         self._updatePloneGroupsTitle()
+        self._updateDocumentViewerConfiguration()
         # reinstall so skins and so on are correct
         self.reinstall(profiles=[u'profile-Products.MeetingAndenne:default', ])
         # update catalogs after performing all those migration steps
@@ -632,7 +655,8 @@ def migrate(context):
        18) Create the topics used for mail management
        19) Recreate the used POD templates
        20) Make sure Plone groups linked to a MeetingGroup have a consistent title
-       21) Reinstall Products.MeetingAndenne so skin and so on are correct
+       21) Modify the configuration of the collective.documentviewer product
+       22) Reinstall Products.MeetingAndenne so skin and so on are correct
     '''
     Migrate_To_3_3(context).run()
 # ------------------------------------------------------------------------------
