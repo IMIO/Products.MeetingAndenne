@@ -61,6 +61,8 @@ from DateTime import DateTime
 # Some imports added for the OCR functionalities
 import os, os.path, unicodedata
 import shutil
+import ast
+from collective.documentviewer.async import asyncInstalled
 from collective.documentviewer.iso639_2_utf8 import ISO_UTF_MAP
 from collective.documentviewer.convert import DocSplitSubProcess, DUMP_FILENAME
 from collective.documentviewer.convert import TextCheckerSubProcess, textChecker
@@ -205,7 +207,11 @@ class CustomOCRLanguageAdapter(object):
         if hasattr(self.context, 'ocrLanguage'):
             lang = getattr(self.context, 'ocrLanguage', None)
         if lang is None:
-            lang = self.context.REQUEST.get('ocr_language')
+            if asyncInstalled():
+                request = ast.literal_eval(self.context.saved_request)
+                lang = request.get('ocr_language', None)
+            else:
+                lang = self.context.REQUEST.get('ocr_language', None)
         if lang is not None:
             return lang
 
@@ -213,7 +219,7 @@ class CustomOCRLanguageAdapter(object):
         lang = os.environ.get('OCR_LANGUAGE')
         if lang is None:
             lang = getToolByName(self.context, 'portal_languages').getPreferredLanguage()
-            lang = ISO_UTF_MAP.get(lang, 'fra')
+            lang = ISO_UTF_MAP.get(lang[:2], 'fra')
         return lang
 
 
