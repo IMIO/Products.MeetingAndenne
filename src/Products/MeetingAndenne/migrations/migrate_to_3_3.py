@@ -103,6 +103,10 @@ groupsToRename = { 'copy_of_zonet': {
     },
 }
 
+typesToAdaptOCR = [ 'CourrierFile', 'MeetingFile' ]
+
+ocrFlagsToRemove = [ 'isOcrized', 'flaggedForOcr' ]
+
 documentviewerConfig = { 'storage_location': '/var/converted_annexes',
                          'ocr': True,
                          'enable_indexation': True,
@@ -518,6 +522,24 @@ class Migrate_To_3_3(Migrator):
 
         logger.info('Done.')
 
+    def _adaptOcrFlags(self):
+        '''Modify the ocr flags stored with MeetingFile and CourrierFile objects
+           so they will be reindex later by cron4plone'''
+        logger.info('Modifying the ocr flags stored with MeetingFile and CourrierFile objects...')
+
+        for type in typesToAdaptOCR:
+            brains = self.portal.portal_catalog(meta_type=type)
+            for brain in brains:
+                item = brain.getObject()
+                for flag in ocrFlagsToRemove:
+                    if hasattr(item, flag):
+                        delattr(item, flag)
+                item.needsOcr = True
+                if getattr(item, 'ocrLanguage', None) is None:
+                    item.ocrLanguage = 'fra'
+
+        logger.info('Done.')
+
     def _createMailTopics(self):
         '''Create the topics used for mail management'''
         logger.info('Creating the topics used for mail management...')
@@ -616,6 +638,7 @@ class Migrate_To_3_3(Migrator):
         self._adaptMeetingConfigs()
         self._adaptMailFolder()
         self._adaptMailSecurity()
+        self._adaptOcrFlags()
         self._createMailTopics()
         self._createPODTemplates()
         self._updatePloneGroupsTitle()
@@ -652,11 +675,12 @@ def migrate(context):
        15) Change various meetingConfigs properties
        16) Modify the default view and redirection method of mail folder
        17) Modify the local roles of every mail file
-       18) Create the topics used for mail management
-       19) Recreate the used POD templates
-       20) Make sure Plone groups linked to a MeetingGroup have a consistent title
-       21) Modify the configuration of the collective.documentviewer product
-       22) Reinstall Products.MeetingAndenne so skin and so on are correct
+       18) Modify the ocr flags stored with MeetingFile and CourrierFile objects
+       19) Create the topics used for mail management
+       20) Recreate the used POD templates
+       21) Make sure Plone groups linked to a MeetingGroup have a consistent title
+       22) Modify the configuration of the collective.documentviewer product
+       23) Reinstall Products.MeetingAndenne so skin and so on are correct
     '''
     Migrate_To_3_3(context).run()
 # ------------------------------------------------------------------------------
