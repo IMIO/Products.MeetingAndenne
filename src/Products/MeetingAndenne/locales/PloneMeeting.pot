@@ -82,6 +82,15 @@ msgid "presented_items"
 msgstr ""
 
 # MeetingConfig
+#. Default: "If you check this box, when a meeting will be decided, if an item does not have a decision defined, this decision will be automatically filled with title and description of the item"
+msgid "init_item_decision_if_empty_on_decide"
+msgstr ""
+
+#. Default: "Initialize the item decision when deciding meeting"
+msgid "MeetingAndenne_label_initItemDecisionIfEmptyOnDecide"
+msgstr ""
+
+# MeetingGroup
 #. Default: "Use prevalidation with this group"
 msgid "MeetingAndenne_label_usePrevalidation"
 msgstr ""
