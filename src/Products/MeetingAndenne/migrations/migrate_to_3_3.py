@@ -107,7 +107,7 @@ typesToAdaptOCR = [ 'CourrierFile', 'MeetingFile' ]
 
 ocrFlagsToRemove = [ 'isOcrized', 'flaggedForOcr' ]
 
-documentviewerConfig = { 'storage_location': '/var/converted_annexes',
+documentviewerConfig = { 'storage_location': '../var/converted_annexes',
                          'ocr': True,
                          'enable_indexation': True,
                          'detect_text': True
@@ -277,6 +277,18 @@ class Migrate_To_3_3(Migrator):
             for member in groupTool.getGroupMembers(advisersGroup):
                 groupTool.addPrincipalToGroup(member, mailViewersGroup)
                 groupTool.removePrincipalFromGroup(member, advisersGroup)
+
+        logger.info('Done.')
+
+    def _cleanApplicationManager(self):
+        '''Remove some objects in Zope Control Panel which were not migrated properly'''
+        logger.info('Removing some objects in Zope Control Panel which were not migrated properly...')
+
+        rootOb = self.portal.aq_parent
+        appManager = rootOb['Control_Panel']
+        if appManager.hasObject('TranslationService'):
+            appManager._delObject('TranslationService')
+            delattr(appManager, '_objects')
 
         logger.info('Done.')
 
@@ -628,6 +640,7 @@ class Migrate_To_3_3(Migrator):
         self._addMeetingFormationType()
         self._migrateMeetingItemFormations()
         self._migrateMailRoles()
+        self._cleanApplicationManager()
         self._removeUnusedGlobalRoles()
         self._removeUnusedPloneUsers()
         self._removeUselessMailTopics()
@@ -665,23 +678,24 @@ def migrate(context):
        4)  Add the template used to create MeetingItemFormation objects
        5)  Migrate MeetingItemFormation objects
        6)  Migrate mail roles
-       7)  Remove unused global roles
-       8)  Remove unused users present in portal_membership and acl_users
-       9)  Remove useless mail topics added by PloneMeeting migration
-       10) Remove useless fck_editor properties object
-       11) Rename some categories if they exist and change related MeetingItems
-       12) Rename some groups if they exist and change related MeetingItems
-       13) Set CKeditor as default editor for everybody and remove useless properties
-       14) Change ploneMeeting configuration
-       15) Change various meetingConfigs properties
-       16) Modify the default view and redirection method of mail folder
-       17) Modify the local roles of every mail file
-       18) Modify the ocr flags stored with MeetingFile and CourrierFile objects
-       19) Create the topics used for mail management
-       20) Recreate the used POD templates
-       21) Make sure Plone groups linked to a MeetingGroup have a consistent title
-       22) Modify the configuration of the collective.documentviewer product
-       23) Reinstall Products.MeetingAndenne so skin and so on are correct
+       7)  Remove some objects in Zope Control Panel which were not migrated properl
+       8)  Remove unused global roles
+       9)  Remove unused users present in portal_membership and acl_users
+       10) Remove useless mail topics added by PloneMeeting migration
+       11) Remove useless fck_editor properties object
+       12) Rename some categories if they exist and change related MeetingItems
+       13) Rename some groups if they exist and change related MeetingItems
+       14) Set CKeditor as default editor for everybody and remove useless properties
+       15) Change ploneMeeting configuration
+       16) Change various meetingConfigs properties
+       17) Modify the default view and redirection method of mail folder
+       18) Modify the local roles of every mail file
+       19) Modify the ocr flags stored with MeetingFile and CourrierFile objects
+       20) Create the topics used for mail management
+       21) Recreate the used POD templates
+       22) Make sure Plone groups linked to a MeetingGroup have a consistent title
+       23) Modify the configuration of the collective.documentviewer product
+       24) Reinstall Products.MeetingAndenne so skin and so on are correct
     '''
     Migrate_To_3_3(context).run()
 # ------------------------------------------------------------------------------
