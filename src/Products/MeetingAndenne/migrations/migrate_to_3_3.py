@@ -209,6 +209,7 @@ class Migrate_To_3_3(Migrator):
         data = dict()
         data['id'] = 'demande-de-formation'
         data['title'] = 'Demande de formation'
+        data['proposingGroup'] = 'secretariat'
         data['templateUsingGroups'] = []
         data['category'] = '45-personnel'
         folder.invokeFactory('MeetingItemCollege', **data)
