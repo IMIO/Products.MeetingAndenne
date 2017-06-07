@@ -499,8 +499,6 @@ class Migrate_To_3_3(Migrator):
                     topicsUIDs.append(mc.topics[topic].UID())
                 mc.setToDoListTopics(topicsUIDs)
 
-            performWorkflowAdaptations(self.portal, mc, logger)
-
         logger.info('Done.')
 
     def _adaptMailFolder(self):
