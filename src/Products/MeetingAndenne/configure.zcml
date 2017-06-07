@@ -10,8 +10,7 @@
   <i18n:registerTranslations directory="locales" />
 
   <include package=".browser" />
-  <include package="Products.CMFPlacefulWorkflow"/>
-  <include package="Products.PloneMeeting"/>
+  <include package="Products.PloneMeeting" />
 
   <!-- Adapters for user information and user preferences panels -->
   <adapter for="plone.app.layout.navigation.interfaces.INavigationRoot"
@@ -68,11 +67,11 @@
   <adapter
     name="plone.app.blob.subtypes.file"
     for="Products.MeetingAndenne.interfaces.ICourrierFile"
-    factory="plone.app.blob.subtypes.file.SchemaExtender" />
+    factory="plone.app.blob.subtypes.file.SchemaExtender"/>
 
   <!-- makes the CourrierFile implements IFileContent so every views of collective.documentviewer are also available... -->
   <class class="Products.MeetingAndenne.CourrierFile.CourrierFile">
-    <implements interface="Products.ATContentTypes.interfaces.file.IFileContent" />
+    <implements interface="Products.ATContentTypes.interfaces.file.IFileContent"/>
   </class>
 
   <!-- Adapters for collective.documentviewer OCR detection -->
