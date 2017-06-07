@@ -17,10 +17,13 @@ import logging
 logger = logging.getLogger('MeetingAndenne: setuphandlers')
 from Products.MeetingAndenne.config import PROJECTNAME
 from Products.MeetingAndenne.config import DEPENDENCIES
+from Products.MeetingAndenne.config import CRON_PARAMS, CRON_VIEW
 import os
 from Products.CMFCore.utils import getToolByName
 import transaction
 ##code-section HEAD
+from zope.component import queryUtility
+from Products.cron4plone.browser.configlets.cron_configuration import ICronConfiguration
 from Products.PloneMeeting.exportimport.content import ToolInitializer
 from Products.PloneMeeting.model.adaptations import performWorkflowAdaptations
 ##/code-section HEAD
@@ -48,16 +51,37 @@ def postInstall(context):
     # the right place for your custom code
     if isNotMeetingAndenneProfile(context):
         return
+
     logStep("postInstall", context)
     site = context.getSite()
+
     # Need to reinstall PloneMeeting after reinstalling MA workflows to re-apply wfAdaptations
     reinstallPloneMeeting(context, site)
+
     # Make sure the 'home' tab is shown
     showHomeTab(context, site)
+
     # reorder skins so we are sure that the meetingAndenne_xxx skins are just under custom
     reorderSkinsLayers(context, site)
+
     # reimport actions provider so that useless portal_tabs are not shown anymore
     reorderPortalTabs(context, site)
+
+    # configure Products.cron4plone
+    # add a call to @@run-docsplit-on-blobs that will run docsplit on a batch of
+    # CourrierFile and MeetingFile objects until all migrated content is converted.
+    cron_configlet = queryUtility(ICronConfiguration, 'cron4plone_config')
+    if not cron_configlet.cronjobs:
+        cron_configlet.cronjobs = [CRON_PARAMS + CRON_VIEW]
+    else:
+        addCron = True
+        for cron in cron_configlet.cronjobs:
+            cron = cron.split(' ')
+            if cron[-1] == CRON_VIEW:
+                addCron = False
+                break
+        if addCron:
+            cron_configlet.cronjobs.append(CRON_PARAMS + CRON_VIEW)
 
 
 def updateRoleMappings(context):

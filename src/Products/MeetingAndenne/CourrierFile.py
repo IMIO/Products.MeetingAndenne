@@ -16,7 +16,6 @@ __docformat__ = 'plaintext'
 from AccessControl import ClassSecurityInfo
 from Products.Archetypes.atapi import *
 from zope.interface import implements
-from zope.i18n import translate
 import interfaces
 
 from Products.CMFDynamicViewFTI.browserdefault import BrowserDefaultMixin
@@ -29,7 +28,6 @@ from Products.PloneMeeting.config import *
 import os
 import os.path
 import socket
-import locale
 from Acquisition import aq_base
 from AccessControl import Unauthorized
 from zope.annotation import IAnnotations
@@ -41,40 +39,20 @@ from Products.CMFPlone.CatalogTool import getObjSize
 from Products.MailHost.MailHost import MailHostError
 from Products.MimetypesRegistry.common import MimeTypeException
 from collective.documentviewer.async import asyncInstalled
+from Products.PloneMeeting.MeetingFile import convertToImages
 from Products.PloneMeeting.utils import getCustomAdapter, SENDMAIL_ERROR, ENCODING_ERROR, MAILHOST_ERROR
 
 from DateTime import DateTime
 from Products.MeetingAndenne.config import *
 from Products.MeetingAndenne.utils import *
 
-
 import logging
 logger = logging.getLogger( 'MeetingAndenne' )
 
 # Error-related constants ------------------------------------------------------
-UNSUPPORTED_FORMAT_FOR_OCR = 'File "%s" could not be OCR-ized because mime ' \
-    'type "%s" is not a supported input format. Supported input formats ' \
-    'are: %s; %s.'
-DUMP_FILE_ERROR = 'Error occurred while dumping or removing file "%s" on ' \
-    'disk. %s'
-GS_ERROR = 'An error occurred when using Ghostscript to convert "%s". Note ' \
-    'that program "gs" must be in path.'
-TESSERACT_ERROR = 'An error occurred when using Tesseract to OCR-ize file ' \
-    '"%s". Note that program "tesseract" must be in path.'
-
-GS_TIFF_COMMAND = 'gs -q -dNOPAUSE -dBATCH -sDEVICE=tiffg4 ' \
-    '-sOutputFile=%s/%%04d.tif %s -c quit'
-GS_INFO_COMMAND = 'Launching Ghoscript: %s'
-POPPLER_COMMAND = 'pdftoppm -png %s %s'
-POPPLER_INFO_COMMAND = 'Launching Poppler: %s'
-POPPLER_ERROR = 'An error occurred when using Poppler to convert "%s". Note ' \
-    'that program "pdftoppm" must be in path.'
-TESSERACT_COMMAND = 'tesseract %s %s -l %s'
-TESSERACT_INFO_COMMAND = 'Launching Tesseract: %s'
-PDFTOTEXT_COMMAND = 'pdftotext %s %s'
-PDFTOTEXT_INFO_COMMAND = 'Launching pdftotext: %s'
-PDFTOTEXT_ERROR = 'An error occurred while converting a PDF file with ' \
-    'pdftotext.'
+CONTENT_TYPE_NOT_FOUND = 'The content_type for CourrierFile at %s was not found in mimetypes_registry!'
+FILE_EXTENSION_NOT_FOUND = 'The extension used by CourrierFile at %s does not correspond to ' \
+    'an extension available in the mimetype %s found in mimetypes_registry!'
 ##/code-section module-header
 
 schema = Schema((
@@ -178,8 +156,9 @@ class CourrierFile(ATBlob, BrowserDefaultMixin):
 
     # Manually created methods
 
-    # we must use a fieldindex index to sort but getCourrierReference is ZCTextIndex (use un search with *) thus we must create an index method an use a fake fieldindex
-    security.declarePublic('getCourrierReference')
+    # We must use a fieldindex to sort but getCourrierReference is ZCTextIndex (used to search with *)
+    # thus we must create another fake index method and use fieldindex.
+    security.declarePrivate('getRefcourrierFake')
     def getRefcourrierFake(self):
         return self.getRefcourrier();
 
@@ -206,8 +185,7 @@ class CourrierFile(ATBlob, BrowserDefaultMixin):
 
     security.declarePublic('listdestUsers')
     def listDestUsers(self):
-        '''List the users that will be selectable to be in destination (view only) for this
-           item.'''
+        '''List the users that will be selectable in the destination user ComboBox.'''
         pgp = self.portal_membership
         res = []
         for user in pgp.listMembers():
@@ -257,13 +235,7 @@ class CourrierFile(ATBlob, BrowserDefaultMixin):
         self.deletefile()
         # Add text-extraction-related attributes
         rq = self.REQUEST
-        self.needsOcr = rq.get('needs_ocr', None) is not None
         self.ocrLanguage = rq.get('ocr_language', 'fra')
-        self.flaggedForOcr = False
-        self.isOcrized = False
-        # Reindexing the annex may have the effect of extracting text from the
-        # binary content, if tool.extractTextFromFiles is True (see method
-        # CourrierFile.indexExtractedText).
         self.reindexObject()
 
     security.declarePrivate('at_post_edit_script')
@@ -271,10 +243,8 @@ class CourrierFile(ATBlob, BrowserDefaultMixin):
         rq = self.REQUEST
         self.updateLocalRoles()
         self.sendMailIfRelevant()
-        self.needsOcr = rq.get('needs_ocr', None) is not None
         self.ocrLanguage = rq.get('ocr_language', 'fra')
-        self.flaggedForOcr = False
-        self.isOcrized = False
+        convertToImages(self, None, force=True)
         self.reindexObject()
 
     security.declarePublic('wfConditions')
@@ -343,91 +313,66 @@ class CourrierFile(ATBlob, BrowserDefaultMixin):
             into text. Tesseract needs to know in what p_ocrLanguage the file
             is written in'''
         return ''
-        if not hasattr( self.aq_base, 'needsOcr' ):
-            return ''
 
-        tool = self.portal_plonemeeting
-        if not tool.getExtractTextFromFiles():
-            return ''
+    security.declarePublic('isConvertable')
+    def isConvertable(self):
+        '''Check if the mail is convertable (hopefully).  If the mail mimetype is one taken into
+           account by collective.documentviewer CONVERTABLE_TYPES, then it should be convertable...
+        '''
+        mr = self.mimetypes_registry
+        try:
+            content_type = mr.lookup(self.content_type)
+        except MimeTypeException:
+            content_type = None
+        if not content_type:
+            logger.warning(CONTENT_TYPE_NOT_FOUND % self.absolute_url_path())
+            return False
+        # get printable extensions from collective.documentviewer
+        printableExtensions = self._documentViewerPrintableExtensions()
 
-        # Extracts the text from the binary content.
-        extractedText = ''
-        mimeType = self.content_type
-        if self.needsOcr:
-            # This if is added to prevent ocr-isation on the fly (when item is created or edited)
-            # but to allow it when an ocr script is launched during the next night.
-            if( hasattr( self, 'flaggedForOcr' ) and self.flaggedForOcr == True ):
-                if mimeType in self.ocrAllFormatsOk:
-                    try:
-                        fileName = self.dump() # Dumps me on disk first
-                        pngFolder = None
-                        if mimeType in self.ocrFormatsOkButConvertNeeded:
-                            # Poppler will be used to convert the file to
-                            # "png" format. A folder where Poppler will
-                            # generate one png file per PDF page will be created.
-                            pngFolder = os.path.splitext( fileName )[0] + '.folder'
-                            os.mkdir( pngFolder )
-                            cmd = POPPLER_COMMAND % ( fileName, pngFolder + '/' )
-                            logger.info( POPPLER_INFO_COMMAND % cmd )
-                            os.system( cmd )
-                            pngFiles = ['%s/%s' % ( pngFolder, f ) for f in \
-                                        os.listdir( pngFolder )]
-                            if not pngFiles:
-                                logger.warn( POPPLER_ERROR % ( fileName ) )
-                        else:
-                            pngFiles = [fileName]
-                        pngFiles.sort()
-                        # Launch the OCR engine
-                        for pngFile in pngFiles:
-                            resFile = os.path.splitext( pngFile )[0]
-                            resFilePlusExt = resFile + '.txt'
-                            cmd = TESSERACT_COMMAND % ( pngFile, resFile,
-                                                        self.ocrLanguage)
-                            logger.info( TESSERACT_INFO_COMMAND % cmd )
-                            os.system( cmd )
-                            if not os.path.exists( resFilePlusExt ):
-                                logger.warn( TESSERACT_ERROR % pngFile )
-                            else:
-                                f = file( resFilePlusExt )
-                                extractedText += f.read()
-                                f.close()
-                                os.remove( resFilePlusExt )
-                            os.remove( pngFile )
-                        if pngFolder:
-                            os.removedirs( pngFolder )
-                        os.remove( fileName )
-                    except OSError, oe:
-                        logger.warn( DUMP_FILE_ERROR % ( self.getFilename(), str( oe ) ) )
-                    except IOError, ie:
-                        logger.warn( DUMP_FILE_ERROR % ( self.getFilename(), str( ie ) ) )
-                else:
-                    logger.warn( UNSUPPORTED_FORMAT_FOR_OCR % ( self.getFilename(),
-                        mimeType, self.ocrFormatsOk,
-                        self.ocrFormatsOkButConvertNeeded ) )
-        else:
-            fileName = self.dump() # Dumps me on disk first
-            # Import the content of a not-to-ocr PDF file.
-            resultFileName = os.path.splitext( fileName )[0] + '.txt'
-            decodeNeeded = None
-            if mimeType == 'application/pdf':
-                cmd = PDFTOTEXT_COMMAND % ( fileName, resultFileName )
-                logger.info( PDFTOTEXT_INFO_COMMAND % cmd )
-                os.system( cmd )
-                if not os.path.exists( resultFileName ):
-                    logger.warn( PDFTOTEXT_ERROR )
-            else:
-                logger.info( 'Unable to index content of "%s"' % self.id )
-            # Return temporary files written on disk and return the result.
-            os.remove( fileName )
-            if os.path.exists( resultFileName ):
-                f = file( resultFileName )
-                if decodeNeeded:
-                    extractedText += f.read().decode( decodeNeeded )
-                else:
-                    extractedText += f.read()
-                f.close()
-                os.remove(resultFileName)
-        return extractedText
+        # mr.lookup returns a list
+        extensions = content_type[0].extensions
+        # now that we have the extensions, find the one we are using
+        currentExtension = ''
+        # in case we have myimage.JPG, make sure extension is lowercase as
+        # extentions on mimetypes_registry are lowercase...
+        try:
+            filename = self.getFilename()
+        except AttributeError:
+            filename = self.getFile().filename
+        file_extension = filename.split('.')[-1].lower()
+        for extension in extensions:
+            if file_extension == extension:
+                currentExtension = extension
+                break
+
+        # if we found the exact extension we are using, we can see if it is in the list
+        # of printable extensions provided by collective.documentviewer
+        # most of times, this is True...
+        if currentExtension in printableExtensions:
+            return True
+        if not currentExtension:
+            logger.warning(FILE_EXTENSION_NOT_FOUND % (self.absolute_url_path(),
+                                                       content_type[0]))
+
+        # if we did not find the currentExtension in the mimetype's extensions,
+        # for example an uploaded element without extension, check nevertheless
+        # if the mimetype seems to be managed by collective.documentviewer
+        if set(extensions).intersection(set(printableExtensions)):
+            return True
+
+        return False
+
+    @memoize
+    def _documentViewerPrintableExtensions(self):
+        """
+          Compute file extensions that will be considered as printable.
+        """
+        from collective.documentviewer.config import CONVERTABLE_TYPES
+        printableExtensions = []
+        for convertable_type in CONVERTABLE_TYPES.iteritems():
+            printableExtensions.extend(convertable_type[1].extensions)
+        return printableExtensions
 
 
 registerType(CourrierFile, PROJECTNAME)

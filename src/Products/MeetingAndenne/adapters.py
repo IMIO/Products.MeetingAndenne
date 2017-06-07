@@ -1283,16 +1283,11 @@ class CustomMeetingFileAndenne(MeetingFile):
 
     security.declarePublic('indexExtractedText')
     def indexExtractedText(self):
-        ''' This method extracts text from the binary content of this object
-            and puts it in the index that corresponds to this method. It does so
-            only if tool.extractTextFromFiles is True.
+        ''' This method should extract text from the binary content of this object
+            and put it in the indexExtractedText index if tool.extractTextFromFiles is True.
 
-            If self.needsOcr is True, it does OCR recognition
-            by calling command-line programs Poppler (pdftoppm) and Tesseract
-            (tesseract). Poppler is used for converting a file into
-            images and Tesseract is the OCR engine that converts those images
-            into text. Tesseract needs to know in what p_ocrLanguage the file
-            is written in'''
+            However, as we use collective.documentviewer and SearchableText,
+            we have to monkjey patch this function and always return an empty string.'''
         return ''
 
     MeetingFile.indexExtractedText = indexExtractedText

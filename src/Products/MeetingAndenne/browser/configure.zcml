@@ -14,16 +14,14 @@
         for="plone.app.layout.navigation.interfaces.INavigationRoot"
         class=".personalpreferences.EnhancedPersonalPreferencesPanel"
         layer="..interfaces.IMeetingAndenneLayer"
-        permission="cmf.SetOwnProperties"
-        />
+        permission="cmf.SetOwnProperties"/>
 
     <browser:page
         name="user-preferences"
         for="plone.app.layout.navigation.interfaces.INavigationRoot"
         class=".personalpreferences.EnhancedPersonalPreferencesConfiglet"
         layer="..interfaces.IMeetingAndenneLayer"
-        permission="plone.app.controlpanel.UsersAndGroups"
-        />
+        permission="plone.app.controlpanel.UsersAndGroups"/>
 
     <!-- Overriden PloneMeeting viewlets -->
 
@@ -34,7 +32,7 @@
         class=".welcomeuser.WelcomeUser"
         template="templates/welcomeuser.pt"
         layer="Products.MeetingAndenne.interfaces.IMeetingAndenneLayer"
-        permission="zope2.View" />
+        permission="zope2.View"/>
 
     <!-- the mail_topic_view used to display list of mail items -->
     <browser:page
@@ -43,14 +41,14 @@
         class=".views.MeetingAndenneMailTopicView"
         template="templates/mail_topic_view.pt"
         layer="Products.MeetingAndenne.interfaces.IMeetingAndenneLayer"
-        permission="zope2.View" />
+        permission="zope2.View"/>
     <browser:page
         name="mail_topic_view"
         for="Products.ATContentTypes.interfaces.folder.IATBTreeFolder"
         class=".views.MeetingAndenneMailTopicView"
         template="templates/mail_topic_view.pt"
         layer="Products.MeetingAndenne.interfaces.IMeetingAndenneLayer"
-        permission="zope2.View" />
+        permission="zope2.View"/>
 
     <!-- the mailfolder_redirect_view.pt that redirects the user when entering the courrierfake meetingConfig -->
     <browser:view
@@ -58,13 +56,21 @@
         name="mailfolder_redirect_view"
         class=".views.MeetingAndenneMailFolderView"
         layer="Products.MeetingAndenne.interfaces.IMeetingAndenneLayer"
-        permission="zope2.View" />
+        permission="zope2.View"/>
     <browser:view
         for="Products.ATContentTypes.interfaces.folder.IATBTreeFolder"
         name="mailfolder_redirect_view"
         class=".views.MeetingAndenneMailFolderView"
         layer="Products.MeetingAndenne.interfaces.IMeetingAndenneLayer"
-        permission="zope2.View" />
+        permission="zope2.View"/>
+
+    <!-- the maintenance task view that runs docsplit on migrated blobs -->
+    <browser:view
+        for="Products.CMFPlone.interfaces.siteroot.IPloneSiteRoot"
+        name="run-docsplit-on-blobs"
+        class=".views.RunDocsplitOnBlobsView"
+        layer="Products.MeetingAndenne.interfaces.IMeetingAndenneLayer"
+        permission="cmf.ManagePortal"/>
 
     <!-- Macros -->
     <browser:page

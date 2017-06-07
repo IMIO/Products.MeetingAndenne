@@ -124,6 +124,12 @@ CUSTOM_TYPES_BY_CONFIG = {
 # Types to search for in local searches
 SEARCH_TYPES = {'gestion-courrier': 'CourrierFile', 'meeting-config-college': 'MeetingItemCollege',
                 'conseil-communal': 'MeetingItemcons', 'rapport-col-au-con': 'MeetingItemrcc'}
+
+# cron4plone defines
+CRON_PARAMS = u'0 20 * * '
+CRON_VIEW = u'portal/@@run-docsplit-on-blobs'
+CRON_BATCH_SIZE = 2000
+
 ##/code-section config-bottom
 
 
