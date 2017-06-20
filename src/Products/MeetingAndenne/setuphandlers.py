@@ -26,6 +26,8 @@ from zope.component import queryUtility
 from Products.cron4plone.browser.configlets.cron_configuration import ICronConfiguration
 from Products.PloneMeeting.exportimport.content import ToolInitializer
 from Products.PloneMeeting.model.adaptations import performWorkflowAdaptations
+
+noSearchTypes = ('MeetingCfake', 'MeetingItemCfake', )
 ##/code-section HEAD
 
 def isNotMeetingAndenneProfile(context):
@@ -67,6 +69,21 @@ def postInstall(context):
     # reimport actions provider so that useless portal_tabs are not shown anymore
     reorderPortalTabs(context, site)
 
+    # reimport plone.app.search javascript registry as some scripts are missing
+    reorderScriptsRegistry(context, site)
+
+    # Remove some types from the standard Plone search (live and advanced)
+    props = site.portal_properties.site_properties
+    nsTypes = props.getProperty('types_not_searched')
+    if not nsTypes:
+        nsTypes = []
+    else:
+        nsTypes = list(nsTypes)
+    for t in noSearchTypes:
+        if t not in nsTypes:
+            nsTypes.append(t)
+    props.manage_changeProperties(types_not_searched = tuple(nsTypes))
+
     # configure Products.cron4plone
     # add a call to @@run-docsplit-on-blobs that will run docsplit on a batch of
     # CourrierFile and MeetingFile objects until all migrated content is converted.
@@ -106,7 +123,7 @@ def reorderCss(context):
     css = ['plonemeeting.css',
            'meeting.css',
            'meetingitem.css',
-           'meetingAndenne.css',
+           'meetingandenne.css',
            'imioapps.css',
            'plonemeetingskin.css',
            'imioapps_IEFixes.css',
@@ -163,7 +180,9 @@ def reorderSkinsLayers(context, site):
 
     logStep("reorderSkinsLayers", context)
     site.portal_setup.runImportStepFromProfile(u'profile-plonetheme.sunburst:default', 'cssregistry')
+    site.portal_setup.runImportStepFromProfile(u'profile-communesplone.layout:default', 'skins')
     site.portal_setup.runImportStepFromProfile(u'profile-plonetheme.imioapps:plonemeetingskin', 'skins')
+    site.portal_setup.runImportStepFromProfile(u'profile-Products.PloneMeeting:default', 'skins')
     site.portal_setup.runImportStepFromProfile(u'profile-Products.MeetingAndenne:default', 'skins')
 
 def reorderPortalTabs(context, site):
@@ -176,6 +195,17 @@ def reorderPortalTabs(context, site):
 
     logStep("reorderPortalTabs", context)
     site.portal_setup.runImportStepFromProfile(u'profile-Products.MeetingAndenne:default', 'actions')
+
+def reorderScriptsRegistry(context, site):
+    """
+       Re-apply plone.app.search jsregistry.xml step as the reinstallation of
+       PloneMeeting disables Plone's advanced search by default
+    """
+    if isNotMeetingAndenneProfile(context):
+        return
+
+    logStep("reorderScriptRegistry", context)
+    site.portal_setup.runImportStepFromProfile(u'profile-plone.app.search:default', 'jsregistry')
 
 
 def installMeetingAndenne(context):
