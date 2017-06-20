@@ -9,6 +9,23 @@
     <!-- MeetingAndenne-specific viewlets -->
 
     <!-- Overriden Plone viewlets -->
+    <browser:viewlet
+        name="plone.searchbox"
+        manager="plone.app.layout.viewlets.interfaces.IPortalHeader"
+        class="plone.app.layout.viewlets.common.SearchBoxViewlet"
+        template="templates/searchbox.pt"
+        layer="Products.MeetingAndenne.interfaces.IMeetingAndenneLayer"
+        permission="zope2.View"/>
+
+    <!-- Overriden Plone views -->
+    <browser:page
+        name="search"
+        class="plone.app.search.browser.Search"
+        permission="zope2.View"
+        for="*"
+        layer="Products.MeetingAndenne.interfaces.IMeetingAndenneLayer"
+        template="templates/search.pt"/>
+
     <browser:page
         name="personal-preferences"
         for="plone.app.layout.navigation.interfaces.INavigationRoot"
@@ -22,8 +39,6 @@
         class=".personalpreferences.EnhancedPersonalPreferencesConfiglet"
         layer="..interfaces.IMeetingAndenneLayer"
         permission="plone.app.controlpanel.UsersAndGroups"/>
-
-    <!-- Overriden PloneMeeting viewlets -->
 
     <!-- overlay views used in present <-> absent management -->
     <browser:page

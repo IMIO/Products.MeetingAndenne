@@ -51,7 +51,8 @@ from Products.MeetingAndenne.interfaces import \
      IMeetingItemCollegeAndenneWorkflowActions, IMeetingItemCollegeAndenneWorkflowConditions, \
      IMeetingCollegeAndenneWorkflowActions, IMeetingCollegeAndenneWorkflowConditions, \
      IMeetingItemFormation, IOCRLanguageCustom
-from Products.MeetingAndenne.config import MAIL_TYPES, SEARCH_TYPES
+from Products.MeetingAndenne.config import MAIL_TYPES
+from Products.MeetingAndenne.utils import *
 from Products.MeetingAndenne.SearcherAndenne import SearcherAndenne
 from Products.PloneMeeting.utils import checkPermission, getCustomAdapter, prepareSearchValue
 from Products.PloneMeeting.model import adaptations
@@ -67,6 +68,12 @@ from collective.documentviewer.iso639_2_utf8 import ISO_UTF_MAP
 from collective.documentviewer.convert import DocSplitSubProcess, DUMP_FILENAME
 from collective.documentviewer.convert import TextCheckerSubProcess, textChecker
 from collective.documentviewer.convert import Page, word_re
+
+# Some imports added for the search functionalities
+from plone.app.search.browser import Search
+from plone.app.search.browser import quote_chars
+from plone.app.search.browser import EVER
+from Products.CMFPlone.browser.navtree import getNavigationRoot
 
 import logging
 logger = logging.getLogger( 'MeetingAndenne' )
@@ -298,6 +305,71 @@ DocSplitSubProcess.convert=convert
 
 
 # ------------------------------------------------------------------------------
+# filter_query function is monkey patched in order to add an asterisk after the
+# text searched for so the given results are the same as those of the live
+# search. Moreover, a functionality to search only in a selected field is added
+# and another one to search only in objects linked to a given MeetingConfig.
+def filter_query(self, query):
+    request = self.request
+
+    tool = getToolByName(self.context, 'portal_plonemeeting')
+    catalog = getToolByName(self.context, 'portal_catalog')
+    valid_indexes = tuple(catalog.indexes())
+    valid_keys = self.valid_keys + valid_indexes
+
+    text = query.get('SearchableText', None)
+    if text is None:
+        text = request.form.get('SearchableText', '')
+    if not text:
+        # Without text, must provide a meaningful non-empty search
+        valid = set(valid_indexes).intersection(request.form.keys()) or \
+            set(valid_indexes).intersection(query.keys())
+        if not valid:
+            return
+
+    for k, v in request.form.items():
+        if v and ((k in valid_keys) or k.startswith('facet.')):
+            query[k] = v
+    if text:
+        # Add an asterisk
+        query['SearchableText'] = quote_chars(text) + '*'
+
+    # Add search only on specific fields functionality
+    field = request.form.get('field', '')
+    if field and field != 'all':
+        query[field] = quote_chars(text) + '*'
+        del query['SearchableText']
+
+    # don't filter on created at all if we want all results
+    created = query.get('created')
+    if created:
+        try:
+            if created.get('query') and created['query'][0] <= EVER:
+                del query['created']
+        except AttributeError:
+            # created not a mapping
+            del query['created']
+
+    # respect `types_not_searched` setting
+    types = query.get('portal_type', [])
+    if 'query' in types:
+        types = types['query']
+    query['portal_type'] = self.filter_types(types)
+    # respect effective/expiration date
+    query['show_inactive'] = False
+    # respect navigation root
+    if 'path' not in query:
+        query['path'] = getNavigationRoot(self.context)
+    # permit only filtering on types related to the MeetingConfig we are in
+    query['path'] = tool.adapted().getSearchPathFromMeetingConfig(self.context, query)
+    query['portal_type'] = tool.adapted().getSearchTypesFromMeetingConfig(self.context, query)
+
+    return query
+
+Search.filter_query = filter_query
+
+
+# ------------------------------------------------------------------------------
 class CustomMeetingAndenne(Meeting):
     '''Adapter that adapts a meeting item implementing IMeetingItem to the
        interface IMeetingItemCustom.'''
@@ -321,7 +393,7 @@ class CustomMeetingAndenne(Meeting):
     security.declarePublic('getSignatoriesForPrinting') 
     def getSignatoriesForPrinting (self, pos=0, level=0, useforpv=False, userepl=True):
         '''To be changed.'''
-        # new from plonemeeting 3.3 :print sigantories in template relative to position ans level. pos 0 and level 0 is the first sigantory (bg) and function. 
+        # new from plonemeeting 3.3 :print sigantories in template relative to position ans level. pos 0 and level 0 is the first sigantory (bg) and function.
         # pos 0 and level 1 is the first signatory (bg) with Name
         res = []
         meeting = self.getSelf()
@@ -329,7 +401,7 @@ class CustomMeetingAndenne(Meeting):
             # normal usage
             res = meeting.getSignatories(theObjects=True, includeDeleted=False,includeReplacements=userepl)
         else:
-            # utiisé dans la partie adopté en séance des PV , pour que le  "Directeur General" et "Bourgmestre" soit affiché même si ils sont absent (on prend les signataire par defaut de la seance) 
+            # utiisé dans la partie adopté en séance des PV , pour que le  "Directeur General" et "Bourgmestre" soit affiché même si ils sont absent (on prend les signataire par defaut de la seance)
             tool = getToolByName(self.context, 'portal_plonemeeting')
             cfg = tool.getMeetingConfig(self.context)
             for user in cfg.getMeetingUsers(usages=('signer',)):
@@ -339,7 +411,7 @@ class CustomMeetingAndenne(Meeting):
         if level == 1:
             return res[pos].Title()
         else:
-            # specialement utilisé pour l'affichae avant migration ou apres migration si la personne remplacante a été oubliée 
+            # specialement utilisé pour l'affichae avant migration ou apres migration si la personne remplacante a été oubliée
             # Si c'est un echevin on remplace par bg ff, si c'est un secretaire en general on a deja un dg f.f dans la fonction  principale de celui qui remplace)
             # le getduty revoit la fonction remplacé si includereplacement=true et qu'il y a vraiment un remplaçant inscrit (grace au fakemeetinguser revoyer à la place)
             duty = res[pos].getDuty()
@@ -1315,6 +1387,70 @@ class CustomToolMeetingAndenne(ToolPloneMeeting):
     def __init__(self, tool):
         self.context = tool
 
+    security.declarePublic('getSearchPathFromMeetingConfig')
+    def getSearchPathFromMeetingConfig(self,context,query):
+        '''Used in monkey patched filter_query function for search, in livesearch_reply.py (skin) for livesearch
+           and in search.pt for filter type advanced search query'''
+        cfg = self.context.getMeetingConfig(self.context)
+        if cfg is not None:
+            if cfg.id == "courrierfake":
+                path = { 'query': 'gestion-courrier', 'level': 1 }
+            else:
+                path = { 'query': 'mymeetings/' + cfg.id, 'level': 3 }
+        else:
+            # if there's no current MeetingConfig (if we are on home for example)
+            path = { 'query': '/', 'level': 1 }
+        return path
+
+    security.declarePublic('getSearchTypesFromMeetingConfig')
+    def getSearchTypesFromMeetingConfig(self,context,query):
+        '''Used in monkey patched filter_query function for search, in livesearch_reply.py (skin) for livesearch
+           and in search.pt for filter type advanced search query'''
+        type_list = []
+        cfg = self.context.getMeetingConfig(self.context)
+        if cfg is not None:
+            if cfg.id == "courrierfake":
+                type_list = ['CourrierFile', ]
+            else:
+                type_list = [cfg.getItemTypeName(), cfg.getMeetingTypeName(), 'MeetingFile']
+        else:
+            # if there's no current MeetingConfig (if we are on home for example)
+            type_list = ['CourrierFile', 'MeetingFile']
+            for config in self.context.objectValues('MeetingConfig'):
+                type_list.append(config.getItemTypeName())
+                type_list.append(config.getMeetingTypeName())
+
+        types = query.get('portal_type', [])
+        if 'query' in types:
+            types = types['query']
+        if types:
+            all_allowed_types = type_list
+            type_list = []
+            for portal_type in types:
+                if portal_type in all_allowed_types:
+                    type_list.append(portal_type)
+
+        return type_list
+
+    security.declarePublic('getCategoriesFromMeetingConfig')
+    def getCategoriesFromMeetingConfig(self,context):
+        '''Used in advanced searches to filter results by category'''
+        cfg = self.context.getMeetingConfig(self.context)
+        if cfg is not None and cfg.id != "courrierfake":
+            return cfg.categories.objectValues()
+        return None  
+
+    security.declarePublic('listdestUsers')
+    def listDestUsers(self):
+        '''List the users that will be selectable in the destination user ComboBox.'''
+        pgp = self.context.portal_membership
+        res = []
+        for user in pgp.listMembers():
+            if user.getProperty('listed'):
+                res.append( (user.getId(), user.getProperty('fullname')) )
+        res = sorted( res, key=collateDisplayListsValues )
+        return res
+
     security.declarePublic('getCourrierfakeConfig')
     def getCourrierfakeConfig(self):
         '''
@@ -1328,21 +1464,6 @@ class CustomToolMeetingAndenne(ToolPloneMeeting):
             Returns the courrierfake folder.
         '''
         return self.getPhysicalPath()[0] + '/commune/gestion-courrier'
-
-
-    security.declarePublic('hasSearchTypeFor')
-    def hasSearchTypeFor(self, meetingType):
-        '''
-            Returns True if there is a portal_type to be used in a search local to the given meeting type.
-        '''
-        return meetingType in SEARCH_TYPES.keys()
-
-    security.declarePublic('getSearchTypeFor')
-    def getSearchTypeFor(self, meetingType):
-        '''
-            Returns the portal_type to be used in a search local to the given meeting type.
-        '''
-        return SEARCH_TYPES[meetingType]
 
     security.declarePublic('getMailTypesForSearch')
     def getMailTypesForSearch(self):

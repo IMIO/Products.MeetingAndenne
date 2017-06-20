@@ -186,13 +186,7 @@ class CourrierFile(ATBlob, BrowserDefaultMixin):
     security.declarePublic('listdestUsers')
     def listDestUsers(self):
         '''List the users that will be selectable in the destination user ComboBox.'''
-        pgp = self.portal_membership
-        res = []
-        for user in pgp.listMembers():
-            if user.getProperty('listed'):
-                res.append( (user.getId(), user.getProperty('fullname')) )
-        res = sorted( res, key=collateDisplayListsValues )
-        return DisplayList( tuple(res) )
+        return DisplayList( tuple(self.portal_plonemeeting.adapted().listDestUsers()) )
 
     security.declarePublic('getDisplayableDestUsers')
     def getDisplayableDestUsers(self):

@@ -233,3 +233,7 @@
     color: white !important;
     border: 2px solid grey;
 }
+
+#search-results-bar dl, #search-results-bar #searchResultsSort {
+    display: inline;
+}

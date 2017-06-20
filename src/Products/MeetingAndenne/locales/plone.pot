@@ -24,25 +24,25 @@ msgstr ""
 msgid "MeetingCollege"
 msgstr ""
 
-#. Default: "MeetincCouncil"
-msgid "MeetingCouncil"
+#. Default: "Meetingcons"
+msgid "Meetingcons"
 msgstr ""
 
 #. Default: "MeetingItemcd"
 msgid "MeetingItemcd"
-msgstr "Point Comité de Direction"
+msgstr ""
 
 #. Default: "MeetingItemCollege"
 msgid "MeetingItemCollege"
 msgstr ""
 
-#. Default: "MeetingItemCouncil"
-msgid "MeetingItemCouncil"
+#. Default: "MeetingItemcons"
+msgid "MeetingItemcons"
 msgstr ""
 
 #. Default: "MeetingItemrcc"
 msgid "MeetingItemrcc"
-msgstr "Rapport d'Activité"
+msgstr ""
 
 #. Default: "Meetingrcc"
 msgid "Meetingrcc"
@@ -222,4 +222,33 @@ msgstr ""
 
 #. Default: "Meeting PV Writer"
 msgid "MeetingPvWriterer"
+msgstr ""
+
+# Advanced Search
+#. Default: "All fields"
+msgid "fields_all"
+msgstr ""
+
+#. Default: "Only title"
+msgid "fields_only_title"
+msgstr ""
+
+#. Default: "Fields to search"
+msgid "label_fields_to_search"
+msgstr ""
+
+#. Default: "Category"
+msgid "label_item_category"
+msgstr ""
+
+#. Default: "Proposing group"
+msgid "label_item_proposing_group"
+msgstr ""
+
+#. Default: "Mail receiver"
+msgid "label_mail_receiver"
+msgstr ""
+
+#. Default: "Mail type"
+msgid "label_mail_type"
 msgstr ""

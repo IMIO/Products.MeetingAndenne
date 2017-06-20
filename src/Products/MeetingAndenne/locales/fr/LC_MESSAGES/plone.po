@@ -25,8 +25,8 @@ msgstr "Courrier"
 msgid "MeetingCollege"
 msgstr "Séance du Collège communal"
 
-#. Default: "MeetincCouncil"
-msgid "MeetingCouncil"
+#. Default: "Meetingcons"
+msgid "Meetingcons"
 msgstr "Séance du Conseil communal"
 
 #. Default: "Meetingcd"
@@ -42,8 +42,8 @@ msgstr "Rapport du Collège au Conseil"
 msgid "MeetingItemCollege"
 msgstr "Point Collège communal"
 
-#. Default: "MeetingItemCouncil"
-msgid "MeetingItemCouncil"
+#. Default: "MeetingItemcons"
+msgid "MeetingItemcons"
 msgstr "Point Conseil communal"
 
 #. Default: "MeetingItemcd"
@@ -229,3 +229,32 @@ msgstr ""
 #. Default: "Meeting PV Writer"
 msgid "MeetingPvWriterer"
 msgstr ""
+
+# Advanced Search
+#. Default: "All fields"
+msgid "fields_all"
+msgstr "Tous les champs"
+
+#. Default: "Only title"
+msgid "fields_only_title"
+msgstr "Titre seulement"
+
+#. Default: "Fields to search"
+msgid "label_fields_to_search"
+msgstr "Champs dans lesquels rechercher"
+
+#. Default: "Category"
+msgid "label_item_category"
+msgstr "Catégorie"
+
+#. Default: "Proposing group"
+msgid "label_item_proposing_group"
+msgstr "Groupe proposant"
+
+#. Default: "Mail receiver"
+msgid "label_mail_receiver"
+msgstr "Destinataire"
+
+#. Default: "Mail type"
+msgid "label_mail_type"
+msgstr "Type de courrier"
