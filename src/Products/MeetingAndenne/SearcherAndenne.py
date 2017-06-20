@@ -137,14 +137,6 @@ class SearcherAndenne(Searcher):
         if len(res) == 1:
             return res[0]
         else:
-#            print "Les titles"
-#            for i in res[0]:
-#                print i[8]
-#
-#            print "Les indexExtractedText"
-#            for i in res[1]:
-#                print i[8]
-
             sortKey = params['sort_on']
             return self.mergeResults(res, sortKey)
 

@@ -85,6 +85,7 @@
 
 
   <five:deprecatedManageAddDelete class=".CourrierFile.CourrierFile" />
+  <five:deprecatedManageAddDelete class=".SearcherAndenne.SearcherAndenne" />
 
 
   <!-- ##/code-section configure.zcml.header -->

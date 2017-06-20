@@ -48,7 +48,7 @@
 
         <tal:comment replace="nothing">Reference</tal:comment>
         <th class="ma_listing_th_reference" tal:condition="python: 'refCourrier' in visibleColumns"
-            tal:define="fieldIndex string:getRefcourrier">
+            tal:define="fieldIndex string:getRefcourrierFake">
           <span i18n:translate="MeetingAndenne_label_refCourrier"></span>
           <metal:sortAndFilter use-macro="context/@@mail-navigate-macros/sortAndFilter"/>
         </th>

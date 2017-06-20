@@ -1229,7 +1229,6 @@ class CustomMeetingConfigAndenne(MeetingConfig):
                     params[filterKey] = prepareSearchValue(filterValue)
                 brains = self.portal_catalog(**params)
             res = tool.batchAdvancedSearch(
-
                 brains, topic, rq, batch_size=batchSize)
         else:
             # This is an advanced search. Use the Searcher.
