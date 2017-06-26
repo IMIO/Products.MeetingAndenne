@@ -3,9 +3,11 @@
 import logging
 logger = logging.getLogger('MeetingAndenne')
 
+import os
 import sys
 import mimetypes
 
+from App.config import getConfiguration
 from OFS.Image import File
 from zope.annotation.interfaces import IAnnotations
 
@@ -107,8 +109,7 @@ typesToAdaptOCR = [ 'CourrierFile', 'MeetingFile' ]
 
 ocrFlagsToRemove = [ 'isOcrized', 'flaggedForOcr' ]
 
-documentviewerConfig = { 'storage_location': '../var/converted_annexes',
-                         'ocr': True,
+documentviewerConfig = { 'ocr': True,
                          'enable_indexation': True,
                          'detect_text': True
 }
@@ -627,6 +628,13 @@ class Migrate_To_3_3(Migrator):
         if config != None:
             for key, value in documentviewerConfig.iteritems():
                 config[key] = value
+
+            clientDirectory = getConfiguration().clienthome
+            baseDir = os.path.split(clientDirectory)[0]
+            storageDir = baseDir + '/converted_annexes'
+            if not os.path.exists(storageDir):
+                os.mkdir(storageDir)
+            config['storage_location'] = storageDir
 
         logger.info('Done.')
 

@@ -8,6 +8,8 @@ from Acquisition import aq_base
 from Products.PloneMeeting.profiles import MeetingFileTypeDescriptor
 from Products.PloneMeeting.migrations import Migrator
 
+from collective.documentviewer.settings import GlobalSettings
+from collective.documentviewer.utils import allowedDocumentType
 
 # The migration class ----------------------------------------------------------
 class Migrate_To_3_2(Migrator):
@@ -30,6 +32,7 @@ class Migrate_To_3_2(Migrator):
         '''Add some default MeetingFileType relatedTo 'advice' so we can add
            annexes on advices.'''
         logger.info('Addind default MeetingFileType relatedTo \'advice\'...')
+
         mfts = []
         mfts.append(MeetingFileTypeDescriptor(id='annexeAvis',
                                               title=u'Annexe à un avis',
@@ -52,12 +55,30 @@ class Migrate_To_3_2(Migrator):
             for mft in mfts:
                 if not hasattr(aq_base(cfg.meetingfiletypes), mft.id):
                     cfg.addFileType(mft, source=mcProfilePath)
+
+        logger.info('Done.')
+
+    def _setMailFilesLayout(self):
+        '''Set layout of CourrierFile objects so docsplit can process them.'''
+        logger.info('Setting layout of CourrierFile objects so docsplit can process them...')
+
+        gsettings = GlobalSettings(self.portal)
+        brains = self.portal.portal_catalog(meta_type='CourrierFile')
+        for brain in brains:
+            item = brain.getObject()
+            if not allowedDocumentType(item, gsettings.auto_layout_file_types):
+                continue
+
+            if item.getLayout() != 'documentviewer':
+                item.setLayout('documentviewer')
+
         logger.info('Done.')
 
     def run(self):
         logger.info('Migrating to MeetingAndenne 3.2...')
         self._removeUselessMailTopics()
         self._addDefaultAdviceAnnexesFileTypes()
+        self._setMailFilesLayout()
 
         # reinstall so things overwritten by PloneMeeting profile are restored
 #        self.reinstall(profiles=[u'profile-Products.MeetingAndenne:default', ])
@@ -70,6 +91,7 @@ def migrate(context):
 
        1) Remove useless mail topics added by PloneMeeting migration
        2) Add default MeetingFileType relatedTo 'advice'
+       3) Set layout of CourrierFile objects so docsplit can process them
     '''
     Migrate_To_3_2(context).run()
 # ------------------------------------------------------------------------------
