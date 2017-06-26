@@ -55,7 +55,7 @@
 
         <tal:comment replace="nothing">Sender</tal:comment>
         <th class="ma_listing_th_sender" tal:condition="python: 'destOrigin' in visibleColumns"
-            tal:define="fieldIndex string:getDestOrigin">
+            tal:define="fieldIndex string:sortable_sender">
           <span i18n:translate="MeetingAndenne_label_destOrigin"></span>
           <metal:sortAndFilter use-macro="context/@@mail-navigate-macros/sortAndFilter"/>
         </th>

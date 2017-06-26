@@ -64,6 +64,9 @@
            factory="Products.MeetingAndenne.adapters.CustomToolMeetingAndenne"
            provides="Products.PloneMeeting.interfaces.IToolPloneMeetingCustom"/>
 
+  <!-- Indexes -->
+  <adapter name="sortable_sender" factory=".indexes.sortable_sender" />
+
   <!-- add the blob field to CourrierFile -->
   <adapter
     name="plone.app.blob.subtypes.file"

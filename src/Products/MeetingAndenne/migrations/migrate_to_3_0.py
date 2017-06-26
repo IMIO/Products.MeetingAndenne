@@ -58,6 +58,19 @@ class Migrate_To_3_0(Migrator):
                 item.reindexObject(idxs=['Title', ])
         logger.info('Done.')
 
+    def _adaptCourrierFilesCatalogIndexes(self):
+        '''Adapt indexes definitions linked to CourrierFiles.'''
+        logger.info('Adapting indexes definitions linked to CourrierFiles...')
+
+        catalog = self.portal.portal_catalog
+        zopeCatalog = catalog._catalog
+
+        if not 'sortable_sender' in zopeCatalog.indexes:
+            catalog.addIndex('sortable_sender', 'FieldIndex')
+            catalog.reindexIndex('sortable_sender', self.portal.REQUEST)
+
+        logger.info('Done.')
+
     def _removeGlobalPowerObservers(self):
         ''' Before, PowerObservers where global to every meetingConfig. Now
             that PowerObservers are locally defined for each meetingConfig,
@@ -107,6 +120,7 @@ class Migrate_To_3_0(Migrator):
         self._removeIconExprObjectsOnTypes()
         self._migrateCourrierFilesToBlobs()
         self._retrieveCourrierFilesTitles()
+        self._adaptCourrierFilesCatalogIndexes()
         self._removeGlobalPowerObservers()
 
         # reinstall so things overwritten by PloneMeeting profile are restored
@@ -121,7 +135,8 @@ def migrate(context):
        1) Remove icon_expr_object on portal_types relative to MeetingAndenne
        2) Migrate CourrierFiles to Blobs
        3) Restore titles to CourrierFiles which were lost during Blobs migration
-       4) Migrate from global PowerObservers to local PowerObservers
+       4) Adapt indexes definitions linked to CourrierFiles
+       5) Migrate from global PowerObservers to local PowerObservers
     '''
     Migrate_To_3_0(context).run()
 # ------------------------------------------------------------------------------
