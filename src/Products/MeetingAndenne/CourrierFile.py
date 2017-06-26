@@ -147,21 +147,11 @@ class CourrierFile(ATBlob, BrowserDefaultMixin):
         'gethtml'    : '',
         'mkdir'      : '',
     }
-    ocrFormatsOk = ('image/tiff',)
-    ocrFormatsOkButConvertNeeded = ('application/pdf',)
-    ocrAllFormatsOk = ocrFormatsOk + ocrFormatsOkButConvertNeeded
     ##/code-section class-header
 
     # Methods
 
     # Manually created methods
-
-    # We must use a fieldindex to sort but getCourrierReference is ZCTextIndex (used to search with *)
-    # thus we must create another fake index method and use fieldindex.
-    security.declarePrivate('getRefcourrierFake')
-    def getRefcourrierFake(self):
-        return self.getRefcourrier();
-
     security.declarePublic('getCourrierReference')
     def getCourrierReference(self):
         '''Return a too complicated item reference to be defined as a TAL Expression

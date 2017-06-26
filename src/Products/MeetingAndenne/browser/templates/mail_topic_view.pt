@@ -62,7 +62,7 @@
     <div id="queryResult"><div align="center"><br /><br /><img src="spinner.gif" tal:attributes="src string:${portal_url}/spinner.gif"/></div></div>
     <div>
       <script language="javascript"
-              tal:content="python: 'askSearchResult(\'queryResult\', \'%s\', \'%s\', 1, \'getRefcourrierFake\', \'desc\')' % (context.absolute_url(), topic.id)">
+              tal:content="python: 'askSearchResult(\'queryResult\', \'%s\', \'%s\', 1, \'getRefcourrier\', \'desc\')' % (context.absolute_url(), topic.id)">
       </script>
     </div>
 

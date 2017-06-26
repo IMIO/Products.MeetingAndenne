@@ -62,12 +62,27 @@ class Migrate_To_3_0(Migrator):
         '''Adapt indexes definitions linked to CourrierFiles.'''
         logger.info('Adapting indexes definitions linked to CourrierFiles...')
 
+        addedIndexes = []
         catalog = self.portal.portal_catalog
         zopeCatalog = catalog._catalog
 
+        if 'getRefcourrierFake' in zopeCatalog.indexes:
+            catalog.delIndex('getRefcourrierFake')
+
+        if 'getRefcourrier' in zopeCatalog.indexes:
+            if zopeCatalog.indexes['getRefcourrier'].__class__.__name__ != 'FieldIndex':
+                catalog.delIndex('getRefcourrier')
+
+        if not 'getRefcourrier' in zopeCatalog.indexes:
+            catalog.addIndex('getRefcourrier', 'FieldIndex')
+            addedIndexes.append('getRefcourrier')
+
         if not 'sortable_sender' in zopeCatalog.indexes:
             catalog.addIndex('sortable_sender', 'FieldIndex')
-            catalog.reindexIndex('sortable_sender', self.portal.REQUEST)
+            addedIndexes.append('sortable_sender')
+
+        if len(addedIndexes) > 0:
+            catalog.reindexIndex(tuple(addedIndexes), self.portal.REQUEST)
 
         logger.info('Done.')
 

@@ -27,7 +27,7 @@
       tal:define="toLocalizedTime     nocall: tool/@@plone/toLocalizedTime;
                   descrsStyle         python: tool.readCookie('pmShowDescriptions') == 'false' and 'none' or 'inline';
                   visibleColumns      python: meetingConfig.getQueryColumns(resultMetaType);
-                  sortKey             request/sortKey | python:'getRefcourrierFake';
+                  sortKey             request/sortKey | python:'getRefcourrier';
                   sortOrder           request/sortOrder | python:'desc';
                   showActions         python: tool.isManager(here);">
       <tr>
@@ -48,7 +48,7 @@
 
         <tal:comment replace="nothing">Reference</tal:comment>
         <th class="ma_listing_th_reference" tal:condition="python: 'refCourrier' in visibleColumns"
-            tal:define="fieldIndex string:getRefcourrierFake">
+            tal:define="fieldIndex string:getRefcourrier">
           <span i18n:translate="MeetingAndenne_label_refCourrier"></span>
           <metal:sortAndFilter use-macro="context/@@mail-navigate-macros/sortAndFilter"/>
         </th>
