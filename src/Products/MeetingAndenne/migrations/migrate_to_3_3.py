@@ -662,9 +662,9 @@ class Migrate_To_3_3(Migrator):
         self._createMailTopics()
         self._createPODTemplates()
         self._updatePloneGroupsTitle()
-        self._updateDocumentViewerConfiguration()
         # reinstall so skins and so on are correct
         self.reinstall(profiles=[u'profile-Products.MeetingAndenne:default', ])
+        self._updateDocumentViewerConfiguration()
         # update catalogs after performing all those migration steps
         self.refreshDatabase(catalogs=True,
                              catalogsToRebuild=['portal_catalog',
@@ -700,8 +700,8 @@ def migrate(context):
        20) Create the topics used for mail management
        21) Recreate the used POD templates
        22) Make sure Plone groups linked to a MeetingGroup have a consistent title
-       23) Modify the configuration of the collective.documentviewer product
-       24) Reinstall Products.MeetingAndenne so skin and so on are correct
+       23) Reinstall Products.MeetingAndenne so skin and so on are correct
+       24) Modify the configuration of the collective.documentviewer product
     '''
     Migrate_To_3_3(context).run()
 # ------------------------------------------------------------------------------
