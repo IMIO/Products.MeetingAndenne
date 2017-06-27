@@ -378,6 +378,7 @@ Search.filter_query = filter_query
 # in order to clean attributes in tags when the safe_html portal transform is
 # applied on Rich Text Fields.
 html.defs.safe_attrs = list(html.defs.safe_attrs) + ['style']
+Cleaner.safe_attrs = html.defs.safe_attrs
 
 # convert function is monkey patched in order to backport from PortalTransform3
 def convert(self, orig, data, **kwargs):
@@ -425,7 +426,7 @@ def scrub_html(self, orig):
                         for style in value.split(';'):
                             styleDict = style.split(':')
                             if "".join(styleDict[0].split()).lower() in self.config['style_whitelist']:
-                                newS.append(style)
+                                newStyle.append(style)
                         elem.attrib[attrib] = ";".join(newStyle)
 
     valid_tags = [tag for tag, enabled in self.config['valid_tags'].items() if enabled]

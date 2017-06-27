@@ -86,6 +86,9 @@ def postInstall(context):
             nsTypes.append(t)
     props.manage_changeProperties(types_not_searched = tuple(nsTypes))
 
+    # configure CKEditor
+    configureCKEditor(context, site)
+
     # configure safe_html portal transform
     configureSafeHtml(context, site)
 
@@ -211,6 +214,19 @@ def reorderScriptsRegistry(context, site):
 
     logStep("reorderScriptRegistry", context)
     site.portal_setup.runImportStepFromProfile(u'profile-plone.app.search:default', 'jsregistry')
+
+def configureCKEditor(context, site):
+    """
+       Configure CKEditor properties correctly
+    """
+    if isNotMeetingAndenneProfile(context):
+        return
+
+    logStep("configureCKEditor", context)
+    properties = site.portal_properties.ckeditor_properties
+    properties._updateProperty('toolbar', 'Custom')
+    properties._updateProperty('toolbar_Custom', "\n[\n['Source','-','AjaxSave'],\n['Cut','Copy','Paste','PasteText','PasteFromWord','-', 'SpellChecker', 'Scayt'],\n['Undo','Redo','-','Find','Replace','-','SelectAll'],\n['Bold','Italic','Underline','Strike','-','Subscript','Superscript'],\n['NumberedList','BulletedList','-','Outdent','Indent','Blockquote'],\n['JustifyLeft','JustifyCenter','JustifyRight','JustifyBlock'],\n['Image','Table','HorizontalRule','Smiley','SpecialChar'],\n['Maximize', 'ShowBlocks','-','About']\n]\n")
+    properties._updateProperty('enableScaytOnStartup', True)
 
 def configureSafeHtml(context, site):
     """
