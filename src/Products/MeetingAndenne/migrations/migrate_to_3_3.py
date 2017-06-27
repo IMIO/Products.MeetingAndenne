@@ -10,7 +10,9 @@ import mimetypes
 from App.config import getConfiguration
 from OFS.Image import File
 from zope.annotation.interfaces import IAnnotations
+from zope.component import getUtility
 
+from Products.CMFCore.interfaces import ISiteRoot
 from Products.CMFCore.utils import getToolByName
 from Products.PloneMeeting.config import MEETING_GROUP_SUFFIXES, TOPIC_TAL_EXPRESSION, \
                                          TOPIC_TYPE, TOPIC_SEARCH_SCRIPT
@@ -322,9 +324,17 @@ class Migrate_To_3_3(Migrator):
 
         memberIds = membershipTool.listMemberIds()
         mutableUsers = pas.mutable_properties.enumerateUsers()
+        if 'admin2' in memberIds:
+            memberIds.remove('admin2')
+
+        usersToRemove = []
         for user in mutableUsers:
             if user['id'] not in memberIds:
                 pas.mutable_properties.deleteUser(user['id'])
+                usersToRemove.append(user['id'])
+
+        if len(usersToRemove) > 0:
+            membershipTool.deleteMembers( usersToRemove )
 
         logger.info('Done.')
 
