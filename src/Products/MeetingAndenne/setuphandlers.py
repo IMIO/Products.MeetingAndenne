@@ -15,6 +15,8 @@ __docformat__ = 'plaintext'
 
 import logging
 logger = logging.getLogger('MeetingAndenne: setuphandlers')
+from Persistence import PersistentMapping
+from persistent.list import PersistentList
 from Products.MeetingAndenne.config import PROJECTNAME
 from Products.MeetingAndenne.config import DEPENDENCIES
 from Products.MeetingAndenne.config import CRON_PARAMS, CRON_VIEW
@@ -83,6 +85,9 @@ def postInstall(context):
         if t not in nsTypes:
             nsTypes.append(t)
     props.manage_changeProperties(types_not_searched = tuple(nsTypes))
+
+    # configure safe_html portal transform
+    configureSafeHtml(context, site)
 
     # configure Products.cron4plone
     # add a call to @@run-docsplit-on-blobs that will run docsplit on a batch of
@@ -206,6 +211,44 @@ def reorderScriptsRegistry(context, site):
 
     logStep("reorderScriptRegistry", context)
     site.portal_setup.runImportStepFromProfile(u'profile-plone.app.search:default', 'jsregistry')
+
+def configureSafeHtml(context, site):
+    """
+       Configure safe_html portal transform to filter tags and attributes correctly
+    """
+    if isNotMeetingAndenneProfile(context):
+        return
+
+    logStep("configureSafeHtml", context)
+    pt = site.portal_transforms
+
+    if not 'safe_html' in pt.objectIds():
+        logger.error('safe_html not registered in portal_transforms')
+        return
+
+    config = pt.safe_html._config
+    config['class_blacklist'] = PersistentList()
+    config['nasty_tags'] = PersistentMapping( { 'applet': '1', 'colgroup': '1', 'embed': '1', 'meta': '1', 'object': '1',
+                                                'script' :'1', 'style': '1' } )
+    config['remove_javascript'] = 1
+    config['stripped_attributes'] = PersistentList( [ 'abbr', 'accept', 'accept-charset', 'accesskey', 'action', 'alt', 'axis',
+                                                      'border', 'cellpadding', 'cellspacing', 'char', 'charoff', 'charset',
+                                                      'checked', 'cite', 'class', 'clear', 'color', 'compact', 'coords', 'datetime',
+                                                      'disabled', 'enctype', 'for', 'frame', 'headers', 'height', 'hreflang',
+                                                      'ismap', 'label', 'lang', 'longdesc', 'maxlength', 'media', 'method',
+                                                      'multiple', 'name', 'nohref', 'noshade', 'nowrap', 'prompt', 'readonly',
+                                                      'rel', 'rev', 'rules', 'selected', 'shape', 'size', 'span', 'start',
+                                                      'target', 'type', 'usemap', 'valign', 'value', 'vspace', 'width' ] )
+    config['stripped_combinations'] = PersistentMapping()
+    config['style_whitelist'] = PersistentList( [ 'text-align', 'list-style-type', 'float', 'width', 'height', 'padding-left',
+                                                  'padding-right', 'margin', 'margin-left', 'margin-right' ] )
+    config['valid_tags'] = PersistentMapping( { 'b': '1', 'blockquote': '1', 'br': '0', 'code': '1', 'dd': '1', 'del': '1',
+                                                'dl': '1', 'dt': '1', 'em': '1', 'hgroup': '1', 'hr': '0', 'i': '1',
+                                                'img': '0', 'ins': '1', 'li': '1', 'mark': '1', 'meta': '0', 'ol': '1',
+                                                'p': '1', 'pre': '1', 's': '1', 'small': '1', 'strike': '1', 'strong': '1',
+                                                'sub': '1', 'sup': '1', 'table': '1', 'tbody': '1', 'td': '1', 'tfoot': '1',
+                                                'th': '1', 'thead': '1', 'tr': '1', 'tt': '1', 'u': '1', 'ul': '1' } )
+    pt.reloadTransforms()
 
 
 def installMeetingAndenne(context):

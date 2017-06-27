@@ -65,15 +65,19 @@ import shutil
 import ast
 from collective.documentviewer.async import asyncInstalled
 from collective.documentviewer.iso639_2_utf8 import ISO_UTF_MAP
-from collective.documentviewer.convert import DocSplitSubProcess, DUMP_FILENAME
-from collective.documentviewer.convert import TextCheckerSubProcess, textChecker
-from collective.documentviewer.convert import Page, word_re
+from collective.documentviewer.convert import DocSplitSubProcess, DUMP_FILENAME, \
+                                              TextCheckerSubProcess, textChecker, \
+                                              Page, word_re
 
 # Some imports added for the search functionalities
-from plone.app.search.browser import Search
-from plone.app.search.browser import quote_chars
-from plone.app.search.browser import EVER
+from plone.app.search.browser import Search, quote_chars, EVER
 from Products.CMFPlone.browser.navtree import getNavigationRoot
+
+# Some imports added for the safe_html transform patch
+from lxml import etree, html
+from lxml.html.clean import Cleaner
+from Products.PortalTransforms.libtransforms.utils import bodyfinder
+from Products.PortalTransforms.transforms.safe_html import SafeHTML, hasScript
 
 import logging
 logger = logging.getLogger( 'MeetingAndenne' )
@@ -301,7 +305,7 @@ def convert(self, output_dir, inputfilepath=None, filedata=None,
         os.remove(path)
         return num_pages
 
-DocSplitSubProcess.convert=convert
+DocSplitSubProcess.convert = convert
 
 
 # ------------------------------------------------------------------------------
@@ -367,6 +371,94 @@ def filter_query(self, query):
     return query
 
 Search.filter_query = filter_query
+
+
+# ------------------------------------------------------------------------------
+# convert and scrub_html functions from PortalTransform3 are backported here
+# in order to clean attributes in tags when the safe_html portal transform is
+# applied on Rich Text Fields.
+html.defs.safe_attrs = list(html.defs.safe_attrs) + ['style']
+
+# convert function is monkey patched in order to backport from PortalTransform3
+def convert(self, orig, data, **kwargs):
+    # note if we need an upgrade.
+    if 'disable_transform' not in self.config:
+        log(logging.ERROR, 'PortalTransforms safe_html transform needs '
+            'to be updated. Please re-install the PortalTransforms '
+            'product to fix.')
+
+    # if we have a config that we don't want to delete
+    # we need a disable option
+    if self.config.get('disable_transform'):
+        data.setData(orig)
+    else:
+        safe_html = self.scrub_html(orig)
+        data.setData(safe_html)
+    return data
+
+SafeHTML.convert = convert
+
+# scrub_html function is monkey patched in order to implement attributes cleaning
+def scrub_html(self, orig):
+    # append html tag to create a dummy parent for the tree
+    html_parser = html.HTMLParser(encoding='utf-8')
+    if '<html' in orig.lower():
+        # full html
+        tree = html.fromstring(orig, parser=html_parser)
+        strip_outer = bodyfinder
+    else:
+        # partial html (i.e. coming from WYSIWYG editor)
+        tree = html.fragment_fromstring(orig, create_parent=True, parser=html_parser)
+
+        def strip_outer(s):
+            return s[5:-6]
+
+    for elem in tree.iter(etree.Element):
+        if elem is not None:
+            for attrib, value in elem.attrib.items():
+                if hasScript(value):
+                    del elem.attrib[attrib]
+                else:
+                    # strip css styles that are not part of style_whitelist
+                    if attrib == "style":
+                        newStyle = []
+                        for style in value.split(';'):
+                            styleDict = style.split(':')
+                            if "".join(styleDict[0].split()).lower() in self.config['style_whitelist']:
+                                newS.append(style)
+                        elem.attrib[attrib] = ";".join(newStyle)
+
+    valid_tags = [tag for tag, enabled in self.config['valid_tags'].items() if enabled]
+    nasty_tags = [tag for tag, enabled in self.config['nasty_tags'].items() if enabled]
+    safe_attrs = list(html.defs.safe_attrs) + ['style']
+
+    for attr in self.config['stripped_attributes']:
+        if attr in safe_attrs:
+            safe_attrs.remove(attr)
+
+    remove_script = self.config['nasty_tags'].get('script')
+
+    cleaner = Cleaner(kill_tags=nasty_tags,
+                      remove_tags=self.config.get('stripped_tags', []),
+                      allow_tags=valid_tags,
+                      page_structure=False,
+                      safe_attrs_only=True,
+                      safe_attrs=safe_attrs,
+                      embedded=False,
+                      remove_unknown_tags=False,
+                      meta=False,
+                      javascript=remove_script,
+                      scripts=remove_script,
+                      style=False)
+    try:
+        cleaner(tree)
+    except AssertionError:
+        # some VERY invalid HTML
+        return ''
+    # remove all except body or outer div
+    return strip_outer(etree.tostring(tree, encoding='utf-8').strip())
+
+SafeHTML.scrub_html = scrub_html
 
 
 # ------------------------------------------------------------------------------
