@@ -84,6 +84,8 @@ meetingConfigs = { 'meeting-config-college': {
     },
 }
 
+indexesToRemove = [ 'getRefcourrier', 'getRefcourrierFake' ]
+
 rolesToRemove = [ 'ComdirMember', 'CourrierManager', 'CourrierViewer', 'MeetingAdviceEditor', 'MeetingAdviser', 'MeetingPresenter',
                   'TaskManager', 'TaskPerformer' ]
 
@@ -482,6 +484,22 @@ class Migrate_To_3_3(Migrator):
 
         logger.info('Done.')
 
+    def _adaptCatalog(self):
+        '''Modify some indexes in portal_catalog tool'''
+        logger.info('Modifying some indexes in portal_catalog tool...')
+
+        catalog = self.portal.portal_catalog
+        zopeCatalog = catalog._catalog
+
+        for index in indexesToRemove:
+            if index in zopeCatalog.indexes:
+                catalog.delIndex(index)
+
+        if 'getRefcourrier' not in zopeCatalog.indexes:
+            catalog.addIndex('getRefcourrier', 'FieldIndex')
+
+        logger.info('Done.')
+
     def _adaptUserProperties(self):
         '''Set CKeditor as default editor for everybody and remove useless properties'''
         logger.info('Setting CKeditor as default editor for everybody and removing useless properties...')
@@ -675,6 +693,7 @@ class Migrate_To_3_3(Migrator):
         self._removeUselessFCKEditorProperties()
         self._renameCategories()
         self._renameGroups()
+        self._adaptCatalog()
         self._adaptUserProperties()
         self._adaptPloneMeetingConfig()
         self._adaptMeetingConfigs()
@@ -714,17 +733,18 @@ def migrate(context):
        12) Remove useless fck_editor properties object
        13) Rename some categories if they exist and change related MeetingItems
        14) Rename some groups if they exist and change related MeetingItems
-       15) Set CKeditor as default editor for everybody and remove useless properties
-       16) Change ploneMeeting configuration
-       17) Change various meetingConfigs properties
-       18) Modify the default view and redirection method of mail folder
-       19) Modify the local roles of every mail file
-       20) Modify the ocr flags stored with MeetingFile and CourrierFile objects
-       21) Create the topics used for mail management
-       22) Recreate the used POD templates
-       23) Make sure Plone groups linked to a MeetingGroup have a consistent title
-       24) Reinstall Products.MeetingAndenne so skin and so on are correct
-       25) Modify the configuration of the collective.documentviewer product
+       15) Modify some indexes in portal_catalog tool
+       16) Set CKeditor as default editor for everybody and remove useless properties
+       17) Change ploneMeeting configuration
+       18) Change various meetingConfigs properties
+       19) Modify the default view and redirection method of mail folder
+       20) Modify the local roles of every mail file
+       21) Modify the ocr flags stored with MeetingFile and CourrierFile objects
+       22) Create the topics used for mail management
+       23) Recreate the used POD templates
+       24) Make sure Plone groups linked to a MeetingGroup have a consistent title
+       25) Reinstall Products.MeetingAndenne so skin and so on are correct
+       26) Modify the configuration of the collective.documentviewer product
     '''
     Migrate_To_3_3(context).run()
 # ------------------------------------------------------------------------------
