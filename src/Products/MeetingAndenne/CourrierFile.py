@@ -173,7 +173,7 @@ class CourrierFile(ATBlob, BrowserDefaultMixin):
     def deletefile(self):
         os.system( "mv /home/zope/scan/scantmp/" + str(self.getId()) + " /home/zope/scan/scanarchived/" + str(self.getId()))
 
-    security.declarePublic('listdestUsers')
+    security.declarePrivate('listDestUsers')
     def listDestUsers(self):
         '''List the users that will be selectable in the destination user ComboBox.'''
         return DisplayList( tuple(self.portal_plonemeeting.adapted().listDestUsers()) )

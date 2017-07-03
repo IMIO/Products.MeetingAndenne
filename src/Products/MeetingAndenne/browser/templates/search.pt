@@ -274,7 +274,7 @@
 
                                   <div class="field"
                                        tal:define="tool python:context.portal_plonemeeting;
-                                                   group_list tool/getMeetingGroups;
+                                                   groups_list python:tool.adapted().listProposingGroups();
                                                    all_checked python:False;
                                                    toggle_select_state python:all_checked and 'true' or 'false';">
 
@@ -283,19 +283,21 @@
                                       <div style="float: left; margin-right: 2em; border: 1px solid grey; width: 200px; height: 200px;
                                                   overflow-y: scroll; position: fixed; background: white; margin-top: 2px;"
                                            tal:attributes="style python:isRTL and 'float: right;; margin-left: 2em;; height: 200px;; overflow-y: scroll;;' or 'float: left;; margin-right: 2em;; height: 200px;; overflow-y: scroll;;';">
-                                          <tal:items repeat="group group_list">
+                                          <tal:items repeat="group groups_list">
                                               <input type="checkbox"
                                                      name="getProposingGroup:list"
                                                      value="#"
                                                      class="noborder"
                                                      checked="checked"
-                                                     tal:attributes="value group/id;
-                                                                     id string:proposing_group_${group/id};
-                                                                     checked python:((group.id in request.get('getProposingGroup', [])) or False) and 'checked' or ''"/>
+                                                     tal:define="groupId python:group[0]"
+                                                     tal:attributes="value groupId;
+                                                                     id string:proposing_group_${groupId};
+                                                                     checked python:((group[0] in request.get('getProposingGroup', [])) or False) and 'checked' or ''"/>
                                               <label for=""
                                                      i18n:translate=""
-                                                     tal:attributes="for string:proposinggroup_${group/id}"
-                                                     tal:content="group/Title"
+                                                     tal:define="groupId python:group[0]"
+                                                     tal:attributes="for string:proposing_group_${groupId}"
+                                                     tal:content="python: group[1]"
                                                      />
                                               <br />
                                           </tal:items>
@@ -311,7 +313,7 @@
 
                                   <div class="field"
                                        tal:define="tool python:context.portal_plonemeeting;
-                                                   category_list python:tool.adapted().getCategoriesFromMeetingConfig(context);
+                                                   categories_list python:tool.adapted().getCategoriesFromMeetingConfig(context);
                                                    all_checked python:False;
                                                    toggle_select_state python:all_checked and 'true' or 'false';">
 
@@ -336,7 +338,7 @@
                                       <br />
                                       <div style="float:left; margin-right: 2em;"
                                            tal:attributes="style python:isRTL and 'float: right;; margin-left: 2em;; height: 200px;; overflow-y: scroll;;' or 'float: left;; margin-right: 2em;; height: 200px;; overflow-y: scroll;;';">
-                                          <tal:items repeat="category category_list">
+                                          <tal:items repeat="category categories_list">
                                               <input type="checkbox"
                                                      name="getCategory:list"
                                                      value="#"
@@ -380,14 +382,14 @@
                                                      value="#"
                                                      class="noborder"
                                                      checked="checked"
-                                                     tal:define="id python:destuser[0]"
-                                                     tal:attributes="value id;
-                                                                     id string:destuser_${id};
+                                                     tal:define="userId python:destuser[0]"
+                                                     tal:attributes="value userId;
+                                                                     id string:destuser_${userId};
                                                                      checked python:((destuser[0] in request.get('getDestUsers', [])) or False) and 'checked' or ''"/>
                                               <label for=""
                                                      i18n:translate=""
-                                                     tal:define="id python:destuser[0]"
-                                                     tal:attributes="for string:destuser_${id}"
+                                                     tal:define="userId python:destuser[0]"
+                                                     tal:attributes="for string:destuser_${userId}"
                                                      tal:content="python: destuser[1]"
                                                      />
                                               <br />
@@ -404,7 +406,7 @@
 
                                   <div class="field"
                                        tal:define="tool python:context.portal_plonemeeting;
-                                                   typecourriers_list python:tool.adapted().getMailTypesForSearch();
+                                                   types_list python:tool.adapted().getMailTypesForSearch();
                                                    all_checked first_call;
                                                    toggle_select_state python:all_checked and 'true' or 'false';">
 
@@ -413,21 +415,21 @@
                                       <div style="float:left; margin-right: 2em;"
                                            tal:attributes="style python:isRTL and 'float: right;; margin-left: 2em;;' or 'float: left;; margin-right: 2em;;';">
 
-                                          <tal:items repeat="typecourrier typecourriers_list">
+                                          <tal:items repeat="type types_list">
                                               <input type="checkbox"
                                                      name="getTypecourrier:list"
                                                      value="#"
                                                      class="noborder"
                                                      checked="checked"
-                                                     tal:define="id python:typecourrier[0]"
-                                                     tal:attributes="value python:typecourrier[0];
-                                                                     id string:typecourrier_${id};
-                                                                     checked python:((typecourrier[0] in request.get('getTypecourrier', [])) or False) and 'checked' or ''"/>
+                                                     tal:define="typeId python:type[0]"
+                                                     tal:attributes="value python:type[0];
+                                                                     id string:typecourrier_${typeId};
+                                                                     checked python:((type[0] in request.get('getTypecourrier', [])) or False) and 'checked' or ''"/>
                                               <label for=""
                                                      i18n:translate=""
-                                                     tal:define="id python:typecourrier[0]"
-                                                     tal:attributes="for string:typecourrier_${id}"
-                                                     tal:content="python: typecourrier[1]"
+                                                     tal:define="typeId python:type[0]"
+                                                     tal:attributes="for string:typecourrier_${typeId}"
+                                                     tal:content="python: type[1]"
                                                      />
                                               <br />
                                           </tal:items>

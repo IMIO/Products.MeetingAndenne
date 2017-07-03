@@ -1126,23 +1126,18 @@ class CustomMeetingItemAndenne(MeetingItem):
         # replace div by p, because xhtmlparlser convert div to page-break and it causes problems in text align justify
         # replace line breaks by </p><p> because line breaks are in <p> and causes justify problems
         description = self.context.Description()
-        description = description.replace("<div", "<p").replace("</div>", "</p>")
         self.context.setDescription(self.context.replaceBr(description))
 
         decision = self.context.getDecision()
-        decision = decision.replace("<div", "<p").replace("</div>", "</p>")
         self.context.setDecision(self.context.replaceBr(decision))
 
         projetpv = self.context.getProjetpv()
-        projetpv = projetpv.replace("<div", "<p").replace("</div>", "</p>")
         self.context.setProjetpv(self.context.replaceBr(projetpv))
 
         textpv = self.context.getTextpv()
-        textpv = textpv.replace("<div", "<p").replace("</div>", "</p>")
         self.context.setTextpv(self.context.replaceBr(textpv))
 
         pv = self.context.getPv()
-        pv = pv.replace("<div", "<p").replace("</div>", "</p>")
         self.context.setPv(self.context.replaceBr(pv))
 
         # Add local roles corresponding to the proposing group if item category is personnel or if item is confidential
@@ -1532,7 +1527,17 @@ class CustomToolMeetingAndenne(ToolPloneMeeting):
             return cfg.categories.objectValues()
         return None  
 
-    security.declarePublic('listdestUsers')
+    security.declarePrivate('listProposingGroup')
+    def listProposingGroups(self):
+        '''Used in advanced searches to filter results by proposing group.'''
+        res = []
+        tool = getToolByName(self.context, 'portal_plonemeeting')
+        for group in tool.getMeetingGroups():
+            res.append((group.id, group.getName()))
+        res = sorted( res, key=collateDisplayListsValues )
+        return res
+
+    security.declarePrivate('listDestUsers')
     def listDestUsers(self):
         '''List the users that will be selectable in the destination user ComboBox.'''
         pgp = self.context.portal_membership
