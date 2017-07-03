@@ -179,6 +179,17 @@ class Migrate_To_3_3(Migrator):
                 cfg.setOnMeetingTransitionItemTransitionToTrigger(newValue)
         logger.info('Done.')
 
+    def _updateMimetypesRegistry(self):
+        '''Modify some entries in the mimetypes registry for annex indexation.'''
+        logger.info('Modifying some entries in the mimetypes registry for annex indexation...')
+
+        mr = self.portal.mimetypes_registry
+        mt = mr.lookup('application/zip')[0]
+        mt.edit(mt.id, mt.mimetypes, ['zip', 'docx', 'xlsx', 'pptx', ], mt.icon_path,
+                binary = mt.binary, globs = ['*.zip', '*.docx', '*.xlsx', '*.pptx', ])
+
+        logger.info('Done.')
+
     def _addMissingRolesAndGroups(self):
         '''Add missing global roles and Plone groups related to MeetingAndenne.'''
         logger.info('Adding missing global roles and Plone groups related to MeetingAndenne...')
@@ -652,6 +663,7 @@ class Migrate_To_3_3(Migrator):
         logger.info('Migrating to MeetingAndenne 3.3...')
         self._migrateItemDecisionReportTextAttributeOnConfigs()
         self._updateOnMeetingTransitionItemTransitionToTrigger()
+        self._updateMimetypesRegistry()
         self._addMissingRolesAndGroups()
         self._addMeetingFormationType()
         self._migrateMeetingItemFormations()
@@ -690,28 +702,29 @@ def migrate(context):
 
        1)  Remove obsolete attribute 'itemDecisionReportText' from every meetingConfigs
        2)  Migrate onMeetingTransitionItemTransitionToTrigger
-       3)  Add missing global roles and Plone groups related to MeetingAndenne
-       4)  Add the template used to create MeetingItemFormation objects
-       5)  Migrate MeetingItemFormation objects
-       6)  Migrate mail roles
-       7)  Remove some objects in Zope Control Panel which were not migrated properl
-       8)  Remove unused global roles
-       9)  Remove unused users present in portal_membership and acl_users
-       10) Remove useless mail topics added by PloneMeeting migration
-       11) Remove useless fck_editor properties object
-       12) Rename some categories if they exist and change related MeetingItems
-       13) Rename some groups if they exist and change related MeetingItems
-       14) Set CKeditor as default editor for everybody and remove useless properties
-       15) Change ploneMeeting configuration
-       16) Change various meetingConfigs properties
-       17) Modify the default view and redirection method of mail folder
-       18) Modify the local roles of every mail file
-       19) Modify the ocr flags stored with MeetingFile and CourrierFile objects
-       20) Create the topics used for mail management
-       21) Recreate the used POD templates
-       22) Make sure Plone groups linked to a MeetingGroup have a consistent title
-       23) Reinstall Products.MeetingAndenne so skin and so on are correct
-       24) Modify the configuration of the collective.documentviewer product
+       3)  Modify some entries in the mimetypes registry for annex indexation
+       4)  Add missing global roles and Plone groups related to MeetingAndenne
+       5)  Add the template used to create MeetingItemFormation objects
+       6)  Migrate MeetingItemFormation objects
+       7)  Migrate mail roles
+       8)  Remove some objects in Zope Control Panel which were not migrated properl
+       9)  Remove unused global roles
+       10) Remove unused users present in portal_membership and acl_users
+       11) Remove useless mail topics added by PloneMeeting migration
+       12) Remove useless fck_editor properties object
+       13) Rename some categories if they exist and change related MeetingItems
+       14) Rename some groups if they exist and change related MeetingItems
+       15) Set CKeditor as default editor for everybody and remove useless properties
+       16) Change ploneMeeting configuration
+       17) Change various meetingConfigs properties
+       18) Modify the default view and redirection method of mail folder
+       19) Modify the local roles of every mail file
+       20) Modify the ocr flags stored with MeetingFile and CourrierFile objects
+       21) Create the topics used for mail management
+       22) Recreate the used POD templates
+       23) Make sure Plone groups linked to a MeetingGroup have a consistent title
+       24) Reinstall Products.MeetingAndenne so skin and so on are correct
+       25) Modify the configuration of the collective.documentviewer product
     '''
     Migrate_To_3_3(context).run()
 # ------------------------------------------------------------------------------
