@@ -941,7 +941,7 @@ class CustomMeetingItemAndenne(MeetingItem):
         '''Formats the current date to print in the templates.'''
         return DateTime().strftime("%d/%m/%Y")
 
-### New functionalities ###
+    ### New functionalities ###
 
     security.declarePublic('adapted')
     def adapted(self):
@@ -1221,33 +1221,31 @@ class CustomMeetingItemAndenne(MeetingItem):
         return self.REQUEST.RESPONSE.redirect(newItem.absolute_url())
 
     MeetingItem.onDuplicate = onDuplicate
-    #it'a a monkey patch because it's the only way to change the behaviour of the MeetingItem class
+    # it'a a monkey patch because it's the only way to change the behaviour of the MeetingItem class
 
-    ### RAPCOLAUCON ###
+    ### functionalities linked to rap-col-au-con ###
+
     security.declarePublic('israpcolaucon')
     def israpcolaucon(self):
-        """
-        """
+        '''This method is used know in which config we are so the meetingitem_view
+           template is rendered properly.'''
         meetingconfig = self.context.portal_plonemeeting.getMeetingConfig(self.context)
         if  meetingconfig.id == 'rapport-col-au-con':
             return True
         else :
             return False
-#    MeetingItem.israpcolaucon=israpcolaucon
 
     security.declarePublic('getLabelForDescription')
     def getLabelForDescription(self):
-        """
-          If we are in the rapcolaucon meetingConfig, we change the label of the 'description' field
-        """
+        '''This fuinction is used to change the label of the "description" field depending on the
+           meetingConfig we are currently in.'''
         if self.adapted().israpcolaucon():
-            return "Corps du texte"
+            return self.utranslate("meeting_item_rcc_description", domain="PloneMeeting", context=self)
         else:
             return self.utranslate("meeting_item_description", domain="PloneMeeting", context=self)
 
-    MeetingItem.getLabelForDescription=getLabelForDescription
-    #it'a a monkey patch because it's the only way to have a default method in the schema
-    ### END RAPCOLAUCON ###
+    MeetingItem.getLabelForDescription = getLabelForDescription
+    # it'a a monkey patch because it's the only way to have a default method in the schema
 
 
 # ------------------------------------------------------------------------------

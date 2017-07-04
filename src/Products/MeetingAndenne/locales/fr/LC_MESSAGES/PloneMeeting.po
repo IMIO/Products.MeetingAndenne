@@ -113,6 +113,10 @@ msgstr "Accepté provisoirement"
 msgid "meeting_item_description"
 msgstr "Description dans l'Ordre du jour"
 
+#. Default: "Text body"
+msgid "meeting_item_rcc_description"
+msgstr "Corps du texte"
+
 #. Default: "This file is a scanned document"
 msgid "needs_ocr"
 msgstr "Le document doit être OCR-isé"

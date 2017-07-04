@@ -226,33 +226,33 @@ document.location.reload(true);
 
       <tal:comment replace="nothing">Show depart number if user has left (or will do after this item)</tal:comment>
       <tal:left condition="python: aId in departees">
-      <img tal:attributes="src string: $portal_url/departure.gif"
-           title="left_after" i18n:attributes="title"/><span style="color:black"
-           tal:content="python: meeting.getDepartureItem(aId)-1"></span>
-      <tal:comment replace="nothing">Remove info about user departure from the meeting</tal:comment>
-      <img tal:condition="python: mayEditItem and isManager" style="cursor:pointer" title="remove_info" i18n:attributes="title"
-           tal:attributes="src string: $portal_url/delete_small.png;
-                           onClick python:'confirmByebyeUserAndenne(\'%s\', \'%s\', \'delete\', \'leaves_after\')' % (context.absolute_url(), aId)"/>
+       <img tal:attributes="src string: $portal_url/departure.gif"
+            title="left_after" i18n:attributes="title"/><span style="color:black"
+            tal:content="python: meeting.getDepartureItem(aId)-1"></span>
+       <tal:comment replace="nothing">Remove info about user departure from the meeting</tal:comment>
+       <img tal:condition="python: mayEditItem and isManager" style="cursor:pointer" title="remove_info" i18n:attributes="title"
+            tal:attributes="src string: $portal_url/delete_small.png;
+                            onClick python:'confirmByebyeUserAndenne(\'%s\', \'%s\', \'delete\', \'leaves_after\')' % (context.absolute_url(), aId)"/>
       </tal:left>
 
       <tal:comment replace="nothing">Show "absent" icon if the user has left only for this item (=item absent)</tal:comment>
       <tal:left condition="python: aId in context.getItemAbsents()">
-      <img tal:attributes="src string: $portal_url/leaving.gif"
-           title="left_now" i18n:attributes="title"/>
-      <tal:comment replace="nothing">Remove info user being an item absent</tal:comment>
-      <img tal:condition="python: mayEditItem and isManager" style="cursor:pointer" title="remove_info" i18n:attributes="title"
-           tal:attributes="src string: $portal_url/delete_small.png;
-                           onClick python:'confirmByebyeUserAndenne(\'%s\', \'%s\', \'delete\', \'leaves_now\')' % (context.absolute_url(), aId)"/>
+       <img tal:attributes="src string: $portal_url/leaving.gif"
+            title="left_now" i18n:attributes="title"/>
+       <tal:comment replace="nothing">Remove info user being an item absent</tal:comment>
+       <img tal:condition="python: mayEditItem and isManager" style="cursor:pointer" title="remove_info" i18n:attributes="title"
+            tal:attributes="src string: $portal_url/delete_small.png;
+                            onClick python:'confirmByebyeUserAndenne(\'%s\', \'%s\', \'delete\', \'leaves_now\')' % (context.absolute_url(), aId)"/>
       </tal:left>
 
       <tal:comment replace="nothing">Show "present" icon if the user join this item only (=item present) (added by fabmar)</tal:comment>
       <tal:entered condition="python: aId in context.getItemPresents()">
-      <img tal:attributes="src string: $portal_url/arriving.gif"
-           title="arrived_now" i18n:attributes="title"/>
-      <tal:comment replace="nothing">Remove info user being an item present</tal:comment>
-      <img tal:condition="python: mayEditItem and isManager" style="cursor:pointer" title="remove_info" i18n:attributes="title"
-           tal:attributes="src string: $portal_url/delete_small.png;
-                           onClick python:'confirmWelcomeUserAndenne(\'%s\', \'%s\', \'delete\', \'just_now\')' % (context.absolute_url(), aId)"/>
+       <img tal:attributes="src string: $portal_url/arriving.gif"
+            title="arrived_now" i18n:attributes="title"/>
+       <tal:comment replace="nothing">Remove info user being an item present</tal:comment>
+       <img tal:condition="python: mayEditItem and isManager" style="cursor:pointer" title="remove_info" i18n:attributes="title"
+            tal:attributes="src string: $portal_url/delete_small.png;
+                            onClick python:'confirmWelcomeUserAndenne(\'%s\', \'%s\', \'delete\', \'just_now\')' % (context.absolute_url(), aId)"/>
       </tal:entered>
 
       <tal:comment replace="nothing">Button for welcoming a late attendee not yet in the meeting</tal:comment>

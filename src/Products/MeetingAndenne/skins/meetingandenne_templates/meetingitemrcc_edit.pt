@@ -1,0 +1,60 @@
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en-US"
+      lang="en-US"
+      i18n:domain="PloneMeeting">
+
+<body>
+<div metal:define-macro="body">
+
+<metal:base_body use-macro="base_macros/body">
+
+<metal:widgets fill-slot="widgets"
+           tal:define="member context/@@plone_portal_state/member;
+                       border python: test(member.has_role('Manager'), 'enable_border', 'disable_border');
+                       dummy python:request.set(border, 1);
+                       tool python: context.portal_plonemeeting;
+                       member tool/getUser;
+                       portal context/portal_url/getPortalObject;
+                       meetingConfig python: tool.getMeetingConfig(context);
+                       usedAttrs meetingConfig/getUsedItemAttributes;
+                       bilingual python: 'secondLanguage' in tool.getModelAdaptations();">
+
+    <tal:showWarningWillInvalidateAdvices condition="context/willInvalidateAdvices">
+    <dl class="portalMessage warning">
+        <dt i18n:translate="" i18n:domain="plone">Warning</dt><dd i18n:translate="warning_invalidate_advices" i18n:domain="PloneMeeting"></dd>
+    </dl><br />
+    </tal:showWarningWillInvalidateAdvices>
+
+    <tal:comment replace="nothing">Category and proposing group</tal:comment>
+    <table cellpadding="0" cellspacing="0">
+      <tr valign="top">
+        <td width="50%"><metal:field use-macro="python:here.widget('category', mode='edit')"/></td>
+        <td align="right"><metal:field use-macro="python:here.widget('proposingGroup', mode='edit')"/></td>
+      </tr>
+    </table>
+
+    <tal:comment replace="nothing">Title and description, mono- or bilingual</tal:comment>
+    <tal:field define="fieldName python: 'title'">
+      <metal:f use-macro="context/@@pm-macros/editContentField"/>
+    </tal:field>
+
+    <tal:field define="fieldName python: 'description'">
+      <metal:f use-macro="context/@@pm-macros/editContentField"/>
+    </tal:field>
+
+    <tal:comment replace="nothing">Preferred meeting, observations and item tags</tal:comment>
+    <metal:field use-macro="python:here.widget('preferredMeeting', mode='edit')"/>
+
+    <tal:field define="fieldName python: 'observations'"
+               condition="python: 'observations' in usedAttrs" >
+      <metal:f use-macro="context/@@pm-macros/editContentField"/>
+    </tal:field>
+
+    <metal:field use-macro="python:here.widget('itemTags', mode='edit')"/>
+    <metal:field use-macro="python:here.widget('meetingTransitionInsertingMe', mode='edit')"/>
+
+</metal:widgets>
+</metal:base_body>
+</div>
+
+</body>
+</html>

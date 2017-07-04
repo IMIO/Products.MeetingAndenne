@@ -108,6 +108,10 @@ msgstr ""
 msgid "meeting_item_description"
 msgstr ""
 
+#. Default: "Text body"
+msgid "meeting_item_rcc_description"
+msgstr ""
+
 #. Default: "This file is a scanned document"
 msgid "needs_ocr"
 msgstr ""
