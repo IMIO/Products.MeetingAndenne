@@ -94,286 +94,306 @@ CategoryDescriptor('65-nage', '65. Zone de secours NAGE'),
 
 # Pod templates ----------------------------------------------------------------
 
-itemNoteTemplate = PodTemplateDescriptor('ne', "Note d'execution")
-itemNoteTemplate.podTemplate = 'MeetingItemAndenneexecution3.odt'
-itemNoteTemplate.podCondition = 'python:here.meta_type=="MeetingItem" and here.queryState() in ("accepted", "accepted_but_modified","delayed","pre_accepted","refused","accepted_and_closed","accepted_but_modified_and_closed","refused_and_closed","delayed_and_closed")'
+# College Pod templates ----------------------------------------------------------------
+agendaTemplate = PodTemplateDescriptor('agenda', 'O.J.')
+agendaTemplate.podTemplate = 'MeetingAndenne.odt'
+agendaTemplate.podCondition = 'python:(here.meta_type=="Meeting") and ' \
+                              'here.portal_plonemeeting.isManager(here)'
 
-decisionsTemplate = PodTemplateDescriptor('pv', 'P.V.')
-decisionsTemplate.podTemplate = 'Meetingproposednew3.odt'
-decisionsTemplate.podCondition = 'python:(here.meta_type=="Meeting") and here.queryState() in ["decided", "closed","archived"]'
+agendaCPASTemplate = PodTemplateDescriptor('agendaCPAS', 'O.J. - CPAS')
+agendaCPASTemplate.podTemplate = 'MeetingAndenneCPAS.odt'
+agendaCPASTemplate.podCondition = 'python:(here.meta_type=="Meeting") and ' \
+                              'here.portal_plonemeeting.isManager(here)'
 
-agendaTemplate = PodTemplateDescriptor('oj', 'O.J.')
-agendaTemplate.podTemplate = 'meetingandennenew4.odt'
-agendaTemplate.podCondition = 'python:(here.meta_type=="Meeting") and (here.portal_membership.getAuthenticatedMember().has_role("MeetingManager") or here.portal_membership.getAuthenticatedMember().has_role("MeetingPowerObserver"))'
+agendaPersonnelTemplate = PodTemplateDescriptor('agendaPersonnel', 'O.J. - Personnel')
+agendaPersonnelTemplate.podTemplate = 'MeetingAndennePersonnel.odt'
+agendaPersonnelTemplate.podCondition = 'python:(here.meta_type=="Meeting") and ' \
+                              'here.portal_plonemeeting.isManager(here)'
 
-agendalateTemplate = PodTemplateDescriptor('ojc', 'O.J. Comp.')
-agendalateTemplate.podTemplate = 'meetingandennelatenew3.odt'
-agendalateTemplate.podCondition = 'python:(here.meta_type=="Meeting") and (here.portal_membership.getAuthenticatedMember().has_role("MeetingManager") or here.portal_membership.getAuthenticatedMember().has_role("MeetingPowerObserver"))'
+lateAgendaTemplate = PodTemplateDescriptor('lateAgenda', 'O.J. Comp.')
+lateAgendaTemplate.podTemplate = 'MeetingAndenneLate.odt'
+lateAgendaTemplate.podCondition = 'python:(here.meta_type=="Meeting") and ' \
+                              'here.portal_plonemeeting.isManager(here)'
 
-itemDeliberationTemplate = PodTemplateDescriptor('deliberation', 'délibération')
-itemDeliberationTemplate.podTemplate = 'MeetingItemAndenneproposednew4.odt'
-itemDeliberationTemplate.podCondition = 'python:here.meta_type=="MeetingItem" and here.queryState() in ("accepted", "accepted_but_modified","delayed","pre_accepted","refused","accepted","accepted_and_closed","accepted_but_modified_and_closed","refused_and_closed","delayed_and_closed")'
+lateAgendaCPASTemplate = PodTemplateDescriptor('lateAgendaCPAS', 'O.J. Comp. - CPAS')
+lateAgendaCPASTemplate.podTemplate = 'MeetingAndenneLateCPAS.odt'
+lateAgendaCPASTemplate.podCondition = 'python:(here.meta_type=="Meeting") and ' \
+                              'here.portal_plonemeeting.isManager(here)'
 
-itemProjectTemplate = PodTemplateDescriptor('proposition', 'Proposition au collège ')
-itemProjectTemplate.podTemplate = 'MeetingItemAndennenew3.odt'
-itemProjectTemplate.podCondition = 'python:here.meta_type=="MeetingItem"'
+lateAgendaPersonnelTemplate = PodTemplateDescriptor('lateAgendaPersonnel', 'O.J. Comp. - Personnel')
+lateAgendaPersonnelTemplate.podTemplate = 'MeetingAndenneLatePersonnel.odt'
+lateAgendaPersonnelTemplate.podCondition = 'python:(here.meta_type=="Meeting") and ' \
+                              'here.portal_plonemeeting.isManager(here)'
 
-agendaPersTemplate = PodTemplateDescriptor('ojp', 'O.J. Personnel')
-agendaPersTemplate.podTemplate = 'meetingandennepersonnelnew2.odt'
-agendaPersTemplate.podCondition = 'python:(here.meta_type=="Meeting") and (here.portal_membership.getAuthenticatedMember().has_role("MeetingManager") or here.portal_membership.getAuthenticatedMember().has_role("MeetingPowerObserver"))'
+agendaListTemplate = PodTemplateDescriptor('agendaList', 'Liste des points')
+agendaListTemplate.podTemplate = 'MeetingAndenneList.odt'
+agendaListTemplate.podCondition = 'python:(here.meta_type=="Meeting") and ' \
+                              'here.portal_plonemeeting.isManager(here)'
 
-agendaPersLateTemplate = PodTemplateDescriptor('ojpc', 'O.J. Comp. Personnel')
-agendaPersLateTemplate.podTemplate = 'meetingandennelatepersonnelnew2.odt'
-agendaPersLateTemplate.podCondition = 'python:(here.meta_type=="Meeting") and (here.portal_membership.getAuthenticatedMember().has_role("MeetingManager") or here.portal_membership.getAuthenticatedMember().has_role("MeetingPowerObserver"))'
+decisionTemplate = PodTemplateDescriptor('pv', 'P.V.')
+decisionTemplate.podTemplate = 'MeetingAndennePV.odt'
+decisionTemplate.podCondition = 'python:(here.meta_type=="Meeting") and ' \
+                              'here.portal_plonemeeting.isManager(here) and ' \
+                              'here.queryState() in [\'decided\', \'closed\']'
 
-agendaCpasTemplate = PodTemplateDescriptor('ojcpas', 'O.J. CPAS')
-agendaCpasTemplate.podTemplate = 'meetingandennecpasnew2.odt'
-agendaCpasTemplate.podCondition = 'python:(here.meta_type=="Meeting") and (here.portal_membership.getAuthenticatedMember().has_role("MeetingManager") or here.portal_membership.getAuthenticatedMember().has_role("MeetingPowerObserver"))'
+itemPropositionTemplate = PodTemplateDescriptor('itemProposition', 'Proposition au collège')
+itemPropositionTemplate.podTemplate = 'MeetingItemAndenneProposition.odt'
+itemPropositionTemplate.podCondition = 'python:here.meta_type=="MeetingItem"'
 
-agendaCpasLateTemplate = PodTemplateDescriptor('ojcpasc', 'O.J. Comp. CPAS')
-agendaCpasLateTemplate.podTemplate = 'meetingandennelatecpasnew2 .odt'
-agendaCpasLateTemplate.podCondition = 'python:(here.meta_type=="Meeting") and (here.portal_membership.getAuthenticatedMember().has_role("MeetingManager") or here.portal_membership.getAuthenticatedMember().has_role("MeetingPowerObserver"))'
+itemDeliberationTemplate = PodTemplateDescriptor('itemDeliberation', 'Délibération')
+itemDeliberationTemplate.podTemplate = 'MeetingItemAndenneDeliberation.odt'
+itemDeliberationTemplate.podCondition = 'python:here.meta_type=="MeetingItem" and here.queryState() not in ("itemcreated", ' \
+                                            '"proposed", "prevalidated", "validated", "presented", "itemfrozen")'
 
-agendaListeTemplate = PodTemplateDescriptor('liste', 'Liste des points')
-agendaListeTemplate.podTemplate = 'meetingandennenewlist.odt'
-agendaListeTemplate.podCondition = 'python:(here.meta_type=="Meeting") and (here.portal_membership.getAuthenticatedMember().has_role("MeetingManager") or here.portal_membership.getAuthenticatedMember().has_role("MeetingPowerObserver"))'
+itemExecutionTemplate = PodTemplateDescriptor('itemExecution', 'Note d\'exécution')
+itemExecutionTemplate.podTemplate = 'MeetingItemAndenneExecution.odt'
+itemExecutionTemplate.podCondition = 'python:here.meta_type=="MeetingItem" and here.queryState() not in ("itemcreated", ' \
+                                            '"proposed", "prevalidated", "validated", "presented", "itemfrozen")'
 
+collegeTemplates = [ agendaTemplate, agendaCPASTemplate, agendaPersonnelTemplate,
+                     lateAgendaTemplate, lateAgendaCPASTemplate, lateAgendaPersonnelTemplate,
+                     agendaListTemplate, decisionTemplate,
+                     itemPropositionTemplate, itemDeliberationTemplate, itemExecutionTemplate ]
 
+# RapColAuCon Pod templates ----------------------------------------------------------------
+agendaRccTemplate = PodTemplateDescriptor('agenda', 'Rapport du Col. au Con.')
+agendaRccTemplate.podTemplate = 'MeetingAndenneRccRapport.odt'
+agendaRccTemplate.podCondition = 'python:(here.meta_type=="Meeting") and ' \
+                              'here.portal_plonemeeting.isManager(here)'
 
+itemRccTemplate = PodTemplateDescriptor('item', 'Aperçu')
+itemRccTemplate.podTemplate = 'MeetingItemAndenneRccApercu.odt'
+itemRccTemplate.podCondition = 'python:here.meta_type=="MeetingItem"'
 
-collegeTemplates = [itemNoteTemplate, decisionsTemplate,
-                    agendaTemplate, agendalateTemplate,
-                    itemDeliberationTemplate, itemProjectTemplate,
-                    agendaPersTemplate, agendaPersLateTemplate, agendaCpasTemplate,agendaCpasLateTemplate,agendaListeTemplate]
-
+rapcolauconTemplates=[ agendaRccTemplate, itemRccTemplate ]
 
 # Users and groups -------------------------------------------------------------
-adrlar= UserDescriptor ('adrlar', [],email='adrien.laruelle@ac.andenne.be', fullname='Adrien Laruelle')
-ale= UserDescriptor ('ale', [],email='ale@andenne.be', fullname='A.L.E.')
-alebok= UserDescriptor ('alebok', [],email='Alexandre.Bokor@ac.andenne.be', fullname='Alexandre Bokor')
-aledep= UserDescriptor ('aledep', [],email='andenne2@andenne.be', fullname='Alexandre Depaye')
-alithi= UserDescriptor ('alithi', [],email='aline.thiry@ac.andenne.be', fullname='Aline Thiry')
-andbea= UserDescriptor ('andbea', [],email='andre.beaujean@ac.andenne.be', fullname='André Beaujean')
-andlal= UserDescriptor ('andlal', [],email='Andree-Marie.Lallemend@ac.andenne.be', fullname='André-Marie Lallemend')
-angmon= UserDescriptor ('angmon', [],email='angelique.monetat@ac.andenne.be', fullname='Angélique Monetat')
-aniduf= UserDescriptor ('aniduf', [],email='anita.dufour@ac.andenne.be', fullname='Anita Dufour')
-anncol= UserDescriptor ('anncol', [],email='anne-sophie.collet@andenne.be', fullname='Anne-Sophie Collet')
-anndes= UserDescriptor ('anndes', [],email='annick.destree@ac.andenne.be', fullname='Annick Destrée')
-anngof= UserDescriptor ('anngof', [],email='anne.goffin@ac.andenne.be', fullname='Anne Goffin')
-annipp= UserDescriptor ('annipp', [],email='Annick.Ippersiel@ac.andenne.be', fullname='Annick Ippersiel')
-annlem= UserDescriptor ('annlem', [],email='anne-francoise.lemaitre@ac.andenne.be', fullname='Anne-Françoise Lemaitre')
-annmel= UserDescriptor ('annmel', [],email='anne.mella@ac.andenne.be', fullname='Anne Mella')
-arnada= UserDescriptor ('arnada', [],email='arnaud.adam@ac.andenne.be', fullname='Arnaud Adam')
-audbio= UserDescriptor ('audbio', [],email='audrey.bion@ac.andenne.be', fullname='Audrey Bion')
-aurbau= UserDescriptor ('aurbau', [],email='aurore.bauvir@ac.andenne.be', fullname='Aurore Bauvir')
-aurgod= UserDescriptor ('aurgod', [],email='aurelie.godinas@ac.andenne.be', fullname='Aurélie Godinas')
-aurkem= UserDescriptor ('aurkem', [],email='Aurelie.Kempeneers@ac.andenne.be', fullname='Aurélie Kempeneers')
-axegas= UserDescriptor ('axegas', [],email='axel.gaspard@ac.andenne.be', fullname='Axel Gaspard')
-bazfal= UserDescriptor ('bazfal', [],email='bazilette.falonne@ac.andenne.be', fullname='Bazilette Falonne')
-bencos= UserDescriptor ('bencos', [],email='benjamin.costantini@ac.andenne.be', fullname='Benjamin Costantini')
-benlal= UserDescriptor ('benlal', [],email='amaury.braeckman@ac.andenne.be', fullname='Amaury Braeckman')
-benrou= UserDescriptor ('benrou', [],email='benoit.rousseau@ac.andenne.be', fullname='Benoit Rousseau')
-britim= UserDescriptor ('britim', [],email='brigitte.timsonnet@ac.andenne.be', fullname='Brigitte Timsonnet')
-cardor= UserDescriptor ('cardor', [],email='carine.dormal@ac.andenne.be', fullname='Carine Dormal')
-carvuy= UserDescriptor ('carvuy', [],email='carvuy@ac.andenne.be', fullname='Carine Vuylsteke')
-catlam= UserDescriptor ('catlam', [],email='catherine.lambert@ac.andenne.be', fullname='Catherine Lambert')
-cattim= UserDescriptor ('cattim', [],email='Catherine.Timsonet@ac.andenne.be', fullname='Catherine Timsonet')
-ceccro= UserDescriptor ('ceccro', [],email='Cecile.Crossart@ac.andenne.be', fullname='Cecile Crossart')
-celpir= UserDescriptor ('celpir', [],email='celine.pirard@ac.andenne.be', fullname='Céline Pirard')
-chagil= UserDescriptor ('chagil', [],email='chantal.gillart@publilink.be', fullname='Chantal Gillart')
-chamor= UserDescriptor ('chamor', [],email='Chamor@ac.andenne.be', fullname='Chantal Moreau')
-chawin= UserDescriptor ('chawin', [],email='charly.windal@ac.andenne.be', fullname='Charly Windal')
-chrbon= UserDescriptor ('chrbon', [],email='christel.bonmariage@ac.andenne.be', fullname='Christel Bonmariage')
-chrbox= UserDescriptor ('chrbox', [],email='christine.boxho@ac.andenne.be', fullname='Christine Boxho')
-chrcol= UserDescriptor ('chrcol', [],email='Christiane.Colette@ac.andenne.be', fullname='Chritiane Colette')
-chrdie= UserDescriptor ('chrdie', [],email='christine.diet@ac.andenne.be', fullname='Christine Diet')
-chrhus= UserDescriptor ('chrhus', [],email='christian.husson@andenne.be', fullname='Christian.husson')
-chrmal= UserDescriptor ('chrmal', [],email='christian.malisoux@ac.andenne.be', fullname='Christian Malisoux')
-chrpir= UserDescriptor ('chrpir', [],email='andenne3@andenne.be', fullname='Christophe Pirson')
-claeer= UserDescriptor ('claeer', [],email='claude.eerdekens@ac.andenne.be', fullname='Claude Eerdekens')
-clamaq= UserDescriptor ('clamaq', [],email='claude.maquigny@andenne.be', fullname='Claude Maquigny')
-claspr= UserDescriptor ('claspr', [],email='claudia.sprimont@ac.andenne.be', fullname='Claudia Sprimont')
-classement= UserDescriptor ('classement', [],email='classement@ac.andenne.be', fullname='Classement')
-college= UserDescriptor ('college', [],email='college@ac.andenne.be', fullname='Collège Communal')
-corcoz= UserDescriptor ('corcoz', [],email='eic@andenne.be', fullname='Corinne Cozier')
-corkir= UserDescriptor ('corkir', [],email='coryse.kiriluk@ac.andenne.be', fullname='Coryse Kiriluk')
-corman= UserDescriptor ('corman', [],email='coralie.mengal@andene.be', fullname='Coralie Mengal')
-corwya= UserDescriptor ('corwya', [],email='Corinne.Wyard@ac.andenne.be', fullname='Corinne Wyard')
-czarches= UserDescriptor ('czarches', [],email='stephane.carpentier@ac.andenne.be', fullname='C.Z. ZP des Arches')
-didabr= UserDescriptor ('didabr', [],email='mieuxvivre@ac.andenne.be', fullname='Didier Abraham')
-didgos= UserDescriptor ('didgos', [],email='didier.gosset@ac.andenne.be', fullname='Didier Gosset')
-dimpar= UserDescriptor ('dimpar', [],email='dimitri.paris@andenne.be', fullname='Dimitri Paris')
-domlef= UserDescriptor ('domlef', [],email='Dominique.Lefevre@ac.andenne.be', fullname='Dominique Lefevre')
-echevins= UserDescriptor ('echevins', [],email='echevins@ac.andenne.be', fullname='Echevins')
-eddhan= UserDescriptor ('eddhan', [],email='eddy.hanoul@ac.andenne.be', fullname='Eddy Hanoul')
-eic= UserDescriptor ('eic', [],email='eic@andenne.be', fullname='Ecole Industrielle')
-elimal= UserDescriptor ('elimal', [],email='elisabeth.malisoux@ac.andenne.be', fullname='Elisabeth Malisoux')
-emimac= UserDescriptor ('emimac', [],email='emilie.macaux@cs.andenne.be', fullname='Emilie macaux')
-eridon= UserDescriptor ('eridon', [],email='Eric.Donnay@ac.andenne.be', fullname='Eric Donnay')
-erimor= UserDescriptor ('erimor', [],email='eric.moreau@ac.andenne.be', fullname='Eric Moreau')
-eriper= UserDescriptor ('eriper', [],email='Eric.Perwez@ac.andenne.be', fullname='Eric Perwez')
-eripir= UserDescriptor ('eripir', [],email='virginie.demarche@ac.andenne.be', fullname='Eric Pirard')
-eritie= UserDescriptor ('eritie', [],email='eric.etienne@ac.andenne.be', fullname='Eric Etienne')
-fabdel= UserDescriptor ('fabdel', [],email='severine.roquet@ac.andenne.be', fullname='Severine Roquet')
-fabmar= UserDescriptor ('fabmar', [],email='fabio.marcuzzi@ac.andenne.be', fullname='Fabio Marcuzzi')
-fabmau= UserDescriptor ('fabmau', [],email='fabienne.mauguit@ac.andenne.be', fullname='Fabienne Mauguit')
-fabnoe= UserDescriptor ('fabnoe', [],email='eic@andenne.be', fullname='Fabien Noé')
-fabsen= UserDescriptor ('fabsen', [],email='Fabien.Senterre@ac.andenne.be', fullname='Fabien Senterre')
-fannic= UserDescriptor ('fannic', [],email='fanny.nicolas@ac.andenne.be', fullname='Fanny Nicolas')
-fiosco= UserDescriptor ('fiosco', [],email='fiona.scott@ac.andenne.be', fullname='Fiona Scott')
-flolou= UserDescriptor ('flolou', [],email='floriane.louis@ac.andenne.be', fullname='Floriane Louis')
-fraboc= UserDescriptor ('fraboc', [],email='francois.boclinville@ac.andenne.be', fullname='François Boclinville')
-fracol= UserDescriptor ('fracol', [],email='francoise.collard@ac.andenne.be', fullname='Françoise Collard')
-fraleo= UserDescriptor ('fraleo', [],email='francoise.leonard@ac.andenne.be', fullname='Françoise Léonard')
-fralux= UserDescriptor ('fralux', [],email='fx.lux@andenne.be', fullname='François-Xavier Lux')
-framou= UserDescriptor ('framou', [],email='francoise.moureau@ac.andenne.be', fullname='Françoise Moureau')
-frasma= UserDescriptor ('frasma', [],email='Francois.smal@ac.andenne.be', fullname='François Smal')
-fraver= UserDescriptor ('fraver', [],email='fraver@ac.andenne.be', fullname='Francis Verborg')
-frawil= UserDescriptor ('frawil', [],email='Francine.Wilemme@ac.andenne.be', fullname='Francine Wilemme')
-frebel= UserDescriptor ('frebel', [],email='Frederic.Belche@andenne.be', fullname='Frédéric Belche')
-frebou= UserDescriptor ('frebou', [],email='andenne2@andenne.be', fullname='Fréderic Bouvier')
-gaecur= UserDescriptor ('gaecur', [],email='gaelle.curvers@ac.andenne.be', fullname='Gaëlle Curvers')
-genanc= UserDescriptor ('genanc', [],email='genevieve.anciaux@ac.andenne.be', fullname='Genevieve Anciaux')
-gerdef= UserDescriptor ('gerdef', [],email='gerard.defrance@andenne.be', fullname='Gerard de France')
-ginhen= UserDescriptor ('ginhen', [],email='prosoc.andenne@sec.cfwb.be', fullname='Virginie Henriet')
-guilej= UserDescriptor ('guilej', [],email='guillaume.lejeune@ac.andenne.be', fullname='Guillaume Lejeune')
-guyhav= UserDescriptor ('guyhav', [],email='guy.havelange@ac.andenne.be', fullname='Guy Havelange')
-hasouc= UserDescriptor ('hasouc', [],email='hassan.ouchan@andenne.be', fullname='Hassan Ouchan')
-helmey= UserDescriptor ('helmey', [],email='Helene.Meyfroidt@ac.andenne.be', fullname='Hélène Meyfroidt')
-helrou= UserDescriptor ('helrou', [],email='heloise.rouard@andenne.be', fullname='Héloise Rouard')
-houmag= UserDescriptor ('houmag', [],email='houria.maghouti@ac.andenne.be', fullname='Houria Maghouti')
-ingiur= UserDescriptor ('ingiur', [],email='ingrid.iuretig@ac.andenne.be', fullname='Ingrid Iuretig')
-isades= UserDescriptor ('isades', [],email='Isabelle.destree@ac.andenne.be', fullname='Isabelle Destrée')
-ismbou= UserDescriptor ('ismbou', [],email='ismail.boukhari@ac.andenne.be', fullname='Ismail boukhari')
-jadbri= UserDescriptor ('jadbri', [],email='jade.brichard@ac.andenne.be', fullname='Jade Brichard')
-jeadel= UserDescriptor ('jeadel', [],email='andenne3@ac.andenne.be', fullname='Jeanne Delaite')
-jeamaq= UserDescriptor ('jeamaq', [],email='Jean-Marie.Maquigny@ac.andenne.be', fullname='Jean-Marie Maquigny')
-jeamat= UserDescriptor ('jeamat', [],email='jean-marie.mattart@ac.andenne.be', fullname='Jean-Marie Mattart')
-jeawar= UserDescriptor ('jeawar', [],email='Jean-Paul.Warzee@ac.andenne.be', fullname='Jean-Paul Warzée')
-jerdup= UserDescriptor ('jerdup', [],email='jeremie.dupont@ac.andenne.be', fullname='Jérémie Dupont')
-jerpir= UserDescriptor ('jerpir', [],email='jerome.pirsoul@ac.andenne.be', fullname='Jerome Pirsoul')
-joelig= UserDescriptor ('joelig', [],email='joelle.ligot@cs.andenne.be', fullname='Joelle Ligot')
-joewar= UserDescriptor ('joewar', [],email='joelle.warzee@ac.andenne.be', fullname='Joelle Warzee')
-julchi= UserDescriptor ('julchi', [],email='julie.chiaradia@cs.andenne.be', fullname='Julie Chiaradia')
-juldel= UserDescriptor ('juldel', [],email='Julie.Delhaise@ac.andenne.be', fullname='Julie Delhaise')
-juldre= UserDescriptor ('juldre', [],email='julien.dresse@ac.andenne.be', fullname='Julien Dresse')
-kambel= UserDescriptor ('kambel', [],email='kamilia.belhachmi@ac.andenne.be', fullname='Kamilia Belhachmi')
-karnaj= UserDescriptor ('karnaj', [],email='karima.naji@ac.andenne.be', fullname='Karima Naji')
-laeste= UserDescriptor ('laeste', [],email='Laetitia.Steylemans@ac.andenne.be', fullname='Laetitia Steylemans')
-laudel= UserDescriptor ('laudel', [],email='laurent.delbrouck@ac.andenne.be', fullname='Laurent Delbrouck')
-lauhan= UserDescriptor ('lauhan', [],email='laurence.hanneuse@ac.andenne.be', fullname='Laurence Hanneuse')
-lauhoc= UserDescriptor ('lauhoc', [],email='laurence.hoche@andenne.be', fullname='Laurence Hoche')
-lenvol= UserDescriptor ('lenvol', [],email='lenvol@andenne.be', fullname="L'envol")
-leohau= UserDescriptor ('leohau', [],email='leon.j.hauregard@ceramandenne.be', fullname='Léon Hauregard')
-logcas= UserDescriptor ('logcas', [],email='logan.casimir@ac.andenne.be', fullname='Logan Casimir')
-louanc= UserDescriptor ('louanc', [],email='louis.anciaux@ac.andenne.be', fullname='Louis Anciaux')
-lusdon= UserDescriptor ('lusdon', [],email='lusine.yeg@ac.andenne.be', fullname='Lusine YEGHIAZARYAN')
-lydmot= UserDescriptor ('lydmot', [],email='Lydia.Motte@ac.andenne.be', fullname='Lydia Motte')
-marant12= UserDescriptor ('marant12', [],email='marie.anthone@ac.andenne.be', fullname='Marie Anthone')
-marauq= UserDescriptor ('marauq', [],email='marie-rose.auquier@andenne.be', fullname='Marie-Rose Auquier')
-marbeg= UserDescriptor ('marbeg', [],email='Maryline.Beguin@ac.andenne.be', fullname='Maryline Beguin')
-marbel= UserDescriptor ('marbel', [],email='Marie-anne.Belleflamme@ac.andenne.be', fullname='Marie-Anne Belleflamme')
-marcar= UserDescriptor ('marcar', [],email='marylene.carrier@ac.andenne.be', fullname='Marylène Carrier')
-marcla= UserDescriptor ('marcla', [],email='marc.clajot@ac.andenne.be', fullname='Marc Clajot')
-mardeg= UserDescriptor ('mardeg', [],email='Marc.degreef@ac.andenne.be', fullname='Marc Degreef')
-marjam= UserDescriptor ('marjam', [],email='marie.jamart@ac.andenne.be', fullname='Marie Jamart')
-marmag= UserDescriptor ('marmag', [],email='marc.magnier@ac.andenne.be', fullname='Marc Magnier')
-marmat= UserDescriptor ('marmat', [],email='jean-marie.mathieu@cpas-andenne.be', fullname='Jean-Marie Mathieu')
-marmoi= UserDescriptor ('marmoi', [],email='biblio@andenne.be', fullname='Marc moisse')
-marorb= UserDescriptor ('marorb', [],email='marie.orban@ac.andenne.be', fullname='Marie Orban')
-marron= UserDescriptor ('marron', [],email='marc.ronveaux@ac.andenne.be', fullname='Marc Ronveaux')
-marrou= UserDescriptor ('marrou', [],email='Mariette.roup@ac.andenne.be', fullname='Mariette roup')
-marser= UserDescriptor ('marser', [],email='Marianne.Servais@ac.andenne.be', fullname='Marianne Servais')
-martho= UserDescriptor ('martho', [],email='marie-christine.thola@ac.andenne.be', fullname='Marie-Christine Thola')
-matdan= UserDescriptor ('matdan', [],email='mathilde.danze@ac.andenne.be', fullname='Mathilde Danze')
-meldeg= UserDescriptor ('meldeg', [],email='melanie.degroote@ac.andenne.be', fullname='Mélanie Degroote')
-micdec= UserDescriptor ('micdec', [],email='michel.dechamps@ac.andenne.be', fullname='Michel Dechamps')
-micmuk= UserDescriptor ('micmuk', [],email='Micheline.mukazayire@ac.andenne.be', fullname='Micheline MUKAZAYIRE')
-micwil= UserDescriptor ('micwil', [],email='Michel.Willem@ac.andenne.be', fullname='Michèle Willem')
-muscer= UserDescriptor ('muscer', [],email='musee.ceramique@andenne.be', fullname='Musée de la Céramque')
-nandol= UserDescriptor ('nandol', [],email='nancy.dolce@ac.andenne.be', fullname='Nancy Dolce')
-natfra= UserDescriptor ('natfra', [],email='natacha.francois@ac.andenne.be', fullname='Natacha François')
-natleb= UserDescriptor ('natleb', [],email='nathalie.lebrun@ac.andenne.be', fullname='Nathalie Lebrun')
-natlef= UserDescriptor ('natlef', [],email='nathalie.lefrant@andenne.be', fullname='Nathalie Lefrant')
-natrut= UserDescriptor ('natrut', [],email='nathalie.ruth@ac.andenne.be', fullname='Nathalie Ruth')
-nicdel= UserDescriptor ('nicdel', [],email='nicole.delforge@cs.andenne.be', fullname='Nicole Delforge')
-nicpar= UserDescriptor ('nicpar', [],email='nicole.parisel@andenne.be', fullname='Nicole Parisel')
-noedef= UserDescriptor ('noedef', [],email='noella.defer@ac.andenne.be', fullname='Noëlla Defer')
-noelej= UserDescriptor ('noelej', [],email='Noella.Lejeune@ac.andenne.be', fullname='Noella Lejeune')
-oansto= UserDescriptor ('oansto', [],email='oana.stoica@ac.andenne.be', fullname='Oana Stoica')
-olicam= UserDescriptor ('olicam', [],email='olivier.campagne@ac.andenne.be', fullname='Olivier Campagne')
-oxaale= UserDescriptor ('oxaale', [],email='oxana.alexeeva@cs.andenne.be', fullname='Oxana Alexeeva')
-paoven= UserDescriptor ('paoven', [],email='paola.venica@cs.andenne.be', fullname='Paola Venica')
-pashen= UserDescriptor ('pashen', [],email='pascale.hennaux@ac.andenne.be', fullname='Pascale Hennaux')
-pasmon= UserDescriptor ('pasmon', [],email='Pascal.Monjoie@ac.andenne.be', fullname='Pascal Monjoie')
-paster= UserDescriptor ('paster', [],email='Pascal.Terwagne@ac.andenne.be', fullname='Pascal Terwagne')
-pasvan= UserDescriptor ('pasvan', [],email='pascale.vanmechelen@ac.andenne.be', fullname='Pascale Vanmechelen')
-patarn= UserDescriptor ('patarn', [],email='Patricia.Arnold@ac.andenne.be', fullname='Patricia Arnold')
-patgor= UserDescriptor ('patgor', [],email='patrik.goreta@ac.andenne.be', fullname='Patrik Goreta')
-pattho= UserDescriptor ('pattho', [],email='patrick-thomas@andenne.be', fullname='Patrick Thomas')
-pauvan= UserDescriptor ('pauvan', [],email='paulette.vangangel@andenne.be', fullname='Paulette Vangangel')
-pavcor= UserDescriptor ('pavcor', [],email='pavlos.corexenos@ac.andenne.be', fullname='Pavlos Corexenos')
-phicre= UserDescriptor ('phicre', [],email='Philippe.Crefcoeur@ac.andenne.be', fullname='Philippe Crefcoeur')
-phipir= UserDescriptor ('phipir', [],email='sageiss@ac.andenne.be', fullname='Philippe Pironet')
-phiros= UserDescriptor ('phiros', [],email='Philippe.Rose@ac.andenne.be', fullname='Philippe Rose')
-piefon= UserDescriptor ('piefon', [],email='pierre.fontaine@ac.andenne.be', fullname='Pierre Fontaine')
-piemin= UserDescriptor ('piemin', [],email='pierre.minnaert@andenne.be', fullname='Pierre Minnaert')
-pievan= UserDescriptor ('pievan', [],email='pierre.vanpaeschen@ac.andenne.be', fullname='Pierre Vanpaeschen')
-promandenne= UserDescriptor ('promandenne', [],email='info@promandenne.be', fullname='Promandenne')
-ritlam= UserDescriptor ('ritlam', [],email='Rita.Lambert@ac.andenne.be', fullname='Rita Lambert')
-robgob= UserDescriptor ('robgob', [],email='robert.gobin@ac.andenne.be', fullname='Robert Gobin')
-robhoe= UserDescriptor ('robhoe', [],email='robert.hoeymakers@andenne.be', fullname='Robert Hoeymakers')
-roboscan= UserDescriptor ('roboscan', [],email='roboscan@ac.andenne.be', fullname='Robotscanner')
-roldan= UserDescriptor ('roldan', [],email='roland.dantine@ac.andenne.be', fullname='Roland Dantine')
-roldes= UserDescriptor ('roldes', [],email='Rolande.Despagne@ac.andenne.be', fullname='Rolande Despagne')
-rongos= UserDescriptor ('rongos', [],email='Ronald.Gossiaux@ac.andenne.be', fullname='Ronald Gossiaux')
-rudnsi= UserDescriptor ('rudnsi', [],email='rudy.n@andenne.be', fullname='Rudy Nsingi')
-sabwer= UserDescriptor ('sabwer', [],email='sabine.wernerus@ac.andenne.be', fullname='Sabine Wernerus')
-sancru= UserDescriptor ('sancru', [],email='sandrine.cruspin@ac.andenne.be', fullname='Sandrine Cruspin')
-sangri= UserDescriptor ('sangri', [],email='Sandrine.Gris@ac.andenne.be', fullname='Sandrine Gris')
-sanpar= UserDescriptor ('sanpar', [],email='sandrine.parisseaux@ac.andenne.be', fullname='Sandrine Parisseaux')
-sanric= UserDescriptor ('sanric', [],email='sandrine.ricaille@ac.andenne.be', fullname='Sandrine Ricaille')
-sebron= UserDescriptor ('sebron', [],email='sebastien.ronveaux@ac.andenne.be', fullname='Sébastien Ronveaux')
-simgre= UserDescriptor ('simgre', [],email='simon.gregoire@ac.andenne.be', fullname='Simon Gregoire')
-simlam= UserDescriptor ('simlam', [],email='simon.lambrecht@ac.andenne.be', fullname='Simon Lambrecht')
-simler= UserDescriptor ('simler', [],email='simon.leroy@andenne.be', fullname='Simon Leroy')
-sopben= UserDescriptor ('sopben', [],email='sophie.benetti@cs.andenne.be', fullname='Sophie Benetti')
-sopfra= UserDescriptor ('sopfra', [],email='Sophie.Fraikin@ac.andenne.be', fullname='Sophie Fraikin')
-sophan= UserDescriptor ('sophan', [],email='sophie.hannot@cs.andenne.be', fullname='Sophie Hannot')
-stafin= UserDescriptor ('stafin', [],email='stafin@ac.andenne.be', fullname='Stagiaire Finances')
-stajur= UserDescriptor ('stajur', [],email='stajur@ac.andenne.be', fullname='Stagiaire Juridique')
-stasec= UserDescriptor ('stasec', [],email='stasec@ac.andenne.be', fullname='Stagiaire Secrétariat')
-stebad= UserDescriptor ('stebad', [],email='stephanie.badot@ac.andenne.be', fullname='Stéphanie Badot')
-stechi= UserDescriptor ('stechi', [],email='stephanie.chiaradia@ac.andenne.be', fullname='Stéphanie Chiaradia')
-stecol= UserDescriptor ('stecol', [],email='stephane.collignon@cs.andenne.be', fullname='Stephane')
-stedew= UserDescriptor ('stedew', [],email='stephanie.dewez@ac.andenne.be', fullname='Stéphanie Dewez')
-stepre= UserDescriptor ('stepre', [],email='stephanie.preudhomme@cs.andenne.be', fullname="Stéphnaie Preud'homme")
-syldom= UserDescriptor ('syldom', [],email='sylvie.domine@ac.andenne.be', fullname='Sylvie Dominé')
-tatcha= UserDescriptor ('tatcha', [],email='tatiana.charlier@andenne.be', fullname='Tatiana Charlier')
-tinmal= UserDescriptor ('tinmal', [],email='christine.malherbe@ac.andenne.be', fullname='Christine Malherbe')
-userC1= UserDescriptor ('userC1', [],email='userC1@ac.andenne.be', fullname='userC1')
-userP1= UserDescriptor ('userP1', [],email='userP1@ac.andenne.be', fullname='userP1')
-usertest= UserDescriptor ('usertest', [],email='fabio.marcuzzi@ac.andenne.be', fullname='usetest')
-usertest2= UserDescriptor ('usertest2', [],email='fabio.marcuzzi@andenne.be', fullname='usertest')
-valdeg= UserDescriptor ('valdeg', [],email='valentine.degrave@ac.andenne.be', fullname='Valentine De Grave')
-valduc= UserDescriptor ('valduc', [],email='Valerie.Duchesne@ac.andenne.be', fullname='Valérie Duchesne')
-valevr= UserDescriptor ('valevr', [],email='valentine.evrard@ac.andenne.be', fullname='Valentine Evrard')
-valnie= UserDescriptor ('valnie', [],email='valerie.nieus@andenne.be', fullname='Valerie Nieus')
-verper= UserDescriptor ('verper', [],email='veronique.perpinien@ac.andenne.be', fullname='Veronique Perpinien')
-vinbou= UserDescriptor ('vinbou', [],email='Vincent.bouret@ac.andenne.be', fullname='Vincent Bouret')
-vinsam= UserDescriptor ('vinsam', [],email='Vincent.Sampaoli@ac.andenne.be', fullname='Vincent Sampaoli')
-virdem= UserDescriptor ('virdem', [],email='virginie.demarche@ac.andenne.be', fullname='Virginie Demarche')
-virhen= UserDescriptor ('virhen', [],email='virginie.hentiens@ac.andenne.be', fullname='Virginie Hentiens')
-vivmat= UserDescriptor ('vivmat', [],email='viviane.matagne@ac.andenne.be', fullname='Viviane Matagne')
-xaveer= UserDescriptor ('xaveer', [],email='xavier.eerdekens@cs.andenne.be', fullname='Xavier Eerdekens')
-xavwil= UserDescriptor ('xavwil', [],email='xavier.willot@ac.andenne.be', fullname='Xavier Willot')
-yahben= UserDescriptor ('yahben', [],email='yahya.benhaddou@andenne.be', fullname='Yahya Benhaddou')
-yandeg= UserDescriptor ('yandeg', [],email='andenne1@andenne.be', fullname='Yannick Degée')
-yassca= UserDescriptor ('yassca', [],email='Yasmine.Scantamburlo@ac.andenne.be', fullname='Yasmine Scantamburlo')
-yastuz= UserDescriptor ('yastuz', [],email='yasemin.tuzkan@ac.andenne.be', fullname='Yasémin Tuzkan')
-yvagem= UserDescriptor ('yvagem', [],email='Yvan.Gemine@ac.andenne.be', fullname='Yvan Gemine')
-yvesor= UserDescriptor ('yvesor', [],email='yves.soree@ac.andenne.be', fullname='Yves Soree')
-zonet= UserDescriptor ('zonet', [],email='zonet@andenne.be', fullname='Zone T')
+adrlar = UserDescriptor ('adrlar', [],email='adrien.laruelle@ac.andenne.be', fullname='Adrien Laruelle')
+ale = UserDescriptor ('ale', [],email='ale@andenne.be', fullname='A.L.E.')
+alebok = UserDescriptor ('alebok', [],email='Alexandre.Bokor@ac.andenne.be', fullname='Alexandre Bokor')
+aledep = UserDescriptor ('aledep', [],email='andenne2@andenne.be', fullname='Alexandre Depaye')
+alithi = UserDescriptor ('alithi', [],email='aline.thiry@ac.andenne.be', fullname='Aline Thiry')
+andbea = UserDescriptor ('andbea', [],email='andre.beaujean@ac.andenne.be', fullname='André Beaujean')
+andlal = UserDescriptor ('andlal', [],email='Andree-Marie.Lallemend@ac.andenne.be', fullname='André-Marie Lallemend')
+angmon = UserDescriptor ('angmon', [],email='angelique.monetat@ac.andenne.be', fullname='Angélique Monetat')
+aniduf = UserDescriptor ('aniduf', [],email='anita.dufour@ac.andenne.be', fullname='Anita Dufour')
+anncol = UserDescriptor ('anncol', [],email='anne-sophie.collet@andenne.be', fullname='Anne-Sophie Collet')
+anndes = UserDescriptor ('anndes', [],email='annick.destree@ac.andenne.be', fullname='Annick Destrée')
+anngof = UserDescriptor ('anngof', [],email='anne.goffin@ac.andenne.be', fullname='Anne Goffin')
+annipp = UserDescriptor ('annipp', [],email='Annick.Ippersiel@ac.andenne.be', fullname='Annick Ippersiel')
+annlem = UserDescriptor ('annlem', [],email='anne-francoise.lemaitre@ac.andenne.be', fullname='Anne-Françoise Lemaitre')
+annmel = UserDescriptor ('annmel', [],email='anne.mella@ac.andenne.be', fullname='Anne Mella')
+arnada = UserDescriptor ('arnada', [],email='arnaud.adam@ac.andenne.be', fullname='Arnaud Adam')
+audbio = UserDescriptor ('audbio', [],email='audrey.bion@ac.andenne.be', fullname='Audrey Bion')
+aurbau = UserDescriptor ('aurbau', [],email='aurore.bauvir@ac.andenne.be', fullname='Aurore Bauvir')
+aurgod = UserDescriptor ('aurgod', [],email='aurelie.godinas@ac.andenne.be', fullname='Aurélie Godinas')
+aurkem = UserDescriptor ('aurkem', [],email='Aurelie.Kempeneers@ac.andenne.be', fullname='Aurélie Kempeneers')
+axegas = UserDescriptor ('axegas', [],email='axel.gaspard@ac.andenne.be', fullname='Axel Gaspard')
+bazfal = UserDescriptor ('bazfal', [],email='bazilette.falonne@ac.andenne.be', fullname='Bazilette Falonne')
+bencos = UserDescriptor ('bencos', [],email='benjamin.costantini@ac.andenne.be', fullname='Benjamin Costantini')
+benlal = UserDescriptor ('benlal', [],email='amaury.braeckman@ac.andenne.be', fullname='Amaury Braeckman')
+benrou = UserDescriptor ('benrou', [],email='benoit.rousseau@ac.andenne.be', fullname='Benoit Rousseau')
+britim = UserDescriptor ('britim', [],email='brigitte.timsonnet@ac.andenne.be', fullname='Brigitte Timsonnet')
+cardor = UserDescriptor ('cardor', [],email='carine.dormal@ac.andenne.be', fullname='Carine Dormal')
+carvuy = UserDescriptor ('carvuy', [],email='carvuy@ac.andenne.be', fullname='Carine Vuylsteke')
+catlam = UserDescriptor ('catlam', [],email='catherine.lambert@ac.andenne.be', fullname='Catherine Lambert')
+cattim = UserDescriptor ('cattim', [],email='Catherine.Timsonet@ac.andenne.be', fullname='Catherine Timsonet')
+ceccro = UserDescriptor ('ceccro', [],email='Cecile.Crossart@ac.andenne.be', fullname='Cecile Crossart')
+celpir = UserDescriptor ('celpir', [],email='celine.pirard@ac.andenne.be', fullname='Céline Pirard')
+chagil = UserDescriptor ('chagil', [],email='chantal.gillart@publilink.be', fullname='Chantal Gillart')
+chamor = UserDescriptor ('chamor', [],email='Chamor@ac.andenne.be', fullname='Chantal Moreau')
+chawin = UserDescriptor ('chawin', [],email='charly.windal@ac.andenne.be', fullname='Charly Windal')
+chrbon = UserDescriptor ('chrbon', [],email='christel.bonmariage@ac.andenne.be', fullname='Christel Bonmariage')
+chrbox = UserDescriptor ('chrbox', [],email='christine.boxho@ac.andenne.be', fullname='Christine Boxho')
+chrcol = UserDescriptor ('chrcol', [],email='Christiane.Colette@ac.andenne.be', fullname='Chritiane Colette')
+chrdie = UserDescriptor ('chrdie', [],email='christine.diet@ac.andenne.be', fullname='Christine Diet')
+chrhus = UserDescriptor ('chrhus', [],email='christian.husson@andenne.be', fullname='Christian.husson')
+chrmal = UserDescriptor ('chrmal', [],email='christian.malisoux@ac.andenne.be', fullname='Christian Malisoux')
+chrpir = UserDescriptor ('chrpir', [],email='andenne3@andenne.be', fullname='Christophe Pirson')
+claeer = UserDescriptor ('claeer', [],email='claude.eerdekens@ac.andenne.be', fullname='Claude Eerdekens')
+clamaq = UserDescriptor ('clamaq', [],email='claude.maquigny@andenne.be', fullname='Claude Maquigny')
+claspr = UserDescriptor ('claspr', [],email='claudia.sprimont@ac.andenne.be', fullname='Claudia Sprimont')
+classement = UserDescriptor ('classement', [],email='classement@ac.andenne.be', fullname='Classement')
+college = UserDescriptor ('college', [],email='college@ac.andenne.be', fullname='Collège Communal')
+corcoz = UserDescriptor ('corcoz', [],email='eic@andenne.be', fullname='Corinne Cozier')
+corkir = UserDescriptor ('corkir', [],email='coryse.kiriluk@ac.andenne.be', fullname='Coryse Kiriluk')
+corman = UserDescriptor ('corman', [],email='coralie.mengal@andene.be', fullname='Coralie Mengal')
+corwya = UserDescriptor ('corwya', [],email='Corinne.Wyard@ac.andenne.be', fullname='Corinne Wyard')
+czarches = UserDescriptor ('czarches', [],email='stephane.carpentier@ac.andenne.be', fullname='C.Z. ZP des Arches')
+didabr = UserDescriptor ('didabr', [],email='mieuxvivre@ac.andenne.be', fullname='Didier Abraham')
+didgos = UserDescriptor ('didgos', [],email='didier.gosset@ac.andenne.be', fullname='Didier Gosset')
+dimpar = UserDescriptor ('dimpar', [],email='dimitri.paris@andenne.be', fullname='Dimitri Paris')
+domlef = UserDescriptor ('domlef', [],email='Dominique.Lefevre@ac.andenne.be', fullname='Dominique Lefevre')
+echevins = UserDescriptor ('echevins', [],email='echevins@ac.andenne.be', fullname='Echevins')
+eddhan = UserDescriptor ('eddhan', [],email='eddy.hanoul@ac.andenne.be', fullname='Eddy Hanoul')
+eic = UserDescriptor ('eic', [],email='eic@andenne.be', fullname='Ecole Industrielle')
+elimal = UserDescriptor ('elimal', [],email='elisabeth.malisoux@ac.andenne.be', fullname='Elisabeth Malisoux')
+emimac = UserDescriptor ('emimac', [],email='emilie.macaux@cs.andenne.be', fullname='Emilie macaux')
+eridon = UserDescriptor ('eridon', [],email='Eric.Donnay@ac.andenne.be', fullname='Eric Donnay')
+erimor = UserDescriptor ('erimor', [],email='eric.moreau@ac.andenne.be', fullname='Eric Moreau')
+eriper = UserDescriptor ('eriper', [],email='Eric.Perwez@ac.andenne.be', fullname='Eric Perwez')
+eripir = UserDescriptor ('eripir', [],email='virginie.demarche@ac.andenne.be', fullname='Eric Pirard')
+eritie = UserDescriptor ('eritie', [],email='eric.etienne@ac.andenne.be', fullname='Eric Etienne')
+fabdel = UserDescriptor ('fabdel', [],email='severine.roquet@ac.andenne.be', fullname='Severine Roquet')
+fabmar = UserDescriptor ('fabmar', [],email='fabio.marcuzzi@ac.andenne.be', fullname='Fabio Marcuzzi')
+fabmau = UserDescriptor ('fabmau', [],email='fabienne.mauguit@ac.andenne.be', fullname='Fabienne Mauguit')
+fabnoe = UserDescriptor ('fabnoe', [],email='eic@andenne.be', fullname='Fabien Noé')
+fabsen = UserDescriptor ('fabsen', [],email='Fabien.Senterre@ac.andenne.be', fullname='Fabien Senterre')
+fannic = UserDescriptor ('fannic', [],email='fanny.nicolas@ac.andenne.be', fullname='Fanny Nicolas')
+fiosco = UserDescriptor ('fiosco', [],email='fiona.scott@ac.andenne.be', fullname='Fiona Scott')
+flolou = UserDescriptor ('flolou', [],email='floriane.louis@ac.andenne.be', fullname='Floriane Louis')
+fraboc = UserDescriptor ('fraboc', [],email='francois.boclinville@ac.andenne.be', fullname='François Boclinville')
+fracol = UserDescriptor ('fracol', [],email='francoise.collard@ac.andenne.be', fullname='Françoise Collard')
+fraleo = UserDescriptor ('fraleo', [],email='francoise.leonard@ac.andenne.be', fullname='Françoise Léonard')
+fralux = UserDescriptor ('fralux', [],email='fx.lux@andenne.be', fullname='François-Xavier Lux')
+framou = UserDescriptor ('framou', [],email='francoise.moureau@ac.andenne.be', fullname='Françoise Moureau')
+frasma = UserDescriptor ('frasma', [],email='Francois.smal@ac.andenne.be', fullname='François Smal')
+fraver = UserDescriptor ('fraver', [],email='fraver@ac.andenne.be', fullname='Francis Verborg')
+frawil = UserDescriptor ('frawil', [],email='Francine.Wilemme@ac.andenne.be', fullname='Francine Wilemme')
+frebel = UserDescriptor ('frebel', [],email='Frederic.Belche@andenne.be', fullname='Frédéric Belche')
+frebou = UserDescriptor ('frebou', [],email='andenne2@andenne.be', fullname='Fréderic Bouvier')
+gaecur = UserDescriptor ('gaecur', [],email='gaelle.curvers@ac.andenne.be', fullname='Gaëlle Curvers')
+genanc = UserDescriptor ('genanc', [],email='genevieve.anciaux@ac.andenne.be', fullname='Genevieve Anciaux')
+gerdef = UserDescriptor ('gerdef', [],email='gerard.defrance@andenne.be', fullname='Gerard de France')
+ginhen = UserDescriptor ('ginhen', [],email='prosoc.andenne@sec.cfwb.be', fullname='Virginie Henriet')
+guilej = UserDescriptor ('guilej', [],email='guillaume.lejeune@ac.andenne.be', fullname='Guillaume Lejeune')
+guyhav = UserDescriptor ('guyhav', [],email='guy.havelange@ac.andenne.be', fullname='Guy Havelange')
+hasouc = UserDescriptor ('hasouc', [],email='hassan.ouchan@andenne.be', fullname='Hassan Ouchan')
+helmey = UserDescriptor ('helmey', [],email='Helene.Meyfroidt@ac.andenne.be', fullname='Hélène Meyfroidt')
+helrou = UserDescriptor ('helrou', [],email='heloise.rouard@andenne.be', fullname='Héloise Rouard')
+houmag = UserDescriptor ('houmag', [],email='houria.maghouti@ac.andenne.be', fullname='Houria Maghouti')
+ingiur = UserDescriptor ('ingiur', [],email='ingrid.iuretig@ac.andenne.be', fullname='Ingrid Iuretig')
+isades = UserDescriptor ('isades', [],email='Isabelle.destree@ac.andenne.be', fullname='Isabelle Destrée')
+ismbou = UserDescriptor ('ismbou', [],email='ismail.boukhari@ac.andenne.be', fullname='Ismail boukhari')
+jadbri = UserDescriptor ('jadbri', [],email='jade.brichard@ac.andenne.be', fullname='Jade Brichard')
+jeadel = UserDescriptor ('jeadel', [],email='andenne3@ac.andenne.be', fullname='Jeanne Delaite')
+jeamaq = UserDescriptor ('jeamaq', [],email='Jean-Marie.Maquigny@ac.andenne.be', fullname='Jean-Marie Maquigny')
+jeamat = UserDescriptor ('jeamat', [],email='jean-marie.mattart@ac.andenne.be', fullname='Jean-Marie Mattart')
+jeawar = UserDescriptor ('jeawar', [],email='Jean-Paul.Warzee@ac.andenne.be', fullname='Jean-Paul Warzée')
+jerdup = UserDescriptor ('jerdup', [],email='jeremie.dupont@ac.andenne.be', fullname='Jérémie Dupont')
+jerpir = UserDescriptor ('jerpir', [],email='jerome.pirsoul@ac.andenne.be', fullname='Jerome Pirsoul')
+joelig = UserDescriptor ('joelig', [],email='joelle.ligot@cs.andenne.be', fullname='Joelle Ligot')
+joewar = UserDescriptor ('joewar', [],email='joelle.warzee@ac.andenne.be', fullname='Joelle Warzee')
+julchi = UserDescriptor ('julchi', [],email='julie.chiaradia@cs.andenne.be', fullname='Julie Chiaradia')
+juldel = UserDescriptor ('juldel', [],email='Julie.Delhaise@ac.andenne.be', fullname='Julie Delhaise')
+juldre = UserDescriptor ('juldre', [],email='julien.dresse@ac.andenne.be', fullname='Julien Dresse')
+kambel = UserDescriptor ('kambel', [],email='kamilia.belhachmi@ac.andenne.be', fullname='Kamilia Belhachmi')
+karnaj = UserDescriptor ('karnaj', [],email='karima.naji@ac.andenne.be', fullname='Karima Naji')
+laeste = UserDescriptor ('laeste', [],email='Laetitia.Steylemans@ac.andenne.be', fullname='Laetitia Steylemans')
+laudel = UserDescriptor ('laudel', [],email='laurent.delbrouck@ac.andenne.be', fullname='Laurent Delbrouck')
+lauhan = UserDescriptor ('lauhan', [],email='laurence.hanneuse@ac.andenne.be', fullname='Laurence Hanneuse')
+lauhoc = UserDescriptor ('lauhoc', [],email='laurence.hoche@andenne.be', fullname='Laurence Hoche')
+lenvol = UserDescriptor ('lenvol', [],email='lenvol@andenne.be', fullname="L'envol")
+leohau = UserDescriptor ('leohau', [],email='leon.j.hauregard@ceramandenne.be', fullname='Léon Hauregard')
+logcas = UserDescriptor ('logcas', [],email='logan.casimir@ac.andenne.be', fullname='Logan Casimir')
+louanc = UserDescriptor ('louanc', [],email='louis.anciaux@ac.andenne.be', fullname='Louis Anciaux')
+lusdon = UserDescriptor ('lusdon', [],email='lusine.yeg@ac.andenne.be', fullname='Lusine YEGHIAZARYAN')
+lydmot = UserDescriptor ('lydmot', [],email='Lydia.Motte@ac.andenne.be', fullname='Lydia Motte')
+marant12 = UserDescriptor ('marant12', [],email='marie.anthone@ac.andenne.be', fullname='Marie Anthone')
+marauq = UserDescriptor ('marauq', [],email='marie-rose.auquier@andenne.be', fullname='Marie-Rose Auquier')
+marbeg = UserDescriptor ('marbeg', [],email='Maryline.Beguin@ac.andenne.be', fullname='Maryline Beguin')
+marbel = UserDescriptor ('marbel', [],email='Marie-anne.Belleflamme@ac.andenne.be', fullname='Marie-Anne Belleflamme')
+marcar = UserDescriptor ('marcar', [],email='marylene.carrier@ac.andenne.be', fullname='Marylène Carrier')
+marcla = UserDescriptor ('marcla', [],email='marc.clajot@ac.andenne.be', fullname='Marc Clajot')
+mardeg = UserDescriptor ('mardeg', [],email='Marc.degreef@ac.andenne.be', fullname='Marc Degreef')
+marjam = UserDescriptor ('marjam', [],email='marie.jamart@ac.andenne.be', fullname='Marie Jamart')
+marmag = UserDescriptor ('marmag', [],email='marc.magnier@ac.andenne.be', fullname='Marc Magnier')
+marmat = UserDescriptor ('marmat', [],email='jean-marie.mathieu@cpas-andenne.be', fullname='Jean-Marie Mathieu')
+marmoi = UserDescriptor ('marmoi', [],email='biblio@andenne.be', fullname='Marc moisse')
+marorb = UserDescriptor ('marorb', [],email='marie.orban@ac.andenne.be', fullname='Marie Orban')
+marron = UserDescriptor ('marron', [],email='marc.ronveaux@ac.andenne.be', fullname='Marc Ronveaux')
+marrou = UserDescriptor ('marrou', [],email='Mariette.roup@ac.andenne.be', fullname='Mariette roup')
+marser = UserDescriptor ('marser', [],email='Marianne.Servais@ac.andenne.be', fullname='Marianne Servais')
+martho = UserDescriptor ('martho', [],email='marie-christine.thola@ac.andenne.be', fullname='Marie-Christine Thola')
+matdan = UserDescriptor ('matdan', [],email='mathilde.danze@ac.andenne.be', fullname='Mathilde Danze')
+meldeg = UserDescriptor ('meldeg', [],email='melanie.degroote@ac.andenne.be', fullname='Mélanie Degroote')
+micdec = UserDescriptor ('micdec', [],email='michel.dechamps@ac.andenne.be', fullname='Michel Dechamps')
+micmuk = UserDescriptor ('micmuk', [],email='Micheline.mukazayire@ac.andenne.be', fullname='Micheline MUKAZAYIRE')
+micwil = UserDescriptor ('micwil', [],email='Michel.Willem@ac.andenne.be', fullname='Michèle Willem')
+muscer = UserDescriptor ('muscer', [],email='musee.ceramique@andenne.be', fullname='Musée de la Céramque')
+nandol = UserDescriptor ('nandol', [],email='nancy.dolce@ac.andenne.be', fullname='Nancy Dolce')
+natfra = UserDescriptor ('natfra', [],email='natacha.francois@ac.andenne.be', fullname='Natacha François')
+natleb = UserDescriptor ('natleb', [],email='nathalie.lebrun@ac.andenne.be', fullname='Nathalie Lebrun')
+natlef = UserDescriptor ('natlef', [],email='nathalie.lefrant@andenne.be', fullname='Nathalie Lefrant')
+natrut = UserDescriptor ('natrut', [],email='nathalie.ruth@ac.andenne.be', fullname='Nathalie Ruth')
+nicdel = UserDescriptor ('nicdel', [],email='nicole.delforge@cs.andenne.be', fullname='Nicole Delforge')
+nicpar = UserDescriptor ('nicpar', [],email='nicole.parisel@andenne.be', fullname='Nicole Parisel')
+noedef = UserDescriptor ('noedef', [],email='noella.defer@ac.andenne.be', fullname='Noëlla Defer')
+noelej = UserDescriptor ('noelej', [],email='Noella.Lejeune@ac.andenne.be', fullname='Noella Lejeune')
+oansto = UserDescriptor ('oansto', [],email='oana.stoica@ac.andenne.be', fullname='Oana Stoica')
+olicam = UserDescriptor ('olicam', [],email='olivier.campagne@ac.andenne.be', fullname='Olivier Campagne')
+oxaale = UserDescriptor ('oxaale', [],email='oxana.alexeeva@cs.andenne.be', fullname='Oxana Alexeeva')
+paoven = UserDescriptor ('paoven', [],email='paola.venica@cs.andenne.be', fullname='Paola Venica')
+pashen = UserDescriptor ('pashen', [],email='pascale.hennaux@ac.andenne.be', fullname='Pascale Hennaux')
+pasmon = UserDescriptor ('pasmon', [],email='Pascal.Monjoie@ac.andenne.be', fullname='Pascal Monjoie')
+paster = UserDescriptor ('paster', [],email='Pascal.Terwagne@ac.andenne.be', fullname='Pascal Terwagne')
+pasvan = UserDescriptor ('pasvan', [],email='pascale.vanmechelen@ac.andenne.be', fullname='Pascale Vanmechelen')
+patarn = UserDescriptor ('patarn', [],email='Patricia.Arnold@ac.andenne.be', fullname='Patricia Arnold')
+patgor = UserDescriptor ('patgor', [],email='patrik.goreta@ac.andenne.be', fullname='Patrik Goreta')
+pattho = UserDescriptor ('pattho', [],email='patrick-thomas@andenne.be', fullname='Patrick Thomas')
+pauvan = UserDescriptor ('pauvan', [],email='paulette.vangangel@andenne.be', fullname='Paulette Vangangel')
+pavcor = UserDescriptor ('pavcor', [],email='pavlos.corexenos@ac.andenne.be', fullname='Pavlos Corexenos')
+phicre = UserDescriptor ('phicre', [],email='Philippe.Crefcoeur@ac.andenne.be', fullname='Philippe Crefcoeur')
+phipir = UserDescriptor ('phipir', [],email='sageiss@ac.andenne.be', fullname='Philippe Pironet')
+phiros = UserDescriptor ('phiros', [],email='Philippe.Rose@ac.andenne.be', fullname='Philippe Rose')
+piefon = UserDescriptor ('piefon', [],email='pierre.fontaine@ac.andenne.be', fullname='Pierre Fontaine')
+piemin = UserDescriptor ('piemin', [],email='pierre.minnaert@andenne.be', fullname='Pierre Minnaert')
+pievan = UserDescriptor ('pievan', [],email='pierre.vanpaeschen@ac.andenne.be', fullname='Pierre Vanpaeschen')
+promandenne = UserDescriptor ('promandenne', [],email='info@promandenne.be', fullname='Promandenne')
+ritlam = UserDescriptor ('ritlam', [],email='Rita.Lambert@ac.andenne.be', fullname='Rita Lambert')
+robgob = UserDescriptor ('robgob', [],email='robert.gobin@ac.andenne.be', fullname='Robert Gobin')
+robhoe = UserDescriptor ('robhoe', [],email='robert.hoeymakers@andenne.be', fullname='Robert Hoeymakers')
+roboscan = UserDescriptor ('roboscan', [],email='roboscan@ac.andenne.be', fullname='Robotscanner')
+roldan = UserDescriptor ('roldan', [],email='roland.dantine@ac.andenne.be', fullname='Roland Dantine')
+roldes = UserDescriptor ('roldes', [],email='Rolande.Despagne@ac.andenne.be', fullname='Rolande Despagne')
+rongos = UserDescriptor ('rongos', [],email='Ronald.Gossiaux@ac.andenne.be', fullname='Ronald Gossiaux')
+rudnsi = UserDescriptor ('rudnsi', [],email='rudy.n@andenne.be', fullname='Rudy Nsingi')
+sabwer = UserDescriptor ('sabwer', [],email='sabine.wernerus@ac.andenne.be', fullname='Sabine Wernerus')
+sancru = UserDescriptor ('sancru', [],email='sandrine.cruspin@ac.andenne.be', fullname='Sandrine Cruspin')
+sangri = UserDescriptor ('sangri', [],email='Sandrine.Gris@ac.andenne.be', fullname='Sandrine Gris')
+sanpar = UserDescriptor ('sanpar', [],email='sandrine.parisseaux@ac.andenne.be', fullname='Sandrine Parisseaux')
+sanric = UserDescriptor ('sanric', [],email='sandrine.ricaille@ac.andenne.be', fullname='Sandrine Ricaille')
+sebron = UserDescriptor ('sebron', [],email='sebastien.ronveaux@ac.andenne.be', fullname='Sébastien Ronveaux')
+simgre = UserDescriptor ('simgre', [],email='simon.gregoire@ac.andenne.be', fullname='Simon Gregoire')
+simlam = UserDescriptor ('simlam', [],email='simon.lambrecht@ac.andenne.be', fullname='Simon Lambrecht')
+simler = UserDescriptor ('simler', [],email='simon.leroy@andenne.be', fullname='Simon Leroy')
+sopben = UserDescriptor ('sopben', [],email='sophie.benetti@cs.andenne.be', fullname='Sophie Benetti')
+sopfra = UserDescriptor ('sopfra', [],email='Sophie.Fraikin@ac.andenne.be', fullname='Sophie Fraikin')
+sophan = UserDescriptor ('sophan', [],email='sophie.hannot@cs.andenne.be', fullname='Sophie Hannot')
+stafin = UserDescriptor ('stafin', [],email='stafin@ac.andenne.be', fullname='Stagiaire Finances')
+stajur = UserDescriptor ('stajur', [],email='stajur@ac.andenne.be', fullname='Stagiaire Juridique')
+stasec = UserDescriptor ('stasec', [],email='stasec@ac.andenne.be', fullname='Stagiaire Secrétariat')
+stebad = UserDescriptor ('stebad', [],email='stephanie.badot@ac.andenne.be', fullname='Stéphanie Badot')
+stechi = UserDescriptor ('stechi', [],email='stephanie.chiaradia@ac.andenne.be', fullname='Stéphanie Chiaradia')
+stecol = UserDescriptor ('stecol', [],email='stephane.collignon@cs.andenne.be', fullname='Stephane')
+stedew = UserDescriptor ('stedew', [],email='stephanie.dewez@ac.andenne.be', fullname='Stéphanie Dewez')
+stepre = UserDescriptor ('stepre', [],email='stephanie.preudhomme@cs.andenne.be', fullname="Stéphnaie Preud'homme")
+syldom = UserDescriptor ('syldom', [],email='sylvie.domine@ac.andenne.be', fullname='Sylvie Dominé')
+tatcha = UserDescriptor ('tatcha', [],email='tatiana.charlier@andenne.be', fullname='Tatiana Charlier')
+tinmal = UserDescriptor ('tinmal', [],email='christine.malherbe@ac.andenne.be', fullname='Christine Malherbe')
+userC1 = UserDescriptor ('userC1', [],email='userC1@ac.andenne.be', fullname='userC1')
+userP1 = UserDescriptor ('userP1', [],email='userP1@ac.andenne.be', fullname='userP1')
+usertest = UserDescriptor ('usertest', [],email='fabio.marcuzzi@ac.andenne.be', fullname='usetest')
+usertest2 = UserDescriptor ('usertest2', [],email='fabio.marcuzzi@andenne.be', fullname='usertest')
+valdeg = UserDescriptor ('valdeg', [],email='valentine.degrave@ac.andenne.be', fullname='Valentine De Grave')
+valduc = UserDescriptor ('valduc', [],email='Valerie.Duchesne@ac.andenne.be', fullname='Valérie Duchesne')
+valevr = UserDescriptor ('valevr', [],email='valentine.evrard@ac.andenne.be', fullname='Valentine Evrard')
+valnie = UserDescriptor ('valnie', [],email='valerie.nieus@andenne.be', fullname='Valerie Nieus')
+verper = UserDescriptor ('verper', [],email='veronique.perpinien@ac.andenne.be', fullname='Veronique Perpinien')
+vinbou = UserDescriptor ('vinbou', [],email='Vincent.bouret@ac.andenne.be', fullname='Vincent Bouret')
+vinsam = UserDescriptor ('vinsam', [],email='Vincent.Sampaoli@ac.andenne.be', fullname='Vincent Sampaoli')
+virdem = UserDescriptor ('virdem', [],email='virginie.demarche@ac.andenne.be', fullname='Virginie Demarche')
+virhen = UserDescriptor ('virhen', [],email='virginie.hentiens@ac.andenne.be', fullname='Virginie Hentiens')
+vivmat = UserDescriptor ('vivmat', [],email='viviane.matagne@ac.andenne.be', fullname='Viviane Matagne')
+xaveer = UserDescriptor ('xaveer', [],email='xavier.eerdekens@cs.andenne.be', fullname='Xavier Eerdekens')
+xavwil = UserDescriptor ('xavwil', [],email='xavier.willot@ac.andenne.be', fullname='Xavier Willot')
+yahben = UserDescriptor ('yahben', [],email='yahya.benhaddou@andenne.be', fullname='Yahya Benhaddou')
+yandeg = UserDescriptor ('yandeg', [],email='andenne1@andenne.be', fullname='Yannick Degée')
+yassca = UserDescriptor ('yassca', [],email='Yasmine.Scantamburlo@ac.andenne.be', fullname='Yasmine Scantamburlo')
+yastuz = UserDescriptor ('yastuz', [],email='yasemin.tuzkan@ac.andenne.be', fullname='Yasémin Tuzkan')
+yvagem = UserDescriptor ('yvagem', [],email='Yvan.Gemine@ac.andenne.be', fullname='Yvan Gemine')
+yvesor = UserDescriptor ('yvesor', [],email='yves.soree@ac.andenne.be', fullname='Yves Soree')
+zonet = UserDescriptor ('zonet', [],email='zonet@andenne.be', fullname='Zone T')
 
 emetteuravisPers = UserDescriptor('emetteuravisPers', [], email="test@test.be", fullname="Emetteur avis Personnel")
 
@@ -1254,13 +1274,11 @@ groups[26].advisers.append(zonet)
 groups[26].creators.append(zonet)
 
 
-
-
 # Meeting configurations -------------------------------------------------------
 # college
 collegeMeeting = MeetingConfigDescriptor(
     'meeting-config-college', 'College Communal',
-    'College communal', isDefault=True)
+    'College communal', isDefault=True )
 collegeMeeting.meetingManagers = ['rongos','yvagem','fabmar','juldel','annlem','virdem' ]
 #collegeMeeting.assembly = 'Pierre Dupont - Bourgmestre,\n' \
 #                          'Charles Exemple - 1er Echevin,\n' \
@@ -1283,34 +1301,34 @@ collegeMeeting.meetingManagers = ['rongos','yvagem','fabmar','juldel','annlem','
 #]
 collegeMeeting.places = """Hotel de Ville\r
 Centre administratif\r"""
-collegeMeeting.budgetDefault='<p>1) Montant de la dépense : <b> XXX  EUR TVAC</b> <br />2) Article Budgétaire  : <b>XXXX/XXX-XX </b><br />3) Libellé de cet article :<b> XXX</b><br />4) Crédit initial :<b> XXX EUR</b><br />5) Crédit disponible :<b> XXX EUR</b><br />6) Infos prises le<b> XXX</b> auprès de<b> XXX </b><br />7) Observations : <b>NEANT </b> <br /><br /><font color="red">&laquo; ATTENTION : depuis le 1er septembre 2013, tout projet de décision ayant une incidence financière ou budgétaire supérieure à <b>22.000,00 euros</b> doit obligatoirement être accompagné d&rsquo;un avis de légalité écrit, préalable et motivé du Directeur financier.  L&rsquo;avis fait partie intégrante de la décision; il doit en être fait état dans la présentation du point (proposition de décision), ainsi que dans la délibération (reproduction in extenso) lorsqu&rsquo;une délibération est établie. (Article L 1124-40 &sect; 1er-3&deg; CDLD). &raquo;</font></p>'
+collegeMeeting.budgetDefault = '<p>1) Montant de la dépense : <b> XXX  EUR TVAC</b> <br />2) Article Budgétaire  : <b>XXXX/XXX-XX </b><br />3) Libellé de cet article :<b> XXX</b><br />4) Crédit initial :<b> XXX EUR</b><br />5) Crédit disponible :<b> XXX EUR</b><br />6) Infos prises le<b> XXX</b> auprès de<b> XXX </b><br />7) Observations : <b>NEANT </b> <br /><br /><font color="red">&laquo; ATTENTION : depuis le 1er septembre 2013, tout projet de décision ayant une incidence financière ou budgétaire supérieure à <b>22.000,00 euros</b> doit obligatoirement être accompagné d&rsquo;un avis de légalité écrit, préalable et motivé du Directeur financier.  L&rsquo;avis fait partie intégrante de la décision; il doit en être fait état dans la présentation du point (proposition de décision), ainsi que dans la délibération (reproduction in extenso) lorsqu&rsquo;une délibération est établie. (Article L 1124-40 &sect; 1er-3&deg; CDLD). &raquo;</font></p>'
 collegeMeeting.categories = categories
-collegeMeeting.enableAnnexToPrint=True
-collegeMeeting.annexToPrintDefault=True
-collegeMeeting.annexDecisionToPrintDefault=True
-collegeMeeting.annexAdviceToPrintDefault=False
-collegeMeeting.initItemDecisionIfEmptyOnDecide=False
+collegeMeeting.enableAnnexToPrint = True
+collegeMeeting.annexToPrintDefault = True
+collegeMeeting.annexDecisionToPrintDefault = True
+collegeMeeting.annexAdviceToPrintDefault = False
+collegeMeeting.initItemDecisionIfEmptyOnDecide = False
 collegeMeeting.shortName = 'College'
 collegeMeeting.meetingFileTypes = [annexe, annexeBudget, annexeCahier,
                                    annexeDecision, annexeAvis, annexeAvisLegal]
 collegeMeeting.usedItemAttributes = ['budgetInfos',
- 				     'associatedGroups',
+                                     'associatedGroups',
                                      'observations',
                                      'itemsSignatories',
                                      'sendToAuthority',
-                                      ]
+                                    ]
 collegeMeeting.usedMeetingAttributes = ['startDate', 'endDate', 'signatories', 'attendees','excused','absents','place', 'observations','postobservations', ]
 collegeMeeting.recordMeetingHistoryStates = []
 collegeMeeting.itemsListVisibleColumns = ['proposingGroupAcronym',
                                           'state',
                                           'proposingGroup',
                                           'annexes',
-					  'creator',
+                                          'creator',
                                           'category'
                                           'advices',
                                           'actions', ]
 collegeMeeting.itemColumns = ['creator',
-			      'creationDate',
+                              'creationDate',
                               'state',
                               'proposingGroup',
                               'annexes',
@@ -1319,42 +1337,42 @@ collegeMeeting.itemColumns = ['creator',
                               'actions',
                               'meeting', ]
 collegeMeeting.meetingColumns=['creator',
-			      'creationDate',
-                              'state',
-                              'actions',]
+                               'creationDate',
+                               'state',
+                               'actions', ]
 
 collegeMeeting.xhtmlTransformFields = ('MeetingItem.description',
                                        'MeetingItem.pv',
-					'MeetingItem.textpv',
-					'MeetingItem.projetpv',
+                                       'MeetingItem.textpv',
+                                       'MeetingItem.projetpv',
                                        'MeetingItem.decision',
                                        'MeetingItem.observations',
                                        'Meeting.observations',
                                        'Meeting.postobservations', )
-collegeMeeting.maxShownAvailableItems=300
-collegeMeeting.maxShownMeetingItems=300
-collegeMeeting.maxShownLateItems=300
-collegeMeeting.enableGotoPage=False
-collegeMeeting.enableGotoItem=True
-collegeMeeting.openAnnexesInSeparateWindows=False
-collegeMeeting.mailItemEvents=['itemDelayed','adviceToGive','annexAdded',]
-collegeMeeting.xhtmlTransformTypes = ('removeBlanks',)
-collegeMeeting.useGroupsAsCategories=False
-collegeMeeting.toDiscussSetOnItemInsert=True
-collegeMeeting.toDiscussDefault=True
-collegeMeeting.toDiscussLateDefault=True
-collegeMeeting.toDiscussShownForLateItems=True
-collegeMeeting.itemReferenceFormat=''
+collegeMeeting.maxShownAvailableItems = 300
+collegeMeeting.maxShownMeetingItems = 300
+collegeMeeting.maxShownLateItems = 300
+collegeMeeting.enableGotoPage = False
+collegeMeeting.enableGotoItem = True
+collegeMeeting.openAnnexesInSeparateWindows = False
+collegeMeeting.mailItemEvents = ['itemDelayed', 'adviceToGive', 'annexAdded', ]
+collegeMeeting.xhtmlTransformTypes = ('removeBlanks', )
+collegeMeeting.useGroupsAsCategories = False
+collegeMeeting.toDiscussSetOnItemInsert = True
+collegeMeeting.toDiscussDefault = True
+collegeMeeting.toDiscussLateDefault = True
+collegeMeeting.toDiscussShownForLateItems = True
+collegeMeeting.itemReferenceFormat = ''
 collegeMeeting.itemWorkflow = 'meetingitemcollegeandenne_workflow'
 collegeMeeting.meetingWorkflow = 'meetingcollege_workflow' 
 collegeMeeting.itemConditionsInterface = 'Products.MeetingAndenne.interfaces.IMeetingItemCollegeAndenneWorkflowConditions'
 collegeMeeting.itemActionsInterface = 'Products.MeetingAndenne.interfaces.IMeetingItemCollegeAndenneWorkflowActions'
 collegeMeeting.meetingConditionsInterface = 'Products.MeetingAndenne.interfaces.IMeetingCollegeAndenneWorkflowConditions'
 collegeMeeting.meetingActionsInterface = 'Products.MeetingAndenne.interfaces.IMeetingCollegeAndenneWorkflowActions'
-collegeMeeting.transitionsToConfirm = ['MeetingItem.delay','MeetingItem.backToPtoposed','MeetingItem.backToItemCreated' ]
-collegeMeeting.meetingPresentItemWhenNoCurrentMeetingStates='created'
+collegeMeeting.transitionsToConfirm = ['MeetingItem.delay','MeetingItem.backToPtoposed', 'MeetingItem.backToItemCreated', ]
+collegeMeeting.meetingPresentItemWhenNoCurrentMeetingStates = 'created'
 collegeMeeting.meetingTopicStates = ('created', 'frozen')
-collegeMeeting.decisionTopicStates = ('decided', 'closed','archived')
+collegeMeeting.decisionTopicStates = ('decided', 'closed', 'archived')
 collegeMeeting.enforceAdviceMandatoriness = False
 collegeMeeting.insertingMethodsOnAddItem = ({'insertingMethod': 'on_categories',
                                              'reverse': '0'}, )
@@ -1363,27 +1381,27 @@ collegeMeeting.maxShownMeetings = 5
 collegeMeeting.maxDaysDecisions = 60
 collegeMeeting.meetingAppDefaultView = 'topic_searchmyitems'
 collegeMeeting.useAdvices = True
-collegeMeeting.itemAdviceStates = ('itemcreated','proposed','validated','prevalidated','presented','itemfrozen',)
-collegeMeeting.itemAdviceEditStates = ('itemcreated','proposed','validated','prevalidated','presented','itemfrozen',)
+collegeMeeting.itemAdviceStates = ('itemcreated', 'proposed', 'validated', 'prevalidated', 'presented', 'itemfrozen', )
+collegeMeeting.itemAdviceEditStates = ('itemcreated', 'proposed', 'validated', 'prevalidated', 'presented', 'itemfrozen', )
 collegeMeeting.itemAdviceViewStates = ('itemcreated',
-                                       'proposed'
-                                       'prevalidated'
+                                       'proposed',
+                                       'prevalidated',
                                        'validated',
                                        'presented',
                                        'itemfrozen',
                                        'accepted',
                                        'refused',
-				       'accepted_and_closed',
-				       'refused_and_closed',
-				       'delayed_and_closed',
-				       'accepted_but_modified_and_closed',
+                                       'accepted_and_closed',
+                                       'refused_and_closed',
+                                       'delayed_and_closed',
+                                       'accepted_but_modified_and_closed',
                                        'accepted_but_modified',
                                        'delayed',
-                                       'pre_accepted',)
+                                       'pre_accepted', )
 collegeMeeting.usedAdviceTypes = ['positive', 'positive_with_remarks', 'negative', 'nil', ]
 collegeMeeting.enableAdviceInvalidation = False
-collegeMeeting.enforceAdviceMandatoriness=False
-collegeMeeting.defaultAdviceType="positive"
+collegeMeeting.enforceAdviceMandatoriness = False
+collegeMeeting.defaultAdviceType = "positive"
 collegeMeeting.itemAdviceInvalidateStates = []
 collegeMeeting.customAdvisers = [
     {'row_id': 'unique_id_002',
@@ -1406,46 +1424,46 @@ collegeMeeting.customAdvisers = [
      'delay_label': 'Incidence financière >= 22.000€', }, ]
 collegeMeeting.itemPowerObserversStates = ('itemfrozen',
                                            'accepted',
-					   'validated'
+                                           'validated',
                                            'prevalidated',
                                            'delayed',
                                            'refused',
                                            'accepted_but_modified',
-                                           'pre_accepted'
+                                           'pre_accepted',
                                            'accepted_and_closed',
-					   'refused_and_closed',
-					   'delayed_and_closed',
-					   'accepted_but_modified_and_closed',
+                                           'refused_and_closed',
+                                           'delayed_and_closed',
+                                           'accepted_but_modified_and_closed',
 )
-collegeMeeting.meetingPowerObserversStates = ('created','frozen', 'decided', 'closed','archived')
-collegeMeeting.itemDecidedStates = ['accepted', 'refused', 'delayed', 'accepted_but_modified', 'pre_accepted','accepted_and_closed','refused_and_closed','delayed_and_closed','accepted_but_modified_and_closed',]
+collegeMeeting.meetingPowerObserversStates = ('created', 'frozen', 'decided', 'closed', 'archived')
+collegeMeeting.itemDecidedStates = ['accepted', 'refused', 'delayed', 'accepted_but_modified', 'pre_accepted', 'accepted_and_closed', 'refused_and_closed', 'delayed_and_closed', 'accepted_but_modified_and_closed', ]
 collegeMeeting.transitionsForPresentingAnItem = ('propose', 'validate', 'present', )
 #collegeMeeting.onTransitionFieldTransforms = (
 #    ({'transition': 'delay',
 #      'field_name': 'MeetingItem.decision',
 #      'tal_expression': "string:<p>Le Collège décide de reporter le point.</p>${here/getDecision}"},))
 collegeMeeting.onMeetingTransitionItemTransitionToTrigger = ({'meeting_transition': 'freeze',
-                                                              'item_transition': 'itemfreeze'},)
-collegeMeeting.powerAdvisersGroups = ('service-finances', 'secretariat','service-juridique-vb' )
-collegeMeeting.itemBudgetInfosStates = ('proposed', 'validated', 'presented','prevalidated','itemfrozen')
+                                                              'item_transition': 'itemfreeze'}, )
+collegeMeeting.powerAdvisersGroups = ('service-finances', 'secretariat', 'service-juridique-vb' )
+collegeMeeting.itemBudgetInfosStates = ('proposed', 'validated', 'presented', 'prevalidated', 'itemfrozen')
 collegeMeeting.itemCopyGroupsStates =     ('itemfrozen',
                                            'accepted',
-					   'validated'
+                                           'validated',
                                            'prevalidated',
                                            'delayed',
                                            'refused',
                                            'accepted_but_modified',
-                                           'pre_accepted'
+                                           'pre_accepted',
                                            'accepted_and_closed',
-					   'refused_and_closed',
-					   'delayed_and_closed',
-					   'accepted_but_modified_and_closed',
+                                           'refused_and_closed',
+                                           'delayed_and_closed',
+                                           'accepted_but_modified_and_closed',
 )
 
 collegeMeeting.useCopies = True
-collegeMeeting.enableAnnexConfidentiality=True
-collegeMeeting.enableAdviceConfidentiality=True
-collegeMeeting.adviceConfidentialityDefault=False
+collegeMeeting.enableAnnexConfidentiality = True
+collegeMeeting.enableAdviceConfidentiality = True
+collegeMeeting.adviceConfidentialityDefault = False
 collegeMeeting.selectableCopyGroups = [
 groups[1].getIdSuffixed('reviewers'),
 groups[2].getIdSuffixed('reviewers'),
@@ -1498,57 +1516,47 @@ groups[24].getIdSuffixed('reviewers')
 collegeMeeting.podTemplates = collegeTemplates
 
 bourgmestre_mu = MeetingUserDescriptor('claeer',
-                                       duty='Bourgmestre',
-				       replacementDuty="Bourgmestre f.f.",
-                                       usages=['assemblyMember', 'signer', ],
-                                       signatureIsDefault=True)
+                                       duty = 'Bourgmestre',
+                                       replacementDuty = "Bourgmestre f.f.",
+                                       usages = ['assemblyMember', 'signer', ],
+                                       signatureIsDefault = True)
 Echevin1 = MeetingUserDescriptor('elimal',
-                                duty='Echevin',
-			        replacementDuty="Bourgmestre f.f.",
-                                usages=['assemblyMember','signer', ])
+                                 duty = 'Echevin',
+                                 replacementDuty = "Bourgmestre f.f.",
+                                 usages = ['assemblyMember', 'signer', ])
 Echevin2 = MeetingUserDescriptor('guyhav',
-                                duty='Echevin',
-			        replacementDuty="Bourgmestre f.f.",
-                                usages=['assemblyMember','signer', ])
+                                 duty = 'Echevin',
+                                 replacementDuty = "Bourgmestre f.f.",
+                                 usages = ['assemblyMember', 'signer', ])
 Echevin3 = MeetingUserDescriptor('fraleo',
-                                duty='Echevin',
-			        replacementDuty="Bourgmestre f.f.",
-                                usages=['assemblyMember','signer', ])
+                                 duty = 'Echevin',
+                                 replacementDuty = "Bourgmestre f.f.",
+                                 usages = ['assemblyMember', 'signer', ])
 Echevin4 = MeetingUserDescriptor('bencos',
-                                duty='Echevin',
-			        replacementDuty="Bourgmestre f.f.",
-                                usages=['assemblyMember','signer', ])
+                                 duty = 'Echevin',
+                                 replacementDuty = "Bourgmestre f.f.",
+                                 usages = ['assemblyMember', 'signer', ])
 Echevin5 = MeetingUserDescriptor('micdec',
-                                duty='Echevin',
-			        replacementDuty="Bourgmestre f.f.",
-                                usages=['assemblyMember','signer', ])
+                                 duty = 'Echevin',
+                                 replacementDuty = "Bourgmestre f.f.",
+                                 usages = ['assemblyMember', 'signer', ])
 Echevin6 = MeetingUserDescriptor('sancru',
-                                duty="Présidente du Conseil de l'action sociale",
-			        replacementDuty="Bourgmestre f.f.",
-                                usages=['assemblyMember','signer', ])
+                                 duty = "Présidente du Conseil de l'action sociale",
+                                 replacementDuty = "Bourgmestre f.f.",
+                                 usages = ['assemblyMember', 'signer', ])
 dgen_mu = MeetingUserDescriptor('yvagem',
-                                duty='Directeur Général',
-			        replacementDuty="Directeur Général f.f.",
-                                usages=['assemblyMember', 'signer', ],
-                                signatureIsDefault=True)
+                                duty = 'Directeur Général',
+                                replacementDuty = "Directeur Général f.f.",
+                                usages = ['assemblyMember', 'signer', ],
+                                signatureIsDefault = True)
 dgen_mu2 = MeetingUserDescriptor('rongos',
-                                duty='Directeur Général f.f.',
-			        replacementDuty="Directeur Général f.f.",
-                                usages=['signer', ])
+                                 duty = 'Directeur Général f.f.',
+                                 replacementDuty = "Directeur Général f.f.",
+                                 usages = ['signer', ])
 
-collegeMeeting.meetingUsers = [bourgmestre_mu, Echevin1,Echevin2,Echevin3,Echevin4,Echevin5,Echevin6,dgen_mu,dgen_mu2]
+collegeMeeting.meetingUsers = [bourgmestre_mu, Echevin1, Echevin2, Echevin3, Echevin4, Echevin5, Echevin6, dgen_mu, dgen_mu2]
 
-collegeMeeting.itemFormationTemplates = [
-    ItemTemplateDescriptor(
-        id='demande-de-formation',
-        title='Demande de formation',
-        proposingGroup='secretariat',
-        description='',
-        category='45-personnel'),
-]
 
-#collegeMeeting.meetingConfigsToCloneTo = [{'meeting_config': 'meeting-config-council',
-#                                           'trigger_workflow_transitions_until': '__nothing__'}, ]
 # Conseil communal
 councilMeeting = MeetingConfigDescriptor(
     'meeting-config-council', 'Conseil Communal',
@@ -1608,7 +1616,7 @@ councilMeeting.xhtmlTransformFields = ('MeetingItem.description',
                                        'MeetingItem.decision',
                                        'MeetingItem.observations',
                                        'Meeting.observations', )
-councilMeeting.xhtmlTransformTypes = ('removeBlanks',)
+councilMeeting.xhtmlTransformTypes = ('removeBlanks', )
 councilMeeting.itemWorkflow = 'meetingitemcollegeandenne_workflow'
 councilMeeting.meetingWorkflow = 'meetingcollege_workflow'
 councilMeeting.itemConditionsInterface = 'Products.MeetingAndenne.interfaces.IMeetingItemCouncilWorkflowConditions'
@@ -1617,8 +1625,8 @@ councilMeeting.meetingConditionsInterface = 'Products.MeetingAndenne.interfaces.
 councilMeeting.meetingActionsInterface = 'Products.MeetingAndenne.interfaces.IMeetingCouncilWorkflowActions'
 councilMeeting.transitionsToConfirm = []
 councilMeeting.meetingTopicStates = ('created', 'frozen')
-councilMeeting.decisionTopicStates = ('decided', 'closed','archived')
-councilMeeting.itemAdviceStates = ('validated',)
+councilMeeting.decisionTopicStates = ('decided', 'closed', 'archived')
+councilMeeting.itemAdviceStates = ('validated', )
 councilMeeting.enforceAdviceMandatoriness = False
 councilMeeting.insertingMethodsOnAddItem = ({'insertingMethod': 'on_proposing_groups',
                                              'reverse': '0'}, )
@@ -1665,7 +1673,7 @@ councilMeeting.itemPowerObserversStates = ('itemfrozen',
                                            'accepted', 'delayed',
                                            'refused',
                                            'accepted_but_modified', 'pre_accepted')
-councilMeeting.meetingPowerObserversStates = ('frozen','created', 'decided', 'closed','archived')
+councilMeeting.meetingPowerObserversStates = ('frozen','created', 'decided', 'closed', 'archived')
 councilMeeting.powerAdvisersGroups = ()
 councilMeeting.itemBudgetInfosStates = ('proposed', 'validated', 'presented')
 councilMeeting.useCopies = True
@@ -1676,24 +1684,32 @@ councilMeeting.selectableCopyGroups = [groups[0].getIdSuffixed('reviewers'),
 #councilMeeting.podTemplates = councilTemplates
 
 receveur_mu = MeetingUserDescriptor('receveur',
-                                    duty='Receveur communal',
-                                    usages=['assemblyMember', 'signer', 'asker', ])
+                                    duty = 'Receveur communal',
+                                    usages = ['assemblyMember', 'signer', 'asker', ])
 
 councilMeeting.meetingUsers = [receveur_mu]
 
 councilMeeting.recurringItems = [
     RecurringItemDescriptor(
-        id='recurringagenda1',
-        title='Approuve le procès-verbal de la séance antérieure',
-        description='Approuve le procès-verbal de la séance antérieure',
-        category='recurrents',
-        proposingGroup='secretariat',
-        decision='Procès-verbal approuvé'), ]
-councilMeeting.itemFormationTemplates = []
+        id = 'recurringagenda1',
+        title = 'Approuve le procès-verbal de la séance antérieure',
+        description = 'Approuve le procès-verbal de la séance antérieure',
+        category = 'recurrents',
+        proposingGroup = 'secretariat',
+        decision = 'Procès-verbal approuvé'), ]
 
-data = PloneMeetingConfiguration(meetingFolderTitle='Mes séances',
-                                 meetingConfigs=(collegeMeeting, councilMeeting),
-                                 groups=groups)
+
+# rapcolaucon
+rapcolauconMeeting = MeetingConfigDescriptor(
+    'rapport-col-au-con', 'Rapport Col. au Con.',
+    'Rapport Col. au Con.', isDefault=True)
+
+rapcolauconMeeting.podTemplates = rapcolauconTemplates
+
+
+data = PloneMeetingConfiguration('Mes séances',
+                                 (collegeMeeting, councilMeeting),
+                                 groups)
 data.unoEnabledPython = '/usr/bin/python'
 data.usedColorSystem = 'state_color'
 data.enableUserPreferences = False

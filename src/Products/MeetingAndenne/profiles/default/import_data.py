@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
 from Products.PloneMeeting.profiles import PodTemplateDescriptor
+from Products.PloneMeeting.profiles import MeetingConfigDescriptor
+from Products.PloneMeeting.profiles import PloneMeetingConfiguration
 
 # College Pod templates ----------------------------------------------------------------
 agendaTemplate = PodTemplateDescriptor('agenda', 'O.J.')
@@ -25,11 +27,6 @@ lateAgendaTemplate.podCondition = 'python:(here.meta_type=="Meeting") and ' \
 lateAgendaCPASTemplate = PodTemplateDescriptor('lateAgendaCPAS', 'O.J. Comp. - CPAS')
 lateAgendaCPASTemplate.podTemplate = 'MeetingAndenneLateCPAS.odt'
 lateAgendaCPASTemplate.podCondition = 'python:(here.meta_type=="Meeting") and ' \
-                              'here.portal_plonemeeting.isManager(here)'
-
-lateAgendaPersonnelTemplate = PodTemplateDescriptor('lateAgendaPersonnel', 'O.J. Comp. - Personnel')
-lateAgendaPersonnelTemplate.podTemplate = 'MeetingAndenneLatePersonnel.odt'
-lateAgendaPersonnelTemplate.podCondition = 'python:(here.meta_type=="Meeting") and ' \
                               'here.portal_plonemeeting.isManager(here)'
 
 lateAgendaPersonnelTemplate = PodTemplateDescriptor('lateAgendaPersonnel', 'O.J. Comp. - Personnel')
@@ -68,7 +65,36 @@ collegeTemplates = [ agendaTemplate, agendaCPASTemplate, agendaPersonnelTemplate
                      itemPropositionTemplate, itemDeliberationTemplate, itemExecutionTemplate ]
 
 # RapColAuCon Pod templates ----------------------------------------------------------------
+agendaRccTemplate = PodTemplateDescriptor('agenda', 'Rapport du Col. au Con.')
+agendaRccTemplate.podTemplate = 'MeetingAndenneRccRapport.odt'
+agendaRccTemplate.podCondition = 'python:(here.meta_type=="Meeting") and ' \
+                              'here.portal_plonemeeting.isManager(here)'
+
+itemRccTemplate = PodTemplateDescriptor('item', 'Aperçu')
+itemRccTemplate.podTemplate = 'MeetingItemAndenneRccApercu.odt'
+itemRccTemplate.podCondition = 'python:here.meta_type=="MeetingItem"'
+
+rapColAuConTemplates = [ agendaRccTemplate, itemRccTemplate ]
 
 # Users and groups -------------------------------------------------------------
-#collegeMeeting.podTemplates = collegeTemplates
+groups = ()
+
+# Meeting configurations -------------------------------------------------------
+# college
+collegeMeeting = MeetingConfigDescriptor(
+    'meeting-config-college', 'College Communal',
+    'College communal', isDefault = True)
+
+collegeMeeting.podTemplates = collegeTemplates
+
+# rapcolaucon
+rapcolauconMeeting = MeetingConfigDescriptor(
+    'rapport-col-au-con', 'Rapport Col. au Con.',
+    'Rapport Col. au Con.' )
+
+rapcolauconMeeting.podTemplates = rapColAuConTemplates
+
 # ------------------------------------------------------------------------------
+data = PloneMeetingConfiguration('Mes séances',
+                                 (collegeMeeting, rapcolauconMeeting),
+                                 groups)

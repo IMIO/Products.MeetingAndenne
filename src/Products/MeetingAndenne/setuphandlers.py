@@ -28,6 +28,7 @@ from zope.component import queryUtility
 from Products.cron4plone.browser.configlets.cron_configuration import ICronConfiguration
 from Products.PloneMeeting.exportimport.content import ToolInitializer
 from Products.PloneMeeting.model.adaptations import performWorkflowAdaptations
+from Products.PloneMeeting.config import TOOL_FOLDER_POD_TEMPLATES
 
 noSearchTypes = ('MeetingCfake', 'MeetingItemCfake', )
 ##/code-section HEAD
@@ -107,7 +108,6 @@ def postInstall(context):
                 break
         if addCron:
             cron_configlet.cronjobs.append(CRON_PARAMS + CRON_VIEW)
-
 
 def updateRoleMappings(context):
     """after workflow changed update the roles mapping. this is like pressing
@@ -266,10 +266,40 @@ def configureSafeHtml(context, site):
                                                 'th': '1', 'thead': '1', 'tr': '1', 'tt': '1', 'u': '1', 'ul': '1' } )
     pt.reloadTransforms()
 
+def addPodTemplates(context):
+    """
+       Re-register Pod templates present in the default profile after deleting the existing ones
+    """
+    if isNotMeetingAndenneProfile(context):
+        return
+
+    logStep("Registering Pod Templates", context)
+    site = context.getSite()
+    source = context._profile_path
+    if not source:
+        return
+
+    data = ''
+    productname = '.' in PROJECTNAME and PROJECTNAME or 'Products.%s' % PROJECTNAME
+    profileModule = source[source.rfind(productname.replace('.', '/')):].replace('/', '.')
+    profileModule = profileModule.replace('\\', '.')
+    module_path = 'from %s.import_data import data' % profileModule
+    exec module_path
+
+    for configData in data.meetingConfigs:
+        if hasattr(site.portal_plonemeeting, configData.id):
+            cfg = getattr(site.portal_plonemeeting, configData.id)
+            folder = getattr(cfg, TOOL_FOLDER_POD_TEMPLATES)
+            oldTemplatesIds = folder.keys()
+            if len(oldTemplatesIds) > 0:
+                folder.manage_delObjects(list(oldTemplatesIds))
+            for template in configData.podTemplates:
+                cfg.addPodTemplate(template, source)
+
 
 def installMeetingAndenne(context):
     """ Run the default profile before being able to run the Andenne profile"""
-    if isNotMeetingAndenneConfigureProfile(context):
+    if not isMeetingAndenneConfigureProfile(context):
         return
 
     logStep("installMeetingAndenne", context)

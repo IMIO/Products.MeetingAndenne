@@ -26,6 +26,14 @@
       provides="Products.GenericSetup.interfaces.EXTENSION"
       for="Products.CMFPlone.interfaces.IPloneSiteRoot"/>
 
+  <genericsetup:importStep
+      name="addPodTemplate"
+      title="Add Pod Templates"
+      description="Registers the Pod Templates present in MeetingAndenne default profile"
+      handler="Products.MeetingAndenne.setuphandlers.addPodTemplates">
+    <depends name="PloneMeeting-postInstall" />
+  </genericsetup:importStep>
+
   <genericsetup:upgradeStep
       title="Migrate to MeetingAndenne 3.0"
       description="Performs migration from MeetingAndenne 1.9 to MeetingAndenne 3.0"
