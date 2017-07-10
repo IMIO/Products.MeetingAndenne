@@ -288,7 +288,7 @@ class MeetingItemFormation(CustomMeetingItemAndenne):
         for user in pgp.listMembers():
             if user.getProperty('listed'):
                 res.append( (user.getId(), user.getProperty('fullname')) )
-        res = sorted( res, key=collateDisplayListsValues )
+        res = sorted(res, key=collateDisplayListsValues)
         return DisplayList( tuple(res) )
 
     MeetingItem.listTrainingUsers = listTrainingUsers

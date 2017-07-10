@@ -67,7 +67,7 @@ def update_item_schema(baseSchema):
                     label_msgid='MeetingAndenne_label_treatUser',
                     i18n_domain='PloneMeeting',
                 ),
-                vocabulary='listUserGroup',
+                vocabulary='listTreatUsers',
                 searchable=True,
             ),
             TextField(

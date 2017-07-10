@@ -25,6 +25,7 @@ from appy.gen import No
 from persistent.mapping import PersistentMapping
 from zope.interface import implements
 from zope.i18n import translate
+from collections import OrderedDict
 from AccessControl import ClassSecurityInfo
 from Products.Archetypes.atapi import DisplayList
 from Globals import InitializeClass
@@ -514,7 +515,7 @@ class CustomMeetingAndenne(Meeting):
                 return duty
 
     security.declarePublic('getStrikedAssembly')
-    def getStrikedAssembly(self, groupByDuty=True,strikefirst=True,strikemidle=True,strikelast=False,userepl=True):
+    def getStrikedAssembly(self, groupByDuty=True, strikefirst=True, strikemidle=True, strikelast=False, userepl=True):
         '''
           Generates a HTML version of the assembly :
           - strikes absents (represented using [[Member assembly name]])
@@ -525,10 +526,11 @@ class CustomMeetingAndenne(Meeting):
         '''
         meeting = self.getSelf()
         repl = meeting.getUserReplacements()
-        repl2 = [repl[user] for user in repl]
+        repl2 = []
         repl3 = {}
         for user in repl:
-         repl3[repl[user]]=user
+            repl2.append (repl[user])
+            repl3[repl[user]] = user
         # either we use free textarea to define assembly...
         if meeting.getAssembly():
             tool = getToolByName(meeting, 'portal_plonemeeting')
@@ -549,7 +551,7 @@ class CustomMeetingAndenne(Meeting):
                 strikeme = True
                 deleteme = False
                 if userepl == True:
-                    ### ce members est-il a remplacer?
+                    # ce members est-il a remplacer?
                     if userId in repl:
                         # Oui, il est a remplacer
                         # si on decide de barrer le membre, on ne va pas le faire remplacer, donc comportement par defaut, sinon, on essaye ou pas de trouver un remplaçant
@@ -560,24 +562,29 @@ class CustomMeetingAndenne(Meeting):
                             userDuty = mUser.getReplacementDuty()
                             mUser = [mU for mU in UsedMeetingUsers if mU.getId() == repl[userId]][0]            
                             strikeme = False
+
                             userId = mUser.getId()
                             userTitle = mUser.Title()
+                            print "on remplace le membre par " + userTitle
+                    else:
+                        # ce membre n'est pas à remplacer mais peut-être qu'il remplace quelqu'un qu'on n'a pas décidé de ne pas barrer (dans quel cas , il ne faut plus le faire apparaitre)
+                        if userId in repl2 and not ((strikefirst == True and UsedMeetingUsersMinusreplacedIds.index(repl3[userId]) == 0) \
+                                                    or (strikemidle == True and UsedMeetingUsersMinusreplacedIds.index(repl3[userId]) > 0 and UsedMeetingUsersMinusreplacedIds.index(repl3[userId]) < len(UsedMeetingUsersMinusreplacedIds)-1) \
+                                                    or (strikelast == True and UsedMeetingUsersMinusreplacedIds.index(repl3[userId]) == len(UsedMeetingUsersMinusreplacedIds)-1)):
+                            deleteme = True 
                         else:
-                            ### ce membre n'est pas a remplacer mais peut-être qu'il remplace quelqu'un qu'on a pas décidé de ne pas barrer (dans quel cas , il ne faut plus le faire apparaitre)
-                            if userId in repl2 and not ((strikefirst==True and UsedMeetingUsersMinusreplacedIds.index(repl3[userId])==0) or (strikemidle==True and UsedMeetingUsersMinusreplacedIds.index(repl3[userId])>0 and UsedMeetingUsersMinusreplacedIds.index(repl3[userId])<len(UsedMeetingUsersMinusreplacedIds)-1) or (strikelast==True and UsedMeetingUsersMinusreplacedIds.index(repl3[userId])==len(UsedMeetingUsersMinusreplacedIds)-1)):
-                                deleteme = True 
-                            else:
-                                ### ce membre n'est pas a remplacer et il ne remplace personne, on va juste verifié si il doit être barré ou pas
-                                if not ((strikefirst==True and m==0) or (strikemidle==True and m>0 and m<len(UsedMeetingUsers)-1) or (strikelast==True and m==len(UsedMeetingUsers)-1)):
-                                    ### on a pas décidé de barrer donc il faut uniquement supprimer la personne sinon on a décidé de barrer le membre, c'est le comportement par défaut, on ne fait rien
-                                    if not userId in attendeeIds: #il faut juste verifié que il est bien absent avant de l'enlever
-                                        deleteme = True
-                    else: 
-                        # il n'y a pas de remplacement, on regarde juste si on barre ou pas
-                        if not ((strikefirst==True and m==0) or (strikemidle==True and m>0 and m<len(UsedMeetingUsers)-1) or (strikelast==True and m==len(UsedMeetingUsers)-1)):
-                            ### on a pas décidé de barrer donc il faut uniquement supprimer la personne sinon on a décidé de barrer le membre, c'est le comportement par défaut, on ne fait rien
-                            if not userId in attendeeIds: #il faut juste verifié que il est bien absent avant de l'enlever
-                                deleteme = True
+                            # ce membre n'est pas à remplacer et il ne remplace personne, on va juste verifier si il doit être barré ou pas
+                            if not ((strikefirst == True and m == 0) or (strikemidle == True and m > 0 and m < len(UsedMeetingUsers)-1) or (strikelast == True and m == len(UsedMeetingUsers) - 1)):
+                                # on n'a pas décidé de barrer donc il faut uniquement supprimer la personne sinon on a décidé de barrer le membre, c'est le comportement par défaut, on ne fait rien
+                                if not userId in attendeeIds: # il faut juste verifier qu'il est bien absent avant de l'enlever
+                                    deleteme = True
+                else:
+                    # il n'y a pas de remplacement, on regarde juste si on barre ou pas
+                    if not ((strikefirst == True and m == 0) or (strikemidle == True and m > 0 and m < len(UsedMeetingUsers)-1) \
+                            or (strikelast == True and m == len(UsedMeetingUsers) - 1)):
+                        # on n'a pas décidé de barrer donc il faut uniquement supprimer la personne sinon on a décidé de barrer le membre, c'est le comportement par défaut, on ne fait rien
+                        if not userId in attendeeIds: # il faut juste verifier qu'il est bien absent avant de l'enlever
+                            deleteme = True
                 #### END ADDED BY FABMAR
 
                 # if we group by duty, create an OrderedDict where the key is the duty
@@ -987,8 +994,8 @@ class CustomMeetingItemAndenne(MeetingItem):
     MeetingItem.getDocReference = getDocReference
     # it'a a monkey patch because it's the only way to have a default method in the schema
 
-    security.declarePublic('listUserGroup')
-    def listUserGroup(self):
+    security.declarePublic('listTreatUsers')
+    def listTreatUsers(self):
         '''Lists the Users that are associated to the proposing group(s) of the authenticated user.'''
         userCreatorGroups = self.portal_plonemeeting.getGroupsForUser(suffix="creators", userId = self.Creator(), zope=True)
 
@@ -996,11 +1003,68 @@ class CustomMeetingItemAndenne(MeetingItem):
         for group in userCreatorGroups:
             for user in group.getMemberIds():
                 res.add( (user, self.portal_membership.getMemberById(user).getProperty('fullname')) )
+        res = sorted(res, key=collateDisplayListsValues)
 
         return DisplayList( tuple(res) )
 
-    MeetingItem.listUserGroup = listUserGroup
+    MeetingItem.listTreatUsers = listTreatUsers
     # it'a a monkey patch because it's the only way to have a default method in the schema
+
+    security.declarePublic('listProposingGroups')
+    def listProposingGroups(self):
+        '''Return the sorted MeetingGroup(s) that may propose this item. If no group is
+           set yet, this method returns the MeetingGroup(s) the user belongs
+           to. If a group is already set, it is returned.
+           If this item is being created or edited in portal_plonemeeting (as a
+           recurring item), the list of active groups is returned.'''
+        tool = getToolByName(self, 'portal_plonemeeting')
+        groupId = self.getField('proposingGroup').get(self)
+        isDefinedInTool = self.isDefinedInTool()
+        # bypass for Managers, pass idDefinedInTool to True so Managers
+        # can select any available MeetingGroup
+        isManager = tool.isManager(self, realManagers=True)
+        res = tool.getSelectableGroups(isDefinedInTool=(isDefinedInTool or isManager),
+                                       existingGroupId=groupId)
+        res = sorted(res, key=collateDisplayListsValues)
+        # add a 'make_a_choice' value when the item is in the tool
+        if isDefinedInTool:
+            res.insert(0, ('', translate('make_a_choice',
+                           domain='PloneMeeting',
+                           context=self.REQUEST)))
+        return DisplayList(tuple(res))
+
+    MeetingItem.listProposingGroups = listProposingGroups
+    # it'a a monkey patch because it's the only way to change the behaviour of the MeetingItem class
+
+    security.declarePublic('listCopyGroups')
+    def listCopyGroups(self):
+        '''Lists the groups that will be selectable to be in copy for this
+           item.'''
+        cfg = self.portal_plonemeeting.getMeetingConfig(self)
+        res = []
+        for groupId in cfg.getSelectableCopyGroups():
+            group = self.portal_groups.getGroupById(groupId)
+            res.append((groupId, group.getProperty('title')))
+
+        # make sure groups already selected for the current item
+        # and maybe not in the vocabulary are added to it so
+        # the field is correctly displayed while editing/viewing it
+        copyGroups = self.getCopyGroups()
+        if copyGroups:
+            copyGroupsInVocab = [copyGroup[0] for copyGroup in res]
+            for groupId in copyGroups:
+                if not groupId in copyGroupsInVocab:
+                    group = self.portal_groups.getGroupById(groupId)
+                    if group:
+                        res.append((groupId, group.getProperty('title')))
+                    else:
+                        res.append((groupId, groupId))
+        res = sorted(res, key=collateDisplayListsValues)
+
+        return DisplayList(tuple(res))
+
+    MeetingItem.listCopyGroups = listCopyGroups
+    # it'a a monkey patch because it's the only way to change the behaviour of the MeetingItem class
 
     security.declareProtected('Modify portal content', 'onWelcomePerson')
     def onWelcomePerson(self):
@@ -1532,7 +1596,7 @@ class CustomToolMeetingAndenne(ToolPloneMeeting):
         tool = getToolByName(self.context, 'portal_plonemeeting')
         for group in tool.getMeetingGroups():
             res.append((group.id, group.getName()))
-        res = sorted( res, key=collateDisplayListsValues )
+        res = sorted(res, key = collateDisplayListsValues)
         return res
 
     security.declarePrivate('listDestUsers')
@@ -1543,7 +1607,7 @@ class CustomToolMeetingAndenne(ToolPloneMeeting):
         for user in pgp.listMembers():
             if user.getProperty('listed'):
                 res.append( (user.getId(), user.getProperty('fullname')) )
-        res = sorted( res, key=collateDisplayListsValues )
+        res = sorted(res, key = collateDisplayListsValues)
         return res
 
     security.declarePublic('getCourrierfakeConfig')

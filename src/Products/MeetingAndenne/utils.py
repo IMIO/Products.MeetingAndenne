@@ -36,8 +36,8 @@ def isFloat(string):
     except ValueError:
         return False
 
-def collateDisplayListsNames(displayListTuple):
-    '''Function used to collate DisplayLists tuples by name.'''
+def collateDisplayListsKeys(displayListTuple):
+    '''Function used to collate DisplayLists tuples by key.'''
     return locale.strxfrm(displayListTuple[0])
 
 def collateDisplayListsValues(displayListTuple):
