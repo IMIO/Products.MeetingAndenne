@@ -308,7 +308,7 @@ msgstr "Cette formation à pour but..."
 
 #. Default: ""
 msgid "MeetingAndenne_training_description1"
-msgstr "<p>Du ${training_startDate}, au ${training_endDate} ${training_periodicity} ${training_organiser} organise ${training_type} sur le thème <i>${training_purpose}</i>.</p>"
+msgstr "<p>Du %(training_startDate)s, au %(training_endDate)s %(training_periodicity)s %(training_organiser)s organise %(training_type)s sur le thème <i>%(training_purpose)s</i>.</p>"
 
 #. Default: ""
 msgid "MeetingAndenne_training_description2"
