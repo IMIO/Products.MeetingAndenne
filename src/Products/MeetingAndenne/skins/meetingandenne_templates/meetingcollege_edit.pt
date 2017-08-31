@@ -257,8 +257,7 @@
                                  cbid python: 'muser_%s_signer' % mid;"
                      tal:condition="python: mid in allSigners"
                      tal:attributes="id cbid; name cbid;
-                                     checked python: test(errors, request.get(cbid, '')=='on', mid in signers);
-                                     disabled python: test(mUser in allUsersrepl,False,True)"/>
+                                     checked python: test(errors, request.get(cbid, '')=='on', mid in signers)"/>
             </td>
             <td tal:condition="useUserReplacements">
               <select tal:define="mid mUser/getId;
