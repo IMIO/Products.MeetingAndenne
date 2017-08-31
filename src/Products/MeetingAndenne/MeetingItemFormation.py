@@ -20,10 +20,6 @@ from Products.MeetingAndenne.utils import *
 
 # ------------------------------------------------------------------------------
 
-# Some lines added for the OCR functionalities
-#import os, os.path, time, unicodedata
-#import transaction
-
 import logging
 logger = logging.getLogger( 'MeetingAndenne' )
 
@@ -252,6 +248,7 @@ class MeetingItemFormation(CustomMeetingItemAndenne):
     security = ClassSecurityInfo()
 
     meta_type = 'MeetingItem'
+    portal_type = 'MeetingItem'
     schema = MeetingItemFormation_schema
 
     def __init__(self, item):
@@ -498,7 +495,9 @@ class MeetingItemFormation(CustomMeetingItemAndenne):
         CustomMeetingItemAndenne.onEdit(self, isCreated)
 
 
-generateClass(MeetingItemFormation)
+#import pdb; pdb.set_trace()
+registerType(MeetingItemFormation, PROJECTNAME)
+#generateClass(MeetingItemFormation)
 
 # Create missing accessors and mutators in MeetingItem class
 meetingItemSchema = MeetingItem.schema
