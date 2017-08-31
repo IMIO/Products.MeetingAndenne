@@ -476,12 +476,28 @@ class CustomMeetingAndenne(Meeting):
     ##### Functions used for template generation ############################
 
     security.declarePublic('getDisplayableName')
-    def getDisplayableName(self):
+    def getDisplayableName(self, withHour=True):
         '''Formats the name of a meeting in the way it is printed in templates.'''
         meeting = self.getSelf()
-        return meeting.portal_plonemeeting.formatMeetingDate(meeting=meeting, withHour=True)
+        if not withHour:
+            return meeting.portal_plonemeeting.formatMeetingDate(meeting=meeting, withHour=withHour)
 
-    Meeting.getDisplayableName=getDisplayableName
+        if meeting.__class__.__name__ == 'mybrains':
+            # It is a meeting brain, take the 'date_attr' metadata
+            date = getattr(meeting, 'getDate')
+        else:
+            # received meeting is a Meeting instance
+            date = getattr(meeting, 'getDate')()
+
+        # Get the format for the rendering of p_aDate
+        if date._hour or date._minute :
+            fmt = ' (%Hh%M)'
+            h = date.strftime(fmt)
+        else:
+            h = ''
+        return meeting.portal_plonemeeting.formatMeetingDate(meeting=meeting, withHour=False) + h
+
+    Meeting.getDisplayableName = getDisplayableName
     # it'a a monkey patch because it's the only way to add a behaviour to the Meeting class
 
     security.declarePublic('getSignatoriesForPrinting') 
@@ -509,7 +525,7 @@ class CustomMeetingAndenne(Meeting):
             # Si c'est un echevin on remplace par bg ff, si c'est un secretaire en general on a deja un dg f.f dans la fonction  principale de celui qui remplace)
             # le getduty revoit la fonction remplacé si includereplacement=true et qu'il y a vraiment un remplaçant inscrit (grace au fakemeetinguser revoyer à la place)
             duty = res[pos].getDuty()
-            if duty=="Echevin":
+            if duty == "Echevin":
                 return "Bourgmestre f.f"
             else:
                 return duty
@@ -565,7 +581,6 @@ class CustomMeetingAndenne(Meeting):
 
                             userId = mUser.getId()
                             userTitle = mUser.Title()
-                            print "on remplace le membre par " + userTitle
                     else:
                         # ce membre n'est pas à remplacer mais peut-être qu'il remplace quelqu'un qu'on n'a pas décidé de ne pas barrer (dans quel cas , il ne faut plus le faire apparaitre)
                         if userId in repl2 and not ((strikefirst == True and UsedMeetingUsersMinusreplacedIds.index(repl3[userId]) == 0) \
@@ -628,96 +643,6 @@ class CustomMeetingAndenne(Meeting):
                                     "</strike>"
                         res[-1] = lastAdded
             return "<p class='mltAssembly'>" + '<br />'.join(res) + "</p>"
-
-    security.declarePublic('reformAssembly')
-    def reformAssembly(self, assembly, strikefirst=True, strikemidle=True, strikelast=False, userepl=True):
-        '''To be changed.'''
-        # new from plonemeeting 3.3 : used for template only in the header of pv and other. use the return of getstrikeassembly (and item) function to add the replacement user
-        # pour une personne absente, soit on la barre (strike=true) , soit on la supprime (strike=false)
-        # on peut decider de barrer ou supprimer la premiere ligne (bg) , les lignes du milieu (echevin) ou la derniere ligne (directeur)
-        # le comportement par defaut est celui que l'on veur pour la note d'execution
-        # on tiendra compte du "remplacé par" si usereplace=true mais on ne tiendra pas compte du "remplacé par" si on barre ou si userplace=false  
-        res = []
-        meeting = self.getSelf()
-        repl = meeting.getUserReplacements()
-        repl2 = [repl[user] for user in repl]
-        UsedMeetingUsers = meeting.getAllUsedMeetingUsers()
-        # liste des gens remplaçant possible a faire correspondre avec la combo "remplacé par" sinon soucis !
-        UsedMeetingUsers2 = meeting.getAllUsedMeetingUsers(usages = ('assemblyMember', 'signer', ), includeAllActive = True )
-        lines = assembly.split('<br />')
-        #print UsedMeetingUsers
-        m = 0
-        for line in lines:
-            my_line = ''
-            fct = line.split(' - ')
-            fctline = fct[1]
-            minline = 0
-            members = fct[0].split(', ')
-            for member in members:
-                #print member
-                if userepl == True:
-                    ### ce members est-il a remplacer ?
-                    if UsedMeetingUsers[m].getId() in repl :
-                        # si on decide de barrer le membre, on ne va pas le faire remplacer, donc comportement par defaut, sinon, on essaye ou pas de trouver un remplaçant
-                        if( strikefirst == True and m == 0 ) or ( strikemidle == True and m > 0 and m < len(UsedMeetingUsers) - 1) or (strikelast == True and m == len(UsedMeetingUsers) - 1):
-                            my_line = "%s%s, " % (my_line,member)
-                        else:
-                            r = [mUser.Title() for mUser in UsedMeetingUsers2 if mUser.getId() == repl[UsedMeetingUsers[m].getId()]]
-                            #f=[mUser.getReplacementDuty() for mUser in UsedMeetingUsers2 if mUser.getId() == repl[UsedMeetingUsers[m].getId()]]
-                            f = UsedMeetingUsers[m].getReplacementDuty()               
-                            if m == 0:
-                                my_line = "%s%s, " % ("<p class='mltAssembly'>",r[0])
-                            else:
-                                my_line = "%s%s, " % (my_line,r[0])
-
-                            if m == len(UsedMeetingUsers) - 1:
-                                fctline= "%s%s" % (f,"</p>")
-                            else:
-                                fctline= f
-                    else:
-                        ### ce membre remplace t'il quelqu'un qui n'est pas barré ?
-                        if UsedMeetingUsers[m].getId() in repl2 and (strikefirst == False or UsedMeetingUsers[m].getId() <> repl[UsedMeetingUsers[0].getId()]) and (strikemidle == False or UsedMeetingUsers[m].getId() == repl[UsedMeetingUsers[0].getId()] or UsedMeetingUsers[m].getId() == repl[UsedMeetingUsers[len(UsedMeetingUsers) - 1].getId()]) and (strikelast == False or UsedMeetingUsers[m].getId() <> repl[UsedMeetingUsers[len(UsedMeetingUsers) - 1].getId()]):
-                            minline -= 1 
-                        else:
-                            if (strikefirst == True and m == 0) or (strikemidle == True and m > 0 and m < len(UsedMeetingUsers) - 1) or (strikelast == True and m == len(UsedMeetingUsers) - 1):
-                                my_line = "%s%s, " % (my_line,member)
-                            else:
-                                if member.find("<strike>") <> -1:
-                                    minline -= 1
-                                    if (m == 0):
-                                        my_line = "<p class='mltAssembly'>"
-                                    if (m == len(UsedMeetingUsers) - 1):
-                                        my_line = "%s%s" % (my_line,"</p>")
-                                else:
-                                    my_line = "%s%s, " % (my_line,member)
-                else:
-                    if (strikefirst == True and m == 0) or (strikemidle == True and m > 0 and m < len(UsedMeetingUsers) - 1) or (strikelast == True and m == len(UsedMeetingUsers) - 1):
-                        ### on  barre  et on ne remplace pas, on va donc simplement suivre le comportement par default 
-                        my_line = "%s%s, " % (my_line,member)
-                    else:
-                       if member.find("<strike>") <> -1:
-                           minline -= 1
-                           if (m == 0):
-                               my_line = "<p class='mltAssembly'>"
-                           if (m == len(UsedMeetingUsers) - 1):
-                               my_line = "%s%s" % (my_line,"</p>")
-                       else:
-                           my_line = "%s%s, " % (my_line,member)
-
-                m += 1
-                minline += 1
-
-            if minline > 0:
-                my_line = "%s%s<br />" % (my_line,fctline)
-            print my_line
-            res.append(my_line)
-
-        if len(res) > 1:
-            res[-1] = res[-1].replace('<br />', '')
-        else:
-            return ''
-        print ''.join(res)
-        return ''.join(res)
 
     security.declarePublic('getAbsentsForPrinting') 
     def getAbsentsForPrinting(self):
@@ -874,13 +799,13 @@ class CustomMeetingItemAndenne(MeetingItem):
     def getPrintableCopyTo(self):
         '''Formats the copyGroups field to print in the templates.'''
         groupsCopyTo = self.context.getCopyGroups()
-        groupstr=''
+        groupstr = ''
         if groupsCopyTo:
             for group in groupsCopyTo:
                 ploneGroup = self.context.portal_groups.getGroupById(group)
-                groupstr += ploneGroup.getProperty('title').split('(')[0] + ','
+                groupstr += ploneGroup.getProperty('title').split('(')[0][0:-1] + ', '
         if groupstr != '':
-            return 'Copie(s): ' + groupstr[0:-1]
+            return 'Copie(s): ' + groupstr[0:-2]
         else:
             return ''
 
@@ -931,16 +856,136 @@ class CustomMeetingItemAndenne(MeetingItem):
             else:
                 return duty
 
+    security.declarePublic('getStrikedItemAssembly')
+    def getStrikedItemAssembly(self, groupByDuty=True, strikefirst=True, strikemidle=True, strikelast=False, userepl=True):
+        '''
+          Generates a HTML version of the assembly :
+          - strikes absents (represented using [[Member assembly name]])
+          - add a 'mltAssembly' class to generated <p> so it can be used in the Pod Template
+          If p_groupByDuty is True, the result will be generated with members having the same
+          duty grouped, and the duty only displayed once at the end of the list of members
+          having this duty...  This is only relevant if MeetingUsers are enabled.
+        '''
+        item = self.getSelf()
+        meeting = item.getMeeting()
+        repl = meeting.getUserReplacements()
+        repl2 = []
+        repl3 = {}
+        for user in repl:
+            repl2.append(repl[user])
+            repl3[repl[user]] = user
+        # either we use free textarea to define assembly...
+        if item.getAssembly():
+            tool = getToolByName(item, 'portal_plonemeeting')
+            return tool.toHTMLStrikedContent(item.getItemAssembly())
+        # ... or we use MeetingUsers
+        elif item.getAttendees():
+            res = []
+            attendees = meeting.getAttendees(True)
+            attendeeIds = []
+            for user in attendees:
+                if not ((not user.isPresent(self.context, meeting) and user.getId() not in self.context.getItemPresents()) or user.getId() in self.context.getItemAbsents()):
+                    attendeeIds.append(user.getId())
+            meeting.getAttendees()
+            groupedByDuty = OrderedDict()
+            m = 0
+            UsedMeetingUsers = [mUser for mUser in meeting.getAllUsedMeetingUsers(usages=['assemblyMember', 'signer', ])] # ADDED BY FABMAR : just added signer for rongos from original
+            UsedMeetingUsersMinusreplacedIds = [mUser.getId() for mUser in meeting.getAllUsedMeetingUsers(usages=['assemblyMember', 'signer', ]) if mUser.getId() not in repl2] # ADDED BY FABMAR
+            for mUser in UsedMeetingUsers:
+                ### ADDED BY FABMAR FROM ORIGINAL
+                userId = mUser.getId()
+                userTitle = mUser.Title()
+                userDuty = mUser.getDuty()
+                strikeme = True
+                deleteme = False
+                if userepl == True:
+                    # ce members est-il a remplacer?
+                    if userId in repl:
+                        # Oui, il est a remplacer
+                        # si on decide de barrer le membre, on ne va pas le faire remplacer, donc comportement par defaut, sinon, on essaye ou pas de trouver un remplaçant
+                        if not ( (strikefirst == True and UsedMeetingUsersMinusreplacedIds.index(userId) == 0) \
+                                 or (strikemidle == True and UsedMeetingUsersMinusreplacedIds.index(userId) > 0 and UsedMeetingUsersMinusreplacedIds.index(userId) < len(UsedMeetingUsersMinusreplacedIds) - 1) \
+                                 or (strikelast == True and UsedMeetingUsersMinusreplacedIds.index(userId) == len(UsedMeetingUsersMinusreplacedIds) - 1)):
+                            # on remplace le membre car on a pas décidé de le barrer, sinon comportement par defaut
+                            userDuty = mUser.getReplacementDuty()
+                            mUser = [mU for mU in UsedMeetingUsers if mU.getId() == repl[userId]][0]
+                            strikeme = False
+                            userId = mUser.getId()
+                            userTitle = mUser.Title()
+                    else:
+                        # ce membre n'est pas à remplacer mais peut-être qu'il remplace quelqu'un qu'on n'a pas décidé de ne pas barrer (dans quel cas , il ne faut plus le faire apparaitre)
+                        if userId in repl2 and not ((strikefirst == True and UsedMeetingUsersMinusreplacedIds.index(repl3[userId]) == 0) \
+                                                    or (strikemidle == True and UsedMeetingUsersMinusreplacedIds.index(repl3[userId]) > 0 and UsedMeetingUsersMinusreplacedIds.index(repl3[userId]) < len(UsedMeetingUsersMinusreplacedIds)-1) \
+                                                    or (strikelast == True and UsedMeetingUsersMinusreplacedIds.index(repl3[userId]) == len(UsedMeetingUsersMinusreplacedIds)-1)):
+                            deleteme = True
+                        else:
+                            # ce membre n'est pas à remplacer et il ne remplace personne, on va juste verifier si il doit être barré ou pas
+                            if not ((strikefirst == True and m == 0) or (strikemidle == True and m > 0 and m < len(UsedMeetingUsers)-1) or (strikelast == True and m == len(UsedMeetingUsers) - 1)):
+                                # on n'a pas décidé de barrer donc il faut uniquement supprimer la personne sinon on a décidé de barrer le membre, c'est le comportement par défaut, on ne fait rien
+                                if not userId in attendeeIds: # il faut juste verifier qu'il est bien absent avant de l'enlever
+                                    deleteme = True
+                else:
+                    # il n'y a pas de remplacement, on regarde juste si on barre ou pas
+                    if not ((strikefirst == True and m == 0) or (strikemidle == True and m > 0 and m < len(UsedMeetingUsers)-1) \
+                            or (strikelast == True and m == len(UsedMeetingUsers) - 1)):
+                        # on n'a pas décidé de barrer donc il faut uniquement supprimer la personne sinon on a décidé de barrer le membre, c'est le comportement par défaut, on ne fait rien
+                        if not userId in attendeeIds: # il faut juste verifier qu'il est bien absent avant de l'enlever
+                            deleteme = True
+                #### END ADDED BY FABMAR
+
+                # if we group by duty, create an OrderedDict where the key is the duty
+                # and the value is a list of meetingUsers having this duty
+                if not deleteme: ### ADDED BY FABMAR
+                    if groupByDuty:
+                        if not userDuty in groupedByDuty:
+                            groupedByDuty[userDuty] = []
+                        if userId in attendeeIds:
+                            groupedByDuty[userDuty].append(mUser.Title())
+                        else:
+                            if strikeme:  #### ADDED BY FABMAR
+                                groupedByDuty[userDuty].append("<strike>%s</strike>" % userTitle)
+                            else:
+                                groupedByDuty[userDuty].append(mUser.Title())
+                    else:
+                        if userId in attendeeIds:
+                            res.append("%s, %s" % (mUser.Title(), userDuty))
+                        else:
+                            if strikeme:  #### ADDED BY FABMAR
+                                res.append("<strike>%s, %s</strike>" % (mUser.Title(), userDuty))
+                            else:
+                                res.append("%s, %s" % (mUser.Title(), userDuty))
+                m = m + 1
+            if groupByDuty:
+                for duty in groupedByDuty:
+                    # check if every member of given duty are striked, we strike the duty also
+                    everyStriked = True
+                    for elt in groupedByDuty[duty]:
+                        if not elt.startswith('<strike>'):
+                            everyStriked = False
+                            break
+                    res.append(', '.join(groupedByDuty[duty]) + ', ' + duty)
+                    if len(groupedByDuty[duty]) > 1:
+                        # add a trailing 's' to the duty if several members have the same duty...
+                        res[-1] = res[-1] + 's'
+                    if everyStriked:
+                        lastAdded = res[-1]
+                        # strike the entire line and remove existing <strike> tags
+                        lastAdded = "<strike>" + lastAdded.replace('<strike>', '').replace('</strike>', '') + \
+                                    "</strike>"
+                        res[-1] = lastAdded
+            return "<p class='mltAssembly'>" + '<br />'.join(res) + "</p>"
+
     security.declarePublic('getItemAbsentsForPrinting') 
     def getItemAbsentsForPrinting(self):
-        item = self.getSelf()
+        item = self.context.getSelf()
         res = ''
-        absents = item.getItemAbsents(theObjects = True)
-        if absents:
-            res = "<p class='mltAssembly'>"
-            for user in absents:
-                res += "%s, %s<br />" % (user.Title(), user.getDuty())
-            res += "</p>"
+        meeting = item.getMeeting()
+        attendees = meeting.getAttendees(True)
+        for user in attendees:
+            if (not user.isPresent(self.context, meeting) and user.getId() not in self.context.getItemPresents()) or user.getId() in self.context.getItemAbsents():
+                res = "%s%s, %s%s" % (res, user.Title(), user.getDuty(), "<br />")
+        if res != '':
+            res= "%s%s%s" % ("<p class='mltAssembly'>", res, "</p>")
         return res
 
     security.declarePublic('getCurrentDate')
@@ -1008,6 +1053,20 @@ class CustomMeetingItemAndenne(MeetingItem):
         return DisplayList( tuple(res) )
 
     MeetingItem.listTreatUsers = listTreatUsers
+    # it'a a monkey patch because it's the only way to have a default method in the schema
+
+    security.declarePublic('listItemSignatories')
+    def listItemSignatories(self):
+        '''Returns a list of available signatories for the item.'''
+        res = []
+        if self.hasMeeting():
+            # Get IDs of attendees
+            for m in self.getMeeting().getAllUsedMeetingUsers(usages=['signer', ],includeAllActive=True): ### MODIFIED To display all signer and not only the present (use in meetingitemcollege_edit to display the signer list)
+                if 'signer' in m.getUsages():
+                    res.append((m.id, m.Title()))
+        return DisplayList(tuple(res))
+
+    MeetingItem.listItemSignatories = listItemSignatories
     # it'a a monkey patch because it's the only way to have a default method in the schema
 
     security.declarePublic('listProposingGroups')
@@ -1274,6 +1333,53 @@ class CustomMeetingItemAndenne(MeetingItem):
     def onDuplicate(self):
         '''This method is triggered when the users clicks on
            "duplicate item".'''
+#        cpt = 0
+#        schemas = set()
+#        objects = dict()
+#        import pdb; pdb.set_trace()
+#        for brain in self.getSelf().portal_catalog.searchResults(meta_type='MeetingItem'):
+#            obj = brain.getObject()
+#            template = getattr(obj, 'template', None)
+##            if template != None:
+##                import Products.MeetingAndenne.MeetingItemFormation
+##                obj.schema = Products.MeetingAndenne.MeetingItemFormation.MeetingItemFormation_schema
+#            if obj.schema not in schemas:
+#                pdb.set_trace()
+#                cpt += 1
+#                string = "%5d " % cpt
+#                string += str(obj.schema) + " : " + obj.absolute_url()
+#                print string
+#                schemas.add(obj.schema)
+#                objects[str(obj.schema)] = obj
+
+#        import pdb; pdb.set_trace()
+#        print "Ah ouias..."
+#            template = getattr(obj, 'template', None)
+#            inAndOutMoves = getattr(obj, 'inAndOutMoves', None)
+#            notes = getattr(obj, 'notes', None)
+#
+#            if template != None or inAndOutMoves is None or notes is None:
+#                cpt += 1
+#                string = "%5d " % cpt
+#                type = ''
+#                if template != None:
+#                    type += "T"
+#                else:
+#                    type += ' '
+#                if inAndOutMoves != None:
+#                    type += "M"
+#                else:
+#                    type += ' '
+#                if notes != None:
+#                    type += "N"
+#                else:
+#                    type += ' '
+#                string += type
+#
+#            if template != None:
+#                string += " Type: " + template
+#                string += ' : ' + obj.absolute_url()
+#                print string
         user = self.portal_membership.getAuthenticatedMember()
         newItem = self.clone(newOwnerId=user.id, cloneEventAction='Duplicate')
         newItem.setDecision(self.getTextpv())
