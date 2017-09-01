@@ -237,3 +237,18 @@
 #search-results-bar dl, #search-results-bar #searchResultsSort {
     display: inline;
 }
+.pm_meeting_listing_th_proposingGroupAcronym, .pm_meeting_listing_th_categoryOrProposingGroup,.pm_meeting_listing_th_state,.pm_meeting_listing_th_creator {
+width: 1%;
+}
+.pm_meeting_listing_th_title {
+    width: 100%;
+}
+.pmMoreInfo {
+    font-size: 85%;
+}
+.pm_listing_th_creator, .pm_listing_th_state, .pm_listing_th_creationDate, .pm_listing_th_relatedMeeting , .pm_meeting_listing_th_advices {
+width: 1%;
+}
+.pm_listing_th_title {
+width: 100%
+}

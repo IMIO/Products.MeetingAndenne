@@ -121,7 +121,7 @@
       <tal:comment replace="nothing">Checkbox column for selecting items.</tal:comment>
       <th class="pm_meeting_listing_th_checkBoxes"
           tal:condition="showCheckboxes"
-          tal:attributes="style python: showActions and 'width: 48px' or 'width: 1%';">
+          tal:attributes="style python: showActions and 'width: 4px' or 'width: 1%';">
         <img tal:condition="itemsNumbering"
              tal:attributes="src string: $portal_url/select_items.png"
              i18n:attributes="title" title="helpSelectItemsIcon"
