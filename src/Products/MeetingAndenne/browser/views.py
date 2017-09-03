@@ -99,7 +99,7 @@ class RunDocsplitOnBlobsView(BrowserView):
         logger.info('Looking to see if there are still some blobs to convert.')
 
         catalog = getToolByName(self.context, 'portal_catalog')
-        types = ('CourrierFile', 'MeetingFile')
+        types = ('MeetingFile', 'CourrierFile')
         cpt = 0
         for type in types:
             if cpt >= CRON_BATCH_SIZE:
@@ -128,14 +128,34 @@ class RunDocsplitOnBlobsView(BrowserView):
                     else:
                         results = annotations['collective.documentviewer']
                         if 'converting' in results and results['converting']:
-                            logger.info('Object still under conversion : %s' % object.absolute_url())
-                            cpt += 1
-                            continue
+                            if not 'Products.MeetingAndenne' in annotations:
+                                annotations['Products.MeetingAndenne'] = PersistentMapping()
+                            if 'converting' not in annotations['Products.MeetingAndenne']:
+                                annotations['Products.MeetingAndenne']['converting'] = True
+                                logger.warning('Object still under conversion : %s' % object.absolute_url())
+                                cpt += 1
+                                continue
+                            else:
+                                logger.warning('Object conversion stuck : %s' % object.absolute_url())
+                                queueObject = True
+                                if object.meta_type == 'MeetingFile' and 'toPrint' in annotations['Products.MeetingAndenne']:
+                                    object.toPrint = annotations['Products.MeetingAndenne']['toPrint']
+                                if 'stuckCount' not in annotations['Products.MeetingAndenne']:
+                                    annotations['Products.MeetingAndenne']['stuckCount'] = 1
+                                else:
+                                    stuckCount = annotations['Products.MeetingAndenne']['stuckCount'] + 1
+                                    if stuckCount <= 3:
+                                        annotations['Products.MeetingAndenne']['stuckCount'] = stuckCount
+                                    else:
+                                        logger.error('Object not convertable after three trials : %s' % object.absolute_url())
+                                        object.toPrint = False
+                                        queueObject = False
+                                        removeFlags = True
                         if 'successfully_converted' in results and results['successfully_converted']:
                             removeFlags = True
                         else:
                             if 'successfully_converted' in results:
-                                logger.info('Object conversion failed : %s' % object.absolute_url())
+                                logger.error('Object conversion failed : %s' % object.absolute_url())
                             queueObject = True
                             if object.meta_type == 'MeetingFile':
                                 if 'Products.MeetingAndenne' in annotations and 'toPrint' in annotations['Products.MeetingAndenne']:

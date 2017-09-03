@@ -124,7 +124,7 @@ CUSTOM_TYPES_BY_CONFIG = {
 # cron4plone defines
 CRON_PARAMS = u'0 20 * * '
 CRON_VIEW = u'portal/@@run-docsplit-on-blobs'
-CRON_BATCH_SIZE = 2000
+CRON_BATCH_SIZE = 2500
 
 ##/code-section config-bottom
 
