@@ -171,7 +171,7 @@ class CourrierFile(ATBlob, BrowserDefaultMixin):
 
     security.declarePrivate('deletefile')
     def deletefile(self):
-        os.system( "mv /home/zope/scan/scantmp/" + str(self.getId()) + " /home/zope/scan/scanarchived/" + str(self.getId()))
+        os.system( "mv /home/zope/scan/scantmp/" + str(self.getFilename()) + " /home/zope/scan/scanarchived/" + str(self.getFilename()))
 
     security.declarePrivate('listDestUsers')
     def listDestUsers(self):
