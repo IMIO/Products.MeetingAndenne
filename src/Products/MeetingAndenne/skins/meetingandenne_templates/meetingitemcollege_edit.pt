@@ -90,9 +90,12 @@
     <tal:comment replace="nothing">Associated groups, optional advisers and copyGroups</tal:comment>
     <table cellpadding="0" cellspacing="0">
       <tr valign="top">
-        <td tal:condition="python: 'associatedGroups' in usedAttrs"><metal:field use-macro="python:here.widget('associatedGroups', mode='edit')"/></td>
-        <td tal:condition="context/isAdvicesEnabled"><metal:field use-macro="python:here.widget('optionalAdvisers', mode='edit')"/></td>
         <td tal:condition="context/isCopiesEnabled"><metal:field use-macro="python:here.widget('copyGroups', mode='edit')"/></td>
+        <td tal:condition="context/isAdvicesEnabled"><metal:field use-macro="python:here.widget('optionalAdvisers', mode='edit')"/></td>
+      </tr>
+    </table>
+    <table cellpadding="0" cellspacing="0">
+      <tr valign="top">
         <td tal:condition="python: 'itemSignatories' in usedAttrs"><metal:field use-macro="python:here.widget('itemSignatories', mode='edit')"/></td>
       </tr>
     </table>
@@ -138,7 +141,11 @@
       <br/>
     </div>
     </tal:budget>
-
+    <table cellpadding="0" cellspacing="0">
+     <tr valign="top">
+      <td tal:condition="python: 'associatedGroups' in usedAttrs"><metal:field use-macro="python:here.widget('associatedGroups', mode='edit')"/></td>
+     </tr>
+    </table>
     <metal:field use-macro="python:here.widget('oralQuestion', mode='edit')"/>
     <metal:field use-macro="python:here.widget('itemInitiator', mode='edit')"/>
 
