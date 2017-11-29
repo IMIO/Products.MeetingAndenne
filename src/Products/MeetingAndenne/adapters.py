@@ -21,6 +21,7 @@
 #
 # ------------------------------------------------------------------------------
 
+import cgi
 from appy.gen import No
 from persistent.mapping import PersistentMapping
 from zope.interface import implements
@@ -29,6 +30,7 @@ from collections import OrderedDict
 from AccessControl import ClassSecurityInfo
 from Products.Archetypes.atapi import DisplayList
 from Globals import InitializeClass
+from Products.CMFPlone.utils import set_own_login_name, safe_unicode
 from Products.CMFCore.permissions import ModifyPortalContent, ReviewPortalContent
 from Products.CMFCore.utils import getToolByName
 from plone import api
@@ -36,7 +38,7 @@ from plone.app.users.browser.personalpreferences import UserDataPanelAdapter
 from plone.app.users.browser.personalpreferences import PersonalPreferencesPanelAdapter
 from imio.helpers.xhtml import xhtmlContentIsEmpty
 from Products.PloneMeeting.config import ITEM_NO_PREFERRED_MEETING_VALUE, \
-     TOPIC_SEARCH_SCRIPT, TOPIC_SEARCH_FILTERS, TOPIC_TYPE, MEETINGREVIEWERS
+     TOPIC_SEARCH_SCRIPT, TOPIC_SEARCH_FILTERS, TOPIC_TYPE, MEETINGREVIEWERS, NOT_GIVEN_ADVICE_VALUE
 from Products.PloneMeeting.Meeting import MeetingWorkflowActions, \
      MeetingWorkflowConditions, Meeting
 from Products.PloneMeeting.MeetingItem import MeetingItem, \
@@ -178,13 +180,27 @@ adaptations.performWorkflowAdaptations = customPerformWorkflowAdaptations
 class EnhancedUserDataPanelAdapter(UserDataPanelAdapter):
     """
     """
+    
     def get_function(self):
-        return self.context.getProperty('function', '')
+        return safe_unicode(self.context.getProperty('function', ''))
+
     def set_function(self, value):
         if value is None:
             value = ''
         return self.context.setMemberProperties( {'function': value} )
+    
     function = property(get_function, set_function)
+
+    def get_defaultref(self):
+        return safe_unicode(self.context.getProperty('defaultref', ''))
+
+    def set_defaultref(self, value):
+        if value is None:
+            value = ''
+        return self.context.setMemberProperties( {'defaultref': value} )
+
+    defaultref=property(get_defaultref, set_defaultref)
+
 
     def get_gender(self):
         return self.context.getProperty('gender', '')
@@ -193,6 +209,16 @@ class EnhancedUserDataPanelAdapter(UserDataPanelAdapter):
             value = ''
         return self.context.setMemberProperties( {'gender': value} )
     gender = property(get_gender, set_gender)
+
+    def get_defaultgroup(self):
+        return safe_unicode(self.context.getProperty('defaultgroup', ''))
+
+    def set_defaultgroup(self, value):
+        if value is None:
+            value = ''
+        return self.context.setMemberProperties( {'defaultgroup': value} )
+    defaultgroup = property(get_defaultgroup, set_defaultgroup)
+
 
 
 # ------------------------------------------------------------------------------
@@ -693,6 +719,8 @@ class CustomMeetingAndenne(Meeting):
         items = itemsGetter()
         if allItems:
             items = self.context.getItems() + self.context.getLateItems()
+        user = self.context.portal_membership.getAuthenticatedMember()
+        
         # res contains all items by category, the key of res is the category
         # number. Pay attention that the category number is obtain by extracting
         # the 2 first caracters of the categoryname, thus the categoryname must
@@ -703,14 +731,16 @@ class CustomMeetingAndenne(Meeting):
         # First, we create the category and for each category, we create a
         # dictionary that must contain the list of item in in res[catnum][1]
         for item in items:
-            if uids:
+            if user.has_permission("View", item):
+                
+             if uids:
                 if (item.UID() in uids):
                     inuid = "ok"
                 else:
                     inuid = "ko"
-            else:
+             else:
                 inuid = "ok"
-            if (inuid == "ok"):
+             if (inuid == "ok"):
                 current_cat = item.getCategory(theObject=True)
                 catNum = getPrintableNumCategory(current_cat)
                 if catNum in res:
@@ -993,6 +1023,69 @@ class CustomMeetingItemAndenne(MeetingItem):
         '''Formats the current date to print in the templates.'''
         return DateTime().strftime("%d/%m/%Y")
 
+    security.declarePublic('printAdvicesInfos')
+    def printAdvicesInfos(self,
+                          withAdvicesTitle=True,
+                          withDelay=False,
+                          withDelayLabel=True,
+                          withAuthor=True):
+        '''Helper method to have a printable version of advices.'''
+        # bbb compatible fix, as printAdvicesInfos was defined in a profile before...
+        self = self.context.getSelf()
+        membershipTool = getToolByName(self, 'portal_membership')
+        itemAdvicesByType = self.getAdvicesByType()
+        res = "<p class='pmAdvices'>"
+        
+        for adviceType in itemAdvicesByType:
+            for advice in itemAdvicesByType[adviceType]:
+                # if we have a delay and delay_label, we display it
+                delayAwareMsg = u''
+                if withDelay and advice['delay']:
+                        delayAwareMsg = u"%s" % (translate('delay_of_x_days',
+                                                 domain='PloneMeeting',
+                                                 mapping={'delay': advice['delay']},
+                                                 context=self.REQUEST))
+                if withDelayLabel and advice['delay'] and advice['delay_label']:
+                        if delayAwareMsg:
+                            delayAwareMsg = "%s - %s" % (delayAwareMsg,
+                                                         unicode(advice['delay_label'], 'utf-8'))
+                        else:
+                            delayAwareMsg = "%s" % unicode(advice['delay_label'], 'utf-8')
+                if delayAwareMsg:
+                    delayAwareMsg = u"(%s)" % cgi.escape(delayAwareMsg)
+                    msg = u"%s" % delayAwareMsg
+                else:
+                    msg = u""
+                
+
+                # display the author if advice was given
+                if withAuthor and not adviceType == NOT_GIVEN_ADVICE_VALUE:
+                    adviceObj = getattr(self, advice['advice_id'])
+                    author = membershipTool.getMemberInfo(adviceObj.Creator())
+                    res = res + u"<b><u>%s %s, %s le %s %s</u></b><br/>" % (translate('Advice given by',
+                                                                  domain='PloneMeeting',
+                                                                  context=self.REQUEST),
+                                                                  cgi.escape(unicode(author['fullname'], 'utf-8')),cgi.escape(advice['name']),cgi.escape(advice['advice_given_on_localized']),msg)
+                else:
+                    if withAdvicesTitle:
+                        res += "<u><b>%s</b></u><br/>" % translate('PloneMeeting_label_advices',
+                                                          domain='PloneMeeting',
+                                                          context=self.REQUEST)
+                # add advice type
+                res = res + u"<br/><i>--%s--</i><br/>" % (translate([advice['type']][0],
+                                                                        domain='PloneMeeting',
+                                                                        context=self.REQUEST), )
+                adviceComment = 'comment' in advice and advice['comment'] or '-'
+                res = res + (u"<br/><u>%s :</u>%s" % (translate('Advice comment',
+                                                                         domain='PloneMeeting',
+                                                                         context=self.REQUEST),
+                                                               unicode(adviceComment, 'utf-8')))
+        if not itemAdvicesByType:
+            res += '-'
+        res += u"</p>"
+
+        return res.encode('utf-8')
+
     ### New functionalities ###
 
     security.declarePublic('adapted')
@@ -1029,14 +1122,43 @@ class CustomMeetingItemAndenne(MeetingItem):
     def getDocReference(self):
         '''Return a too complicated item reference to be defined as a TAL Expression
            (field MeetingConfig.itemReferenceFormat.'''
-        userMeetingGroups = self.portal_plonemeeting.getGroupsForUser(suffix="creators")
-        if len(userMeetingGroups) >= 1:
-            ref = userMeetingGroups[-1].getAcronym()
+        membershipTool = getToolByName(self, 'portal_membership')
+        User=membershipTool.getAuthenticatedMember()
+        Docref=User.getProperty('defaultref')
+        if Docref:
+            return Docref+ '/' + DateTime(self.CreationDate()).strftime('%Y.%m') + '.'
         else:
-            ref = 'XXXX'
-        return ref + '/XX.XX/' + DateTime(self.CreationDate()).strftime('%Y.%m') + '/'
+            userMeetingGroups = self.portal_plonemeeting.getGroupsForUser(suffix="creators")
+            if len(userMeetingGroups) >= 1:
+                ref = userMeetingGroups[-1].getAcronym()
+            else:
+                ref = 'XXXX'
+            return ref + '/XX.XX/' + DateTime(self.CreationDate()).strftime('%Y.%m') + '.'
 
     MeetingItem.getDocReference = getDocReference
+    # it'a a monkey patch because it's the only way to have a default method in the schema
+
+    security.declarePublic('getDefaultProposingGroup')
+    def getDefaultProposingGroup(self):
+        '''Return a default proposing group to fill the proposing group field on item creation 
+           (usefull when there is more than 1 proposing group) '''
+        tool = getToolByName(self, 'portal_plonemeeting')
+        membershipTool = getToolByName(self, 'portal_membership')
+        User=membershipTool.getAuthenticatedMember()
+        ProposingGroup=User.getProperty('defaultgroup')
+        isDefinedInTool = self.isDefinedInTool()
+        # bypass for Managers, pass idDefinedInTool to True so Managers
+        # can select any available MeetingGroup
+        isManager = tool.isManager(self, realManagers=True)
+        res = tool.getSelectableGroups(isDefinedInTool=(isDefinedInTool or isManager))
+        if ProposingGroup and ProposingGroup in [g[0] for g in res] :
+        #and ProposingGroup in self.listProposingGroups(): 
+           return ProposingGroup
+        else:
+           return None
+    
+    MeetingItem.getDefaultProposingGroup = getDefaultProposingGroup
+
     # it'a a monkey patch because it's the only way to have a default method in the schema
 
     security.declarePublic('listTreatUsers')
@@ -1124,6 +1246,36 @@ class CustomMeetingItemAndenne(MeetingItem):
 
     MeetingItem.listCopyGroups = listCopyGroups
     # it'a a monkey patch because it's the only way to change the behaviour of the MeetingItem class
+    
+    security.declarePublic('listAssociatedGroups')
+    def listAssociatedGroups(self):
+        '''Lists the groups that are associated to the proposing group(s) to
+           propose this item. Return groups that have at least one creator,
+           excepted if we are on an archive site.'''
+        cfg = self.portal_plonemeeting.getMeetingConfig(self)
+        res = []
+        for groupId in cfg.getSelectableAssociatedGroups():
+            group = self.portal_groups.getGroupById(groupId)
+            res.append((groupId, group.getProperty('title')))
+
+        # make sure associatedGroups actually stored have their corresponding
+        # term in the vocabulary, if not, add it
+        associatedGroups = self.getAssociatedGroups()
+        if associatedGroups:
+            associatedGroupsInVocab = [associatedGroup[0] for associatedGroup in res]
+            for groupId in associatedGroups:
+                if not groupId in associatedGroupsInVocab:
+                    group = self.portal_groups.getGroupById(groupId)
+                    if group:
+                        res.append((groupId, group.getProperty('title')))
+                    else:
+                        res.append((groupId, groupId))
+        res = sorted(res, key=collateDisplayListsValues)
+
+        return DisplayList(tuple(res)).sortedByValue()
+
+    MeetingItem.listAssociatedGroups = listAssociatedGroups
+    # it'a a monkey patch because it's the only way to change the behaviour of the MeetingItem class
 
     security.declareProtected('Modify portal content', 'onWelcomePerson')
     def onWelcomePerson(self):
@@ -1169,7 +1321,8 @@ class CustomMeetingItemAndenne(MeetingItem):
     security.declarePrivate('replaceBr')
     def replaceBr (self,text):
         description = text
-
+        if description == "":
+            description = "<html></html>"
         pos = description.find("<br />")
         while pos <> -1 :
             ol = description.count("<ol>", 0, pos)
@@ -1231,7 +1384,7 @@ class CustomMeetingItemAndenne(MeetingItem):
             else:
                 description = description.replace("<br />", "", 1)
             pos = description.find("<br />")
-
+       
         pos = description.find("<table")
         while pos <> -1:
             tdend = description.find("</table", pos)
@@ -1240,28 +1393,29 @@ class CustomMeetingItemAndenne(MeetingItem):
                 l[pos:tdend] = list(description[pos:tdend].replace("<p", "<span", 10).replace("</p>", "</span>", 10))
                 description = "".join(l)
             pos = description.find("<table", pos+1 )
+        
         return description
 
-    security.declarePrivate('onEdit')
+    security.declarePublic('onEdit')
     def onEdit(self, isCreated):
         tool = self.context.portal_plonemeeting
 
         # replace div by p, because xhtmlparlser convert div to page-break and it causes problems in text align justify
         # replace line breaks by </p><p> because line breaks are in <p> and causes justify problems
-        description = self.context.Description()
-        self.context.setDescription(self.context.replaceBr(description))
+        #description = self.context.Description()
+        #self.context.setDescription(self.context.replaceBr(description))
 
-        decision = self.context.getDecision()
-        self.context.setDecision(self.context.replaceBr(decision))
+        #decision = self.context.getDecision()
+        #self.context.setDecision(self.context.replaceBr(decision))
 
-        projetpv = self.context.getProjetpv()
-        self.context.setProjetpv(self.context.replaceBr(projetpv))
+        #projetpv = self.context.getProjetpv()
+        #self.context.setProjetpv(self.context.replaceBr(projetpv))
 
-        textpv = self.context.getTextpv()
-        self.context.setTextpv(self.context.replaceBr(textpv))
+        #textpv = self.context.getTextpv()
+        #self.context.setTextpv(self.context.replaceBr(textpv))
 
-        pv = self.context.getPv()
-        self.context.setPv(self.context.replaceBr(pv))
+        #pv = self.context.getPv()
+        #self.context.setPv(self.context.replaceBr(pv))
 
         # Add local roles corresponding to the proposing group if item category is personnel or if item is confidential
         if self.context.getCategory() == "45-personnel" or self.context.getIsconfidential() == True:
@@ -1313,6 +1467,11 @@ class CustomMeetingItemAndenne(MeetingItem):
                 if not ploneGroup:
                     groupData[0]._createPloneGroup(groupData[1])
                 self.context.manage_addLocalRoles(groupId, (role, ))
+        #add local role for associated group
+        assGroups = self.context.getAssociatedGroups()
+        if assGroups:
+            for assGroup in assGroups:
+                self.context.manage_addLocalRoles(assGroup, ('MeetingMember','Owner'))
 
     security.declarePublic('getLatestReviewer')
     def getLatestReviewer(self):
@@ -1329,7 +1488,7 @@ class CustomMeetingItemAndenne(MeetingItem):
                 i -= 1
         return item.Creator()
 
-    security.declarePublic('onDuplicate')
+    security.declarePublic('ÂµonDuplicate')
     def onDuplicate(self):
         '''This method is triggered when the users clicks on
            "duplicate item".'''
@@ -1382,10 +1541,15 @@ class CustomMeetingItemAndenne(MeetingItem):
 #                print string
         user = self.portal_membership.getAuthenticatedMember()
         newItem = self.clone(newOwnerId=user.id, cloneEventAction='Duplicate')
-        newItem.setDecision(self.getTextpv())
-        newItem.setProjetpv(self.getPv())
-        newItem.reindexObject(idxs=['getDecision', 'getProjetpv'])
+        if (user.has_permission('MeetingAndenne: Read pv', self)):
+            newItem.setDecision(self.getTextpv())
+            newItem.setProjetpv(self.getPv())
+        newItem.setTreatUser(user.id)
+        newItem.itemPresents = ()
+        newItem.itemSignatories = ()
+        newItem.itemAbsents = ()
 
+        newItem.reindexObject(idxs=['getTreatUser','Description','getDecision', 'getProjetpv','getTextpv','getPv'])
         self.plone_utils.addPortalMessage(
             translate('item_duplicated', domain='PloneMeeting', context=self.REQUEST))
         return self.REQUEST.RESPONSE.redirect(newItem.absolute_url())
@@ -1596,6 +1760,32 @@ class CustomMeetingConfigAndenne(MeetingConfig):
 
     MeetingConfig.searchMailsInCopy = searchMailsInCopy
     # it'a a monkey patch because it's the only way to change the behaviour of the MeetingConfig class
+    
+    MeetingConfig.listAdviceTypesOrg=MeetingConfig.listAdviceTypes
+    security.declarePublic('listAdviceTypes')
+    def listAdviceTypes(self):
+        res = self.listAdviceTypesOrg()
+        d = "PloneMeeting"
+        res.add("reservation", translate('reservation', domain=d, context=self.REQUEST))
+        return res
+    MeetingConfig.listAdviceTypes = listAdviceTypes
+    # it'a a monkey patch because it's the only way to change the behaviour of the MeetingConfig class
+    
+    security.declarePublic('listSelectableAssociatedGroups')
+    def listSelectableAssociatedGroups(self):
+        '''Returns a list of groups that can be selected on an item as associated for
+           the item.'''
+        res = []
+        tool = getToolByName(self, 'portal_plonemeeting')
+        meetingGroups = tool.getMeetingGroups()
+        for mg in meetingGroups:
+            meetingPloneGroups = mg.getPloneGroups()
+            for ploneGroup in meetingPloneGroups:
+                res.append((ploneGroup.id, ploneGroup.getProperty('title')))
+        return DisplayList(tuple(res))
+    MeetingConfig.listSelectableAssociatedGroups = listSelectableAssociatedGroups
+    # it'a a monkey patch because it's the only way to change the behaviour of the MeetingConfig class
+
 
 
 # ------------------------------------------------------------------------------
@@ -1788,7 +1978,7 @@ class MeetingCollegeAndenneWorkflowConditions(MeetingWorkflowConditions):
 
     security.declarePublic('mayClose')
     def mayClose(self):
-        # The user just needs the "Review portal content" permission on the
+        # Thè§(r9/*e user just needs the "Review portal content" permission on the
         # object to close it.
         if checkPermission(ReviewPortalContent, self.context):
             return True
@@ -1838,7 +2028,26 @@ class MeetingItemCollegeAndenneWorkflowActions(MeetingItemWorkflowActions):
     security.declarePublic('doRefuse_and_close')
     def doRefuse_and_close(self, stateChange):
         pass
-
+    
+    security.declarePrivate('doValidate')
+    def doDelay(self, stateChange):
+        '''When an item is delayed, we will duplicate it: the copy is back to
+           the initial state and will be linked to this one.'''
+        creator = self.context.Creator()
+        # We create a copy in the initial item state, in the folder of creator.
+        clonedItem = self.context.clone(copyAnnexes=True,
+                                        newOwnerId=creator,
+                                        cloneEventAction='create_from_predecessor',
+                                        keepProposingGroup=True)
+        clonedItem.setPredecessor(self.context)
+        # Send, if configured, a mail to the person who created the item
+        clonedItem.sendMailIfRelevant('itemDelayed', 'Owner', isRole=True)
+        clonedItem.setTreatUser(self.context.getTreatUser())
+        wTool = api.portal.get_tool('portal_workflow')
+        try:
+            wTool.doActionFor(clonedItem, 'propose')
+        except:
+            pass  # Maybe does transaction 'propose' not exist.
 
 # ------------------------------------------------------------------------------
 class MeetingItemCollegeAndenneWorkflowConditions(MeetingItemWorkflowConditions):
