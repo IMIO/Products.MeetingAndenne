@@ -209,6 +209,22 @@ msgstr "Fonction"
 msgid "help_function"
 msgstr "Votre fonction dans l'entreprise."
 
+#. Default: "defaultref"
+msgid "label_defaultref"
+msgstr "Reference interne des documents par défaut"
+
+#. Default: "Your Default reference unsing new note"
+msgid "help_defaultref"
+msgstr "Début de la refrence interne du document, générée lors de la création d'un nouveau point (exemple : informatique/FM.SR) "
+
+#. Default: "defaultgroup"
+msgid "label_defaultgroup"
+msgstr "Groupe proposant par défaut"
+
+#. Default: "Your Group when Proposing Group are multiple"
+msgid "help_defaultgroup"
+msgstr "Groupe proposant qui sera selectionné par défaut lors de la création d'un nouveau point"
+
 #. Default: "Listed in searches"
 msgid "label_listed"
 msgstr "Apparaître dans la liste des utilisateurs"
