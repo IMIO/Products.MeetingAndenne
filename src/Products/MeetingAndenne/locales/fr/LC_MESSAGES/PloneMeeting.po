@@ -469,3 +469,6 @@ msgstr "Chef de service"
 #. Default: "Reviewers"
 msgid "reviewers"
 msgstr "Chefs de service"
+
+msgid "reservation"
+msgstr "Reserve"
