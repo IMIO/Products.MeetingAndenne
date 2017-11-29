@@ -14,10 +14,10 @@
     <h1 class="documentFirstHeading" tal:content="context/Title">Title</h1>
     <form id="welcomeuserForm" method="post" tal:attributes="action python:context.absolute_url() + '/@@welcomeuser'">
     <tal:lateAttendee condition="view/canJoin">
-      <input type="radio" name="welcomeType" id="from_now" class="noborder" value="from_now" checked="checked" />
+      <input type="radio" name="welcomeType" id="from_now" class="noborder" value="from_now" />
       <label for="after" i18n:translate="person_welcome_descr"></label><br/>
     </tal:lateAttendee>
-    <input type="radio" name="welcomeType" id="just_now" class="noborder" value="just_now"
+    <input type="radio" name="welcomeType" id="just_now" class="noborder" value="just_now checked="checked""
            tal:attributes="checked not:view/canJoin" />
     <label for="now" i18n:translate="person_present_descr"></label>
     <br/>
