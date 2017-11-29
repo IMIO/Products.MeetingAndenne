@@ -19,6 +19,7 @@ from Products.PloneMeeting.MeetingFile import MeetingFile
 from Products.PloneMeeting.MeetingGroup import MeetingGroup
 from Products.PloneMeeting.MeetingItem import MeetingItem
 from Products.PloneMeeting.MeetingUser import MeetingUser
+from Products.MeetingAndenne.MeetingItemFormation import MeetingItemFormation_schema
 
 
 # Schema updates related to MeetingItem ----------------------------------------)
@@ -140,14 +141,15 @@ def update_item_schema(baseSchema):
         ),
     )
 
-    completeItemSchema = baseSchema + specificSchema.copy()
-    completeItemSchema['title'].widget.condition='python: not here.adapted().isformation()'
-    completeItemSchema['decision'].widget.condition='python: not here.adapted().isformation()'
-    completeItemSchema['description'].widget.condition='python: not here.adapted().isformation()'
+    completeItemSchema = baseSchema + specificSchema.copy() + MeetingItemFormation_schema.copy()
+    completeItemSchema['title'].widget.condition="python: not hasattr(here, 'template') or not here.queryState()=='itemcreated' or here.portal_membership.getAuthenticatedMember().has_role('Manager')"    
+
     completeItemSchema['copyGroups'].write_permission="MeetingAndenne: Write copygroup"
     completeItemSchema['description'].widget.label_method='getLabelForDescription'
     completeItemSchema['budgetInfos'].widget.rows=12
     completeItemSchema['itemSignatories'].optional=True
+    completeItemSchema['proposingGroup'].default_method="getDefaultProposingGroup"
+
 
 
     completeItemSchema.moveField('refdoc', pos='top')
@@ -282,6 +284,23 @@ def update_config_schema(baseSchema):
                     i18n_domain='PloneMeeting'),
                 write_permission=WriteRiskyConfig,
             ),
+            LinesField(
+                name='selectableAssociatedGroups',
+                widget=MultiSelectionWidget(
+                    size=20,
+                    description="SelectableAssociatedGroups",
+                    description_msgid="selectable_Associated_groups_descr",
+                    label='SelectableAssociatedgroups',
+                    label_msgid='PloneMeeting_label_selectableAssociatedGroups',
+                    i18n_domain='PloneMeeting',
+                ),
+                schemata="advices",
+                multiValued=1,
+                vocabulary='listSelectableAssociatedGroups',
+                enforceVocabulary=True,
+                write_permission="PloneMeeting: Write risky config",
+            ),
+
         ),
     )
 
