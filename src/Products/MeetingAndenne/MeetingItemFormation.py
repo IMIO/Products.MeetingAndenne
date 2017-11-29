@@ -113,7 +113,7 @@ schema = Schema((
             label_msgid='MeetingAndenne_label_training_users',
             i18n_domain='PloneMeeting',
         ),
-        enforceVocabulary=True,
+#        enforceVocabulary=True,
         multiValued=1,
         vocabulary='listTrainingUsers',
     ),
@@ -236,9 +236,9 @@ schema = Schema((
 )
 
 MeetingItemFormation_schema = MeetingItem.schema.copy() + schema.copy()
-MeetingItemFormation_schema['title'].widget.condition = "python: not here.queryState()=='itemcreated' or here.portal_membership.getAuthenticatedMember().has_role('Manager')"
-MeetingItemFormation_schema['category'].widget.visible = {"edit": "invisible" }
-MeetingItemFormation_schema['budgetRelated'].widget.label_msgid_template_edit = 'MeetingAndenne_label_training_budgetRelated'
+#MeetingItemFormation_schema['title'].widget.condition = "python: not here.queryState()=='itemcreated' or here.portal_membership.getAuthenticatedMember().has_role('Manager')"
+#MeetingItemFormation_schema['category'].widget.visible = {"edit": "invisible" }
+#MeetingItemFormation_schema['budgetRelated'].widget.label_msgid_template_edit = 'MeetingAndenne_label_training_budgetRelated'
 
 
 class MeetingItemFormation(CustomMeetingItemAndenne):
@@ -355,68 +355,69 @@ class MeetingItemFormation(CustomMeetingItemAndenne):
             self.context.training_organiser = ""
             self.context.training_place = ""
         else:
-            description1 = self.context.translate('MeetingAndenne_training_description1', domain='PloneMeeting').encode('utf-8')
-            description2 = self.context.translate('MeetingAndenne_training_description2free', domain='PloneMeeting').encode('utf-8')
-            description3 = ''
-            description4 = self.context.translate('MeetingAndenne_training_description4', domain='PloneMeeting').encode('utf-8')
-            decision1 = self.context.translate('MeetingAndenne_training_decision1', domain='PloneMeeting').encode('utf-8')
-            decision2 = self.context.translate('MeetingAndenne_training_decision2free', domain='PloneMeeting').encode('utf-8')
-            decision3 = ''
-            decision4 = self.context.translate('MeetingAndenne_training_decision4', domain='PloneMeeting').encode('utf-8')
+            if  self.context.queryState()=='itemcreated':
+            	description1 = self.context.translate('MeetingAndenne_training_description1', domain='PloneMeeting').encode('utf-8')
+            	description2 = self.context.translate('MeetingAndenne_training_description2free', domain='PloneMeeting').encode('utf-8')
+            	description3 = ''
+            	description4 = self.context.translate('MeetingAndenne_training_description4', domain='PloneMeeting').encode('utf-8')
+	        decision1 = self.context.translate('MeetingAndenne_training_decision1', domain='PloneMeeting').encode('utf-8')
+            	decision2 = self.context.translate('MeetingAndenne_training_decision2free', domain='PloneMeeting').encode('utf-8')
+            	decision3 = ''
+            	decision4 = self.context.translate('MeetingAndenne_training_decision4', domain='PloneMeeting').encode('utf-8')
 
-            trainingTypes = self.listTrainingTypes()
-            trainingType = trainingTypes.getValue(self.context.getTraining_type()).encode('utf-8')
+            	trainingTypes = self.listTrainingTypes()
+            	trainingType = trainingTypes.getValue(self.context.getTraining_type()).encode('utf-8')
 
-            if self.context.getTraining_periodicity() != "":
-                periodicity = ", " + self.context.getTraining_periodicity() + ","
-            else:
-                periodicity = ""
+            	if self.context.getTraining_periodicity() != "":
+                    periodicity = ", " + self.context.getTraining_periodicity() + ","
+            	else:
+                    periodicity = ""
 
-            i = 0
-            users = ""
-            participants = self.context.getTraining_users()
-            additionalUsers = self.context.getTraining_additionalUsers()
-            for user in participants:
-                i += 1
-                ploneUser = self.context.portal_membership.getMemberById(user)
-                if ploneUser.getProperty('function'):
-                    function = ", " + ploneUser.getProperty('function')
-                else:
-                    function = ""
-                if ploneUser.getProperty('gender'):
-                    gender = ploneUser.getProperty('gender')
-                    if gender == 'homme':
-                        gender = "Monsieur "
-                    elif gender == 'femme':
-                        gender = "Madame "
+            	i = 0
+            	users = ""
+            	participants = self.context.getTraining_users()
+            	additionalUsers = self.context.getTraining_additionalUsers()
+            	for user in participants:
+                    i += 1
+                    ploneUser = self.context.portal_membership.getMemberById(user)
+                    if ploneUser.getProperty('function'):
+                        function = ", " + ploneUser.getProperty('function')
                     else:
-                        gender = ""
-                else:
-                    gender= ""
-                if i > 1:
-                    if len(participants) == i and additionalUsers == "":
-                        users += " et "
+                        function = ""
+                    if ploneUser.getProperty('gender'):
+                        gender = ploneUser.getProperty('gender')
+                        if gender == 'homme':
+                            gender = "Monsieur "
+                        elif gender == 'femme':
+                            gender = "Madame "
+                        else:
+                            gender = ""
                     else:
-                        users += ", "
-                users += gender + ploneUser.getProperty('fullname') + function
-            if additionalUsers != "":
-                if users != "":
-                    users += ", " + additionalUsers
+                        gender= ""
+                    if i > 1:
+                        if len(participants) == i and additionalUsers == "":
+                            users += " et "
+                        else:
+                            users += ", "
+                    users += gender + ploneUser.getProperty('fullname') + function
+                if additionalUsers != "":
+                    if users != "":
+                        users += ", " + additionalUsers
+                    else:
+                        users = addiotionalUsers
+                if i < 2:
+                    usertitle = " - " + users
                 else:
-                    users = addiotionalUsers
-            if i < 2:
-                usertitle = " - " + users
-            else:
-                usertitle = ""
+                    usertitle = ""
 
-            budget_array = self.extractBudget()
-            price = budget_array[0]
-            budget = budget_array[1]
-            description3 = ''
-            decision3 = ''
-            payment = ''
+                budget_array = self.extractBudget()
+                price = budget_array[0]
+            	budget = budget_array[1]
+            	description3 = ''
+            	decision3 = ''
+            	payment = ''
 
-            description1 %= { 'training_type': trainingType,
+            	description1 %= { 'training_type': trainingType,
                               'training_purpose': self.context.getTraining_purpose(),
                               'training_startDate': self.context.getTraining_startDate().strftime("%d %B %Y à %H:%M"),
                               'training_endDate': self.context.getTraining_endDate().strftime("%d %B %Y à %H:%M"),
@@ -424,7 +425,7 @@ class MeetingItemFormation(CustomMeetingItemAndenne):
                               'training_organiser': self.context.getTraining_organiser(),
                             }
 
-            decision1 %= { 'training_type': trainingType,
+            	decision1 %= { 'training_type': trainingType,
                            'training_purpose': self.context.getTraining_purpose(),
                            'training_startDate': self.context.getTraining_startDate().strftime("%d %B %Y à %H:%M"),
                            'training_endDate': self.context.getTraining_endDate().strftime("%d %B %Y à %H:%M"),
@@ -434,51 +435,51 @@ class MeetingItemFormation(CustomMeetingItemAndenne):
                            'training_users': users,
                          }
 
-            if price != '':
-                description2 = self.context.translate('MeetingAndenne_training_description2', domain='PloneMeeting').encode('utf-8') % \
+            	if price != '':
+                    description2 = self.context.translate('MeetingAndenne_training_description2', domain='PloneMeeting').encode('utf-8') % \
                                 { 'training_price': price, 'training_budget': budget }
-                decision2 = self.context.translate('MeetingAndenne_training_decision2', domain='PloneMeeting').encode('utf-8') % \
+                    decision2 = self.context.translate('MeetingAndenne_training_decision2', domain='PloneMeeting').encode('utf-8') % \
                                 { 'training_price': price, 'training_budget': budget }
 
-                syllabusCosts = self.context.getTraining_syllabusCosts()
-                travelExpenses = self.context.getTraining_travelExpenses()
-                parkingFees = self.context.getTraining_parkingFees()
-                accomodationExpenses = self.context.getTraining_accomodationExpenses()
-                otherFees = self.context.getTraining_otherFees()
+                    syllabusCosts = self.context.getTraining_syllabusCosts()
+                    travelExpenses = self.context.getTraining_travelExpenses()
+                    parkingFees = self.context.getTraining_parkingFees()
+                    accomodationExpenses = self.context.getTraining_accomodationExpenses()
+                    otherFees = self.context.getTraining_otherFees()
 
-                if syllabusCosts != '' or travelExpenses != '' or parkingFees != '' or accomodationExpenses != '' or otherFees != '':
-                    if syllabusCosts:
-                        syllabusCostsText = self.context.translate('MeetingAndenne_training_syllabusCosts', domain='PloneMeeting').encode('utf-8') % { 'training_syllabusCosts': syllabusCosts }
-                    else:
-                        syllabusCostsText = ""
-                    if travelExpenses:
-                        travelExpensesText = self.context.translate('MeetingAndenne_training_travelExpenses', domain='PloneMeeting').encode('utf-8') % { 'training_travelExpenses': travelExpenses }
-                    else:
-                        travelExpensesText = ""
-                    if parkingFees:
-                        parkingFeesText = self.context.translate('MeetingAndenne_training_parkingFees', domain='PloneMeeting').encode('utf-8') % { 'training_parkingFees': parkingFees }
-                    else:
-                        parkingFeesText = ""
-                    if accomodationExpenses:
-                        accomodationExpensesText = self.context.translate('MeetingAndenne_training_accomodationExpenses', domain='PloneMeeting').encode('utf-8') % { 'training_accomodationExpenses': accomodationExpenses }
-                    else:
-                        accomodationExpensesText = ""
-                    if otherFees:
-                        otherFeesText = self.context.translate('MeetingAndenne_training_otherFees', domain='PloneMeeting').encode('utf-8') % { 'training_otherFees': otherFees }
-                    else:
-                        otherFeesText = ""
+                    if syllabusCosts != '' or travelExpenses != '' or parkingFees != '' or accomodationExpenses != '' or otherFees != '':
+                        if syllabusCosts:
+                            syllabusCostsText = self.context.translate('MeetingAndenne_training_syllabusCosts', domain='PloneMeeting').encode('utf-8') % { 'training_syllabusCosts': syllabusCosts }
+                        else:
+                            syllabusCostsText = ""
+                        if travelExpenses:
+                            travelExpensesText = self.context.translate('MeetingAndenne_training_travelExpenses', domain='PloneMeeting').encode('utf-8') % { 'training_travelExpenses': travelExpenses }
+                        else:
+                            travelExpensesText = ""
+                        if parkingFees:
+                            parkingFeesText = self.context.translate('MeetingAndenne_training_parkingFees', domain='PloneMeeting').encode('utf-8') % { 'training_parkingFees': parkingFees }
+                        else:
+                            parkingFeesText = ""
+                        if accomodationExpenses:
+                            accomodationExpensesText = self.context.translate('MeetingAndenne_training_accomodationExpenses', domain='PloneMeeting').encode('utf-8') % { 'training_accomodationExpenses': accomodationExpenses }
+                        else:
+                            accomodationExpensesText = ""
+                        if otherFees:
+                            otherFeesText = self.context.translate('MeetingAndenne_training_otherFees', domain='PloneMeeting').encode('utf-8') % { 'training_otherFees': otherFees }
+                        else:
+                            otherFeesText = ""
 
-                    description3 = self.context.translate('MeetingAndenne_training_description3', domain='PloneMeeting').encode('utf-8') + \
+                        description3 = self.context.translate('MeetingAndenne_training_description3', domain='PloneMeeting').encode('utf-8') + \
                                     syllabusCostsText + travelExpensesText + parkingFeesText + accomodationExpensesText + otherFeesText
-                    decision3 = self.context.translate('MeetingAndenne_training_decision3', domain='PloneMeeting').encode('utf-8') + \
+                        decision3 = self.context.translate('MeetingAndenne_training_decision3', domain='PloneMeeting').encode('utf-8') + \
                                     syllabusCostsText + travelExpensesText + parkingFeesText + accomodationExpensesText + otherFeesText
 
-                if self.context.getTraining_paymentTerms():
-                    terms = self.listPaymentTerms()
-                    if self.context.getTraining_paymentTerms() == 'after':
-                        payment = "<p>" + terms.values()[0].encode('utf-8') + "</p>"
-                    else:
-                        payment = "<p>" + terms.values()[1].encode('utf-8') + \
+                    if self.context.getTraining_paymentTerms():
+                        terms = self.listPaymentTerms()
+                        if self.context.getTraining_paymentTerms() == 'after':
+                            payment = "<p>" + terms.values()[0].encode('utf-8') + "</p>"
+                        else:
+                            payment = "<p>" + terms.values()[1].encode('utf-8') + \
                                     self.context.translate('MeetingAndenne_training_accountNumber', domain='PloneMeeting').encode('utf-8') + \
                                     self.context.getTraining_accountNumber() + " " + \
                                     self.context.translate('MeetingAndenne_training_accountName', domain='PloneMeeting').encode('utf-8') + \
@@ -486,11 +487,11 @@ class MeetingItemFormation(CustomMeetingItemAndenne):
                                     self.context.translate('MeetingAndenne_training_acceptanceGiro', domain='PloneMeeting').encode('utf-8') + \
                                     self.context.getTraining_acceptanceGiro() + "</p>"
 
-            # On ne remplace pas le titre si on est en mode template car le titre doit rester le meme pour l'affichage du template
-            if self.context.queryState() != "active":
-                self.context.setTitle("Demande de formation - " + self.context.getTraining_purpose() + usertitle)
-            self.context.setDescription(description1 + "<p>" + self.context.getTraining_description() + "</p>" + description2 + description3 + description4)
-            self.context.setDecision(decision1 + decision2 + payment + decision3 + decision4)
+            	# On ne remplace pas le titre si on est en mode template car le titre doit rester le meme pour l'affichage du template
+            	if self.context.queryState() != "active":
+                    self.context.setTitle("Demande de formation - " + self.context.getTraining_purpose() + usertitle)
+            	self.context.setDescription(description1 + "<p>" + self.context.getTraining_description() + "</p>" + description2 + description3 + description4)
+            	self.context.setDecision(decision1 + decision2 + payment + decision3 + decision4)
 
         CustomMeetingItemAndenne.onEdit(self, isCreated)
 
@@ -500,10 +501,10 @@ registerType(MeetingItemFormation, PROJECTNAME)
 #generateClass(MeetingItemFormation)
 
 # Create missing accessors and mutators in MeetingItem class
-meetingItemSchema = MeetingItem.schema
-MeetingItem.schema = MeetingItemFormation.schema
-generateClass(MeetingItem)
-MeetingItem.schema = meetingItemSchema
+#meetingItemSchema = MeetingItem.schema
+#MeetingItem.schema = MeetingItemFormation.schema
+#generateClass(MeetingItem)
+#MeetingItem.schema = meetingItemSchema
 
 ##code-section module-footer #fill in your manual code here
 #/#code-section module-footer
