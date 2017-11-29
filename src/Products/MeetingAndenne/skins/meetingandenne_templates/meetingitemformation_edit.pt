@@ -132,7 +132,7 @@
              onclick="javascript:toggleBudgetInfo(this)" tal:attributes="checked cbChecked"/>
       <input type="hidden" name="budgetRelated:boolean:default" value="" originalvalue=""/>
       <label for="budgetRelated" class="formQuestion" i18n:domain="PloneMeeting"
-             tal:content="brField/widget/label_msgid_template_edit" i18n:translate=""></label>
+             i18n:translate="MeetingAndenne_label_training_budgetRelated"></label>
       <br/>
     </div>
     <div id="budgetField" name="budgetField"
