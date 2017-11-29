@@ -86,7 +86,13 @@
         class=".views.RunDocsplitOnBlobsView"
         layer="Products.MeetingAndenne.interfaces.IMeetingAndenneLayer"
         permission="cmf.ManagePortal"/>
-
+    <browser:view
+        for="Products.CMFPlone.interfaces.siteroot.IPloneSiteRoot"
+        name="run-docsplit-delete"
+        class=".views.RunDocsplitdelete"
+        layer="Products.MeetingAndenne.interfaces.IMeetingAndenneLayer"
+        permission="cmf.ManagePortal"/>
+    
     <!-- Macros -->
     <browser:page
         name="ma-macros"
@@ -131,6 +137,13 @@
         template="templates/annexes_macros.pt"
         layer="Products.MeetingAndenne.interfaces.IMeetingAndenneLayer"
         permission="zope2.View"/>
+    <browser:page
+        for="Products.PloneMeeting.interfaces.IMeetingItem"
+        name="byebyeuser"
+        class="Products.PloneMeeting.browser.byebyeuser.ByebyeUser"
+        permission="zope2.View"
+        layer="Products.MeetingAndenne.interfaces.IMeetingAndenneLayer"
+        template="templates/byebyeuser.pt"/>
 
     <!-- MeetingAndenne-specific portlets -->
     <include package="plone.app.portlets" />
