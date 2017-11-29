@@ -3,11 +3,14 @@ from zope.annotation import IAnnotations
 
 from persistent.mapping import PersistentMapping
 from plone.memoize.instance import memoize
-
+from DateTime import DateTime
 from Products.Five import BrowserView
 from Products.CMFCore.utils import getToolByName
 from Products.PloneMeeting.MeetingFile import convertToImages
-
+from plone.app.async.interfaces import IAsyncService
+from collective.documentviewer.async import isConversion
+from zope.component import getUtility
+from collective.documentviewer.settings import Settings
 from Products.MeetingAndenne.config import CRON_BATCH_SIZE
 
 import logging
@@ -96,16 +99,19 @@ class RunDocsplitOnBlobsView(BrowserView):
       It will also update the indexAdvisers portal_catalog index.
     """
     def __call__(self):
-        logger.info('Looking to see if there are still some blobs to convert.')
+        logger.info('Looking to see if there are still some blobs to convert.(max %d)' % CRON_BATCH_SIZE)
 
         catalog = getToolByName(self.context, 'portal_catalog')
         types = ('MeetingFile', 'CourrierFile')
         cpt = 0
+        date_range = {'query': (DateTime('2017-08-31 23:16:17'),),'range': 'max',}
         for type in types:
             if cpt >= CRON_BATCH_SIZE:
                 break
-
-            brains = catalog(meta_type=type)
+             
+            brains = catalog.queryCatalog({"meta_type":type,"created" : date_range})
+            acpt=len(brains)
+            qcpt = 1
             for brain in brains:
                 object = brain.getObject()
                 removeFlags = False
@@ -117,6 +123,7 @@ class RunDocsplitOnBlobsView(BrowserView):
                     if hasattr(object, 'needsOcr'):
                         logger.info('Object has needsOcr = False : %s' % object.absolute_url())
                         delattr(object, 'needsOcr')
+                    qcpt += 1
                     continue
 
                 if not object.isConvertable():
@@ -134,6 +141,7 @@ class RunDocsplitOnBlobsView(BrowserView):
                                 annotations['Products.MeetingAndenne']['converting'] = True
                                 logger.warning('Object still under conversion : %s' % object.absolute_url())
                                 cpt += 1
+                                qcpt += 1
                                 continue
                             else:
                                 logger.warning('Object conversion stuck : %s' % object.absolute_url())
@@ -172,10 +180,66 @@ class RunDocsplitOnBlobsView(BrowserView):
                         if not 'Products.MeetingAndenne' in annotations:
                             annotations['Products.MeetingAndenne'] = PersistentMapping()
                             annotations['Products.MeetingAndenne']['toPrint'] = object.toPrint
-
+                    
                     convertToImages(object, None, force=True)
+                    logger.info('Object number %d queued on %d %s' %(qcpt,acpt,type))
                     cpt += 1
                     if cpt >= CRON_BATCH_SIZE:
                         break
-
+                qcpt +=1
         logger.info('Added %d jobs in conversion queue' % cpt)
+
+class RunDocsplitdelete(BrowserView):
+    """
+      This is a view that is called as a maintenance task by Products.cron4plone.
+      As we use clear days to compute advice delays, it will be launched at 0:00
+      each night and update relevant items containing delay-aware advices still addable/editable.
+      It will also update the indexAdvisers portal_catalog index.
+    """
+    def __call__(self):
+        logger.info('Looking to see if there are  some items to delete in conversion queue.')
+        catalog = getToolByName(self.context, 'portal_catalog')
+        types = ('MeetingFile', 'CourrierFile')
+        cpt = 0
+        sitepath = self.context.getPhysicalPath()
+        async = getUtility(IAsyncService)
+        queue = async.getQueues()['']
+        date_range = {'query': (DateTime('2017-08-31 23:16:17'),),'range': 'max',}
+        for type in types:
+                         
+            brains = catalog.queryCatalog({"meta_type":type,"created" : date_range})
+            acpt=len(brains)
+            qcpt = 1
+            for brain in brains:
+                if cpt >= 10:
+                        break
+                object = brain.getObject()
+                removeFlags = False
+                queueObject = False
+                annotations = IAnnotations(object)
+                objpath = object.getPhysicalPath()            
+                if not object.isConvertable():
+                    logger.info('Object not convertable : %s' % object.absolute_url())
+                    removeFlags = True
+                else:
+                    if not 'collective.documentviewer' in annotations:
+                        continue
+                    else:
+                        results = annotations['collective.documentviewer']
+                        if 'converting' in results and results['converting']:                    
+                            # find the job		    
+                            jobs = [job for job in queue]
+                            for job in jobs:
+                                if isConversion(job, sitepath) and \
+                                        job.args[0] == objpath and job.args[3]=='admin':
+                                    try:
+                                        queue.remove(job)
+                                        settings = Settings(object)
+                                        settings.converting = False
+                                        cpt +=1
+                                        logger.info('remove from queue : %s in state %s ' % (job.args,job.status))
+                                    except LookupError:
+                                        pass                   
+                    
+        logger.info('%d item deleted in queue ' % cpt)
+
