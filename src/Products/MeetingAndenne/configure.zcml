@@ -87,7 +87,6 @@
            factory="Products.MeetingAndenne.adapters.CustomOCRLanguageAdapter"
            provides="Products.MeetingAndenne.interfaces.IOCRLanguageCustom"/>
 
-
   <five:deprecatedManageAddDelete class=".CourrierFile.CourrierFile" />
   <five:deprecatedManageAddDelete class=".SearcherAndenne.SearcherAndenne" />
 
