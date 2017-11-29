@@ -30,7 +30,7 @@ from collective.documentviewer.interfaces import IOCRLanguage
 from Products.PloneMeeting.interfaces import \
     IMeetingItemWorkflowConditions, IMeetingItemWorkflowActions, \
     IMeetingWorkflowActions, IMeetingWorkflowConditions, \
-    IMeetingItemCustom
+    IMeetingItemCustom,IPloneMeetingLayer
 
 # ------------------------------------------------------------------------------
 class IOCRLanguageCustom(IOCRLanguage):
@@ -126,8 +126,8 @@ class ICourrierFile(Interface):
     '''Marker interface for .MeetingAndenne.CourrierFile'''
     pass
 
-class IMeetingAndenneLayer(IDefaultBrowserLayer):
-    '''Define a layer so some elements are only added for it.'''
+class IMeetingAndenneLayer(IPloneMeetingLayer):
+    '''Define a layer so some elements are only added for it. IDefaultBrowserLayer'''
     pass
 
 # ------------------------------------------------------------------------------
