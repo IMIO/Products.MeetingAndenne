@@ -244,7 +244,7 @@ width: 1%;
     width: 100%;
 }
 .pmMoreInfo {
-    font-size: 85%;
+    font-size: 95%;
 }
 .pm_listing_th_creator, .pm_listing_th_state, .pm_listing_th_creationDate, .pm_listing_th_relatedMeeting , .pm_meeting_listing_th_advices {
 width: 1%;
@@ -252,3 +252,14 @@ width: 1%;
 .pm_listing_th_title {
 width: 100%
 }
+table.vertical td {
+font-size: 85%;
+padding:0.2em;
+}
+table.vertical th {
+font-size: 90%;
+padding-left:0.2em;
+padding-right:0.2em;
+
+}
+
