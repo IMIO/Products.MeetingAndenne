@@ -404,7 +404,7 @@ class MeetingItemFormation(CustomMeetingItemAndenne):
                     if users != "":
                         users += ", " + additionalUsers
                     else:
-                        users = addiotionalUsers
+                        users = additionalUsers
                 if i < 2:
                     usertitle = " - " + users
                 else:
