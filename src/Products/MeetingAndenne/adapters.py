@@ -1928,6 +1928,14 @@ class CustomToolMeetingAndenne(ToolPloneMeeting):
         '''
         return MAIL_TYPES.items()
 
+    security.declarePublic('isMailViewer')
+    def isMailViewer(self):
+        '''
+            Returns True if the current user is member of a _mailviewers
+            group.
+        '''
+        return len(self.context.getGroupsForUser(suffix='mailviewers')) > 0
+
 
 # ------------------------------------------------------------------------------
 class MeetingCollegeAndenneWorkflowActions(MeetingWorkflowActions):

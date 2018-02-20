@@ -171,7 +171,9 @@ class CourrierFile(ATBlob, BrowserDefaultMixin):
 
     security.declarePrivate('deletefile')
     def deletefile(self):
-        os.system( "mv /home/zope/scan/scantmp/" + str(self.getFilename()) + " /home/zope/scan/scanarchived/" + str(self.getFilename()))
+        srcFile = "/home/zope/scan/scantmp/" + str(self.getFilename())
+        if os.path.isfile(srcFile):
+            os.system( "mv " + srcFile + " /home/zope/scan/scanarchived/" + str(self.getFilename()))
 
     security.declarePrivate('listDestUsers')
     def listDestUsers(self):
@@ -207,14 +209,13 @@ class CourrierFile(ATBlob, BrowserDefaultMixin):
             for group in groupsToAdd:
                 self.manage_addLocalRoles( group, ('MeetingMailViewer', ) )
             self.manage_addLocalRoles( destuser, ('MeetingMailViewer', ) )
-            self.reindexObject()
 
     security.declarePrivate('at_post_create_script')
     def at_post_create_script(self):
         user = self.portal_membership.getAuthenticatedMember()
         self.manage_delLocalRoles( [user.getId()] )
         self.manage_addLocalRoles( user.getId(), ('Owner', ) )
-        self.updateLocalRoles()
+        self.setCreationLocalRoles()
         self.sendMailIfRelevant()
         self.deletefile()
         # Add text-extraction-related attributes
@@ -241,13 +242,29 @@ class CourrierFile(ATBlob, BrowserDefaultMixin):
         '''Returns True. This is some kind of patch needed for mail types to work without changing plonemeeting_actions.pt file'''
         return True
 
+    security.declareProtected('Modify portal content', 'setCreationLocalRoles')
+    def setCreationLocalRoles(self):
+        '''Add the MeetingMailViewer following mail creation depending on mail filename.'''
+        title = self.Title()
+        title = title.split('_')
+        if title[0] == 'autotitre':
+            groupToAdd = title[1] + '_mailviewers'
+            self.manage_addLocalRoles( groupToAdd, ('MeetingMailViewer', ) )
+        else:
+            self.updateLocalRoles()
+
     security.declareProtected('Modify portal content', 'updateLocalRoles')
     def updateLocalRoles(self):
-        # Add the local roles corresponding to the selected DestUser.
-        # We give the CourrierFile role to the selected User
-        # this will give them a read-only access to the item
+        # Add the local roles corresponding to the selected destUsers.
+        # We give the MailViewer role to the selected users
+        # that will give them a read and modify access to the item
         portal = self.portal_url.getPortalObject()
         destUsers = self.getDestUsers()
+        rolesToRemove = list()
+        localRoles = self.get_local_roles()
+        for role in localRoles:
+            if role[0] != 'admin':
+                self.manage_delLocalRoles( (role[0], ) )
         if destUsers:
             for destUser in destUsers:
                 self.affectPermissions( destUser )

@@ -100,9 +100,9 @@ MAIL_TOPICS = (
     # Scanned mails : these were added by a robot.
     ( 'searchmailrobot',
     (  ('Type', 'ATPortalTypeCriterion', ('CourrierFile',)),
-       ('Title', 'ATSimpleStringCriterion', 'autotitre'),
+       ('Title', 'ATSimpleStringCriterion', 'autotitre*'),
     ), 'CreationDate', '',
-       "python: here.portal_plonemeeting.isManager(here)"
+       "python: here.portal_plonemeeting.adapted().isMailViewer() or here.portal_plonemeeting.isManager(here)"
     ),
 )
 

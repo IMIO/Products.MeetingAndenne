@@ -29,7 +29,7 @@
                   visibleColumns      python: meetingConfig.getQueryColumns(resultMetaType);
                   sortKey             request/sortKey | python:'getRefcourrier';
                   sortOrder           request/sortOrder | python:'desc';
-                  showActions         python: tool.isManager(here);">
+                  showActions         python: tool.isManager(here) or tool.adapted().isMailViewer();">
       <tr>
         <tal:comment replace="nothing">Title</tal:comment>
         <th class="pm_listing_th_title" tal:define="fieldIndex string:sortable_title; filterIndex string:SearchableText">
