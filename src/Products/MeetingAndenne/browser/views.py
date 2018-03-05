@@ -2,17 +2,22 @@ from zope.component import getMultiAdapter
 from zope.annotation import IAnnotations
 
 from persistent.mapping import PersistentMapping
+from plone import api
 from plone.memoize.instance import memoize
 from DateTime import DateTime
 from Products.Five import BrowserView
 from Products.CMFCore.utils import getToolByName
 from Products.PloneMeeting.MeetingFile import convertToImages
+from Products.PloneMeeting.interfaces import IAnnexable
 from plone.app.async.interfaces import IAsyncService
 from collective.documentviewer.async import isConversion
 from zope.component import getUtility
-from collective.documentviewer.settings import Settings
+from collective.documentviewer.settings import GlobalSettings, Settings
 from Products.MeetingAndenne.config import CRON_BATCH_SIZE
+from os.path import join
 
+import os
+import shutil
 import logging
 logger = logging.getLogger( 'MeetingAndenne' )
 
@@ -93,10 +98,10 @@ class MeetingAndenneMailFolderView(BrowserView):
 
 class RunDocsplitOnBlobsView(BrowserView):
     """
-      This is a view that is called as a maintenance task by Products.cron4plone.
-      As we use clear days to compute advice delays, it will be launched at 0:00
-      each night and update relevant items containing delay-aware advices still addable/editable.
-      It will also update the indexAdvisers portal_catalog index.
+      This is a view that is called in order to launch OCR on annexes and mails by Products.cron4plone.
+      This is used after a migration to update SearchableText on all files. After a migration, a
+      cron4plone task is scheduled at 20:00 everyday. Each time this function is called, 2500 uncataloged
+      items are added in docsplit queue to be processed.
     """
     def __call__(self):
         logger.info('Looking to see if there are still some blobs to convert.(max %d)' % CRON_BATCH_SIZE)
@@ -108,7 +113,7 @@ class RunDocsplitOnBlobsView(BrowserView):
         for type in types:
             if cpt >= CRON_BATCH_SIZE:
                 break
-             
+
             brains = catalog.queryCatalog({"meta_type":type,"created" : date_range})
             acpt=len(brains)
             qcpt = 1
@@ -243,3 +248,77 @@ class RunDocsplitdelete(BrowserView):
                     
         logger.info('%d item deleted in queue ' % cpt)
 
+class ParseConvertedFilesView(BrowserView):
+    """
+      This is a view that is called as a maintenance task by Products.cron4plone.
+      It will be launched at 0:30 every first day of month and will scavenge cataloged objects
+      that don't exist anymore. At the same time, it will report annexes and mails which were
+      not correctly processed by docsplit.
+    """
+    def __call__(self):
+        portal = api.portal.get()
+        gsettings = GlobalSettings(portal)
+        catalog = portal.portal_catalog
+
+        logger.info('Parsing UIDs in the portal_catalog to find deleted objects.')
+        items = catalog.Indexes['UID'].referencedObjects()
+        cpt = 0
+        logger.info('Parsing ' + str(len(items)) + ' objects.')
+
+        for item in items:
+            url = catalog.getpath(item)
+            try:
+                obj = catalog.unrestrictedTraverse(url)
+            except AttributeError:
+                logger.info('Object doesn\'t exist anymore : ' + url)
+                catalog.uncatalog_object(url)
+            cpt += 1
+        logger.info(str(cpt) + ' objects parsed.')
+
+        logger.info('Parsing MeetingFiles and CourrierFiles to see if all is correctly converted.')
+        brains = catalog.searchResults(meta_type='Meeting',
+                                       sort_on='getDate',
+                                       sort_order='ascending')
+        annexUIDs = set()
+        for brain in brains:
+            meeting = brain.getObject()
+            for item in meeting.getAllItems(ordered = True):
+                for annex in IAnnexable(item).getAnnexes():
+                    annexUID = annex.UID()
+                    path = join(gsettings.storage_location, annexUID[0], annexUID[1], annexUID)
+                    if not os.path.exists(path):
+                        logger.info(annex.absolute_url() + ' : Annex not converted !')
+                    annexUIDs.add(annexUID)
+        logger.info(str(len(annexUIDs)) + ' annexes in the database')
+
+        mailUIDs = set()
+        brains = catalog.searchResults(meta_type='CourrierFile',
+                                       sort_on='Date',
+                                       sort_order='descending')
+        for brain in brains:
+            mail = brain.getObject()
+            mailUID = mail.UID()
+            path = join(gsettings.storage_location, mailUID[0], mailUID[1], mailUID)
+            if not os.path.exists(path):
+                logger.info(mail.absolute_url() + ' : Mail not converted !')
+            mailUIDs.add(mailUID)
+        logger.info(str(len(mailUIDs)) + ' mails in the database')
+
+        logger.info('Parsing all UIDs to see if all converted files are linked to objects.')
+        cpt = 0
+        convertedUIDs = annexUIDs.union(mailUIDs)
+        hexachars = ('0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'a', 'b', 'c', 'd', 'e', 'f')
+        for firstchar in hexachars:
+            for secondchar in hexachars:
+                path = join(gsettings.storage_location, firstchar, secondchar)
+                if os.path.exists(path):
+                    for uid in os.listdir(path):
+                        uidpath = join(gsettings.storage_location, firstchar, secondchar, uid)
+                        if not os.path.isdir(uidpath):
+                            logger.info('There\'s something strange in the directories hierarchy : ' + uidpath)
+                        else:
+                            if not uid in convertedUIDs:
+                                logger.info('Removing unused converted annex : ' + uidpath)
+                                shutil.rmtree(uidpath)
+                                cpt += 1
+        logger.info(str(cpt) + ' directories removed from the conversion results')

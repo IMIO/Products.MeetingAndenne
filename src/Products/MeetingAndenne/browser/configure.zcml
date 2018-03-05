@@ -92,6 +92,14 @@
         class=".views.RunDocsplitdelete"
         layer="Products.MeetingAndenne.interfaces.IMeetingAndenneLayer"
         permission="cmf.ManagePortal"/>
+
+    <!-- the maintenance task view that parses all converted files and cleans up the filesystem -->
+    <browser:view
+        for="Products.CMFPlone.interfaces.siteroot.IPloneSiteRoot"
+        name="parse-converted-files"
+        class=".views.ParseConvertedFilesView"
+        layer="Products.MeetingAndenne.interfaces.IMeetingAndenneLayer"
+        permission="cmf.ManagePortal"/>
     
     <!-- Macros -->
     <browser:page
