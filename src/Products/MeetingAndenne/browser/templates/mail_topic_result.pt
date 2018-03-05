@@ -79,8 +79,8 @@
           <tal:wakeUpObject define="obj brain/getObject">
 
             <tal:comment replace="nothing">Title</tal:comment>
-            <td class="pmLinks">
-              <a id="pmNoNewContent" tal:content="brain/pretty_title_or_id" tal:attributes="href brain/getURL"></a>
+            <td class="pmLinks" id="pmMailVisited">
+              <a tal:content="brain/pretty_title_or_id" tal:attributes="href brain/getURL"></a>
             </td>
 
             <tal:comment replace="nothing">Creation date</tal:comment>
