@@ -9,6 +9,7 @@
        so Products.MeetingAndenne can overrides Products.PloneMeeting translations -->
   <i18n:registerTranslations directory="locales" />
 
+  <include file="events.zcml" />
   <include package=".browser" />
   <include package="Products.CMFPlacefulWorkflow"/>
   <include package="Products.PloneMeeting" />

@@ -380,4 +380,14 @@ registerType(CourrierFile, PROJECTNAME)
 # end of class CourrierFile
 
 ##code-section module-footer #fill in your manual code here
+def checkAfterConversion(obj, event):
+    """
+      After conversion, check that there was no error, if an error occured,
+      make sure the annex is set to not toPrint and send an email if relevant.
+    """
+    # remove saved_request on CourrierFile object
+    try:
+        del obj.saved_request
+    except:
+        pass
 #/#code-section module-footer
