@@ -180,27 +180,22 @@ adaptations.performWorkflowAdaptations = customPerformWorkflowAdaptations
 class EnhancedUserDataPanelAdapter(UserDataPanelAdapter):
     """
     """
-    
+
     def get_function(self):
         return safe_unicode(self.context.getProperty('function', ''))
-
     def set_function(self, value):
         if value is None:
             value = ''
         return self.context.setMemberProperties( {'function': value} )
-    
     function = property(get_function, set_function)
 
     def get_defaultref(self):
         return safe_unicode(self.context.getProperty('defaultref', ''))
-
     def set_defaultref(self, value):
         if value is None:
             value = ''
         return self.context.setMemberProperties( {'defaultref': value} )
-
-    defaultref=property(get_defaultref, set_defaultref)
-
+    defaultref = property(get_defaultref, set_defaultref)
 
     def get_gender(self):
         return self.context.getProperty('gender', '')
@@ -212,13 +207,11 @@ class EnhancedUserDataPanelAdapter(UserDataPanelAdapter):
 
     def get_defaultgroup(self):
         return safe_unicode(self.context.getProperty('defaultgroup', ''))
-
     def set_defaultgroup(self, value):
         if value is None:
             value = ''
         return self.context.setMemberProperties( {'defaultgroup': value} )
     defaultgroup = property(get_defaultgroup, set_defaultgroup)
-
 
 
 # ------------------------------------------------------------------------------
@@ -720,7 +713,7 @@ class CustomMeetingAndenne(Meeting):
         if allItems:
             items = self.context.getItems() + self.context.getLateItems()
         user = self.context.portal_membership.getAuthenticatedMember()
-        
+
         # res contains all items by category, the key of res is the category
         # number. Pay attention that the category number is obtain by extracting
         # the 2 first caracters of the categoryname, thus the categoryname must
@@ -732,26 +725,26 @@ class CustomMeetingAndenne(Meeting):
         # dictionary that must contain the list of item in in res[catnum][1]
         for item in items:
             if user.has_permission("View", item):
-                
-             if uids:
-                if (item.UID() in uids):
+
+                if uids:
+                    if (item.UID() in uids):
+                        inuid = "ok"
+                    else:
+                        inuid = "ko"
+                else:
                     inuid = "ok"
-                else:
-                    inuid = "ko"
-             else:
-                inuid = "ok"
-             if (inuid == "ok"):
-                current_cat = item.getCategory(theObject=True)
-                catNum = getPrintableNumCategory(current_cat)
-                if catNum in res:
-                    res[catNum][1][item.getItemNumber()] = item
-                else:
-                    res[catNum] = {}
-                    #first value of the list is the category object
-                    res[catNum][0] = item.getCategory(True)
-                    #second value of the list is a list of items
-                    res[catNum][1] = {}
-                    res[catNum][1][item.getItemNumber()] = item
+                if (inuid == "ok"):
+                    current_cat = item.getCategory(theObject=True)
+                    catNum = getPrintableNumCategory(current_cat)
+                    if catNum in res:
+                        res[catNum][1][item.getItemNumber()] = item
+                    else:
+                        res[catNum] = {}
+                        #first value of the list is the category object
+                        res[catNum][0] = item.getCategory(True)
+                        #second value of the list is a list of items
+                        res[catNum][1] = {}
+                        res[catNum][1][item.getItemNumber()] = item
 
         # Now we must sort the res dictionary with the key (containing catnum)
         # and copy it in the returned array.
@@ -1156,9 +1149,8 @@ class CustomMeetingItemAndenne(MeetingItem):
            return ProposingGroup
         else:
            return None
-    
-    MeetingItem.getDefaultProposingGroup = getDefaultProposingGroup
 
+    MeetingItem.getDefaultProposingGroup = getDefaultProposingGroup
     # it'a a monkey patch because it's the only way to have a default method in the schema
 
     security.declarePublic('listTreatUsers')
@@ -1246,7 +1238,7 @@ class CustomMeetingItemAndenne(MeetingItem):
 
     MeetingItem.listCopyGroups = listCopyGroups
     # it'a a monkey patch because it's the only way to change the behaviour of the MeetingItem class
-    
+
     security.declarePublic('listAssociatedGroups')
     def listAssociatedGroups(self):
         '''Lists the groups that are associated to the proposing group(s) to
@@ -1384,7 +1376,7 @@ class CustomMeetingItemAndenne(MeetingItem):
             else:
                 description = description.replace("<br />", "", 1)
             pos = description.find("<br />")
-       
+
         pos = description.find("<table")
         while pos <> -1:
             tdend = description.find("</table", pos)
@@ -1393,7 +1385,7 @@ class CustomMeetingItemAndenne(MeetingItem):
                 l[pos:tdend] = list(description[pos:tdend].replace("<p", "<span", 10).replace("</p>", "</span>", 10))
                 description = "".join(l)
             pos = description.find("<table", pos+1 )
-        
+
         return description
 
     security.declarePublic('onEdit')
@@ -1488,57 +1480,10 @@ class CustomMeetingItemAndenne(MeetingItem):
                 i -= 1
         return item.Creator()
 
-    security.declarePublic('ÂµonDuplicate')
+    security.declarePublic('onDuplicate')
     def onDuplicate(self):
         '''This method is triggered when the users clicks on
            "duplicate item".'''
-#        cpt = 0
-#        schemas = set()
-#        objects = dict()
-#        import pdb; pdb.set_trace()
-#        for brain in self.getSelf().portal_catalog.searchResults(meta_type='MeetingItem'):
-#            obj = brain.getObject()
-#            template = getattr(obj, 'template', None)
-##            if template != None:
-##                import Products.MeetingAndenne.MeetingItemFormation
-##                obj.schema = Products.MeetingAndenne.MeetingItemFormation.MeetingItemFormation_schema
-#            if obj.schema not in schemas:
-#                pdb.set_trace()
-#                cpt += 1
-#                string = "%5d " % cpt
-#                string += str(obj.schema) + " : " + obj.absolute_url()
-#                print string
-#                schemas.add(obj.schema)
-#                objects[str(obj.schema)] = obj
-
-#        import pdb; pdb.set_trace()
-#        print "Ah ouias..."
-#            template = getattr(obj, 'template', None)
-#            inAndOutMoves = getattr(obj, 'inAndOutMoves', None)
-#            notes = getattr(obj, 'notes', None)
-#
-#            if template != None or inAndOutMoves is None or notes is None:
-#                cpt += 1
-#                string = "%5d " % cpt
-#                type = ''
-#                if template != None:
-#                    type += "T"
-#                else:
-#                    type += ' '
-#                if inAndOutMoves != None:
-#                    type += "M"
-#                else:
-#                    type += ' '
-#                if notes != None:
-#                    type += "N"
-#                else:
-#                    type += ' '
-#                string += type
-#
-#            if template != None:
-#                string += " Type: " + template
-#                string += ' : ' + obj.absolute_url()
-#                print string
         user = self.portal_membership.getAuthenticatedMember()
         newItem = self.clone(newOwnerId=user.id, cloneEventAction='Duplicate')
         if (user.has_permission('MeetingAndenne: Read pv', self)):
@@ -1760,7 +1705,7 @@ class CustomMeetingConfigAndenne(MeetingConfig):
 
     MeetingConfig.searchMailsInCopy = searchMailsInCopy
     # it'a a monkey patch because it's the only way to change the behaviour of the MeetingConfig class
-    
+
     MeetingConfig.listAdviceTypesOrg=MeetingConfig.listAdviceTypes
     security.declarePublic('listAdviceTypes')
     def listAdviceTypes(self):
@@ -1770,7 +1715,7 @@ class CustomMeetingConfigAndenne(MeetingConfig):
         return res
     MeetingConfig.listAdviceTypes = listAdviceTypes
     # it'a a monkey patch because it's the only way to change the behaviour of the MeetingConfig class
-    
+
     security.declarePublic('listSelectableAssociatedGroups')
     def listSelectableAssociatedGroups(self):
         '''Returns a list of groups that can be selected on an item as associated for
@@ -1785,7 +1730,6 @@ class CustomMeetingConfigAndenne(MeetingConfig):
         return DisplayList(tuple(res))
     MeetingConfig.listSelectableAssociatedGroups = listSelectableAssociatedGroups
     # it'a a monkey patch because it's the only way to change the behaviour of the MeetingConfig class
-
 
 
 # ------------------------------------------------------------------------------
@@ -1986,7 +1930,7 @@ class MeetingCollegeAndenneWorkflowConditions(MeetingWorkflowConditions):
 
     security.declarePublic('mayClose')
     def mayClose(self):
-        # Thè§(r9/*e user just needs the "Review portal content" permission on the
+        # The user just needs the "Review portal content" permission on the
         # object to close it.
         if checkPermission(ReviewPortalContent, self.context):
             return True
@@ -2036,8 +1980,8 @@ class MeetingItemCollegeAndenneWorkflowActions(MeetingItemWorkflowActions):
     security.declarePublic('doRefuse_and_close')
     def doRefuse_and_close(self, stateChange):
         pass
-    
-    security.declarePrivate('doValidate')
+
+    security.declarePrivate('doDelay')
     def doDelay(self, stateChange):
         '''When an item is delayed, we will duplicate it: the copy is back to
            the initial state and will be linked to this one.'''
