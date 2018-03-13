@@ -2069,7 +2069,7 @@ class MeetingItemCollegeAndenneWorkflowConditions(MeetingItemWorkflowConditions)
         user = toolMembership.getAuthenticatedMember()
         if user.has_role('Manager', item):
             return True
- 
+
         if item.getCategory() == "45-personnel":
             return group == getattr(tool, "personnel")
         else:

@@ -6,6 +6,7 @@ logger = logging.getLogger('MeetingAndenne')
 import os
 import sys
 import mimetypes
+
 from DateTime import DateTime
 from App.config import getConfiguration
 from OFS.Image import File
@@ -108,6 +109,10 @@ groupsToRename = { 'copy_of_zonet': {
     'groupDescriptor': GroupDescriptor('cabinet-du-bourgmestre-yt', 'Cabinet du Bourgmestre (Yasémin Tuzkan)', 'cab_bg_yastuz')
     },
 }
+
+badEmptyTags = ( '<div/>', )
+
+fieldsToAdaptIfEmpty = [ 'description', 'decision', 'projetpv', 'pv', 'textpv' ]
 
 typesToAdaptOCR = [ 'CourrierFile', 'MeetingFile' ]
 
@@ -231,12 +236,13 @@ class Migrate_To_3_3(Migrator):
         folder.invokeFactory('MeetingItemCollege', **data)
 
         item = getattr(folder, data['id'])
-        #item.schema = MeetingItemFormation.schema
+        item.schema = MeetingItemFormation.schema
         item.template = 'MeetingItemFormation'
         item.templateStates = ['itemcreated', 'active', 'inactive']
+
         # call processForm passing dummy values so existing values are not touched
         item.processForm(values={'dummy': None})
-        logger.info(item.Schema().fields())
+
         logger.info('Done.')
 
     def _migrateMeetingItemFormations(self):
@@ -263,78 +269,6 @@ class Migrate_To_3_3(Migrator):
                 delattr(item, 'training_registrationFee')
 
         logger.info('Done.')
-  
-
-    def _updateLocalMeetingItemsRoles(self):
-        '''update local roles after migration complete'''
-        logger.info('Updating local role like OnEdit do...')
-        date_range = {'query': (DateTime('2009-05-08 15:16:17'),DateTime('2017-08-31 15:16:17'),),'range': 'min:max',}
-        brains = self.portal.portal_catalog.queryCatalog({"meta_type":("MeetingItem","Meeting","CourrierFile","MeetingFile"),"created" : date_range})
-        for brain in brains:
-            item = brain.getObject()
-            item.addAutoCopyGroups(isCreated=False)
-            item.updateLocalRoles()
-            # Call sub-product-specific behaviour
-            item.adapted().onEdit(isCreated=False)
-            logger.info( 'Item at %s edited by "%s".' %(item.absolute_url_path(), "admin"))
-
-        logger.info('Done.')
-
-    def _renameAllGroups(self):
-        '''rename all plone group after migration complete'''
-        acl_users = getToolByName(self.portal, 'acl_users')
-        groups_tool = getToolByName(self.portal, 'portal_groups')
-        group_list = acl_users.source_groups.getGroups()
-        #group_list = groups_tool.getGroups()
-        for group in group_list:
-           # group is PloneGroup object
-             t=group.getProperty('title')[-13:-1]
-             if (t=="Observateurs"):
-               logger.info(group.getProperty('title')[0:-13]+'Tous les agents)')
-               tt=group.getProperty('title')[0:-13]+'Tous les agents)'
-               groups_tool.editGroup(group.getName(), title = tt)
-
-    def _restoreModificationDate(self):
-        '''retore modification date after migration complete'''
-        logger.info('retore modification date to match creation date after migration...')
-        date_range = {'query': (DateTime('2009-05-08 15:01:12'),DateTime('2017-09-01 15:00:00'),),'range': 'min:max',}
-        brains = self.portal.portal_catalog.queryCatalog({"meta_type":("MeetingFile"),"created" : date_range})
-        i=1
-        for brain in brains:
-            item = brain.getObject()
-            logger.info( 'Item Modified at "%s".' %(item.ModificationDate()))
-            i=i+1
-            item.setModificationDate(item.CreationDate())
-            item.reindexObject(idxs=['ModificationDate'])
-
-        logger.info('Done for "%s".' %(i))
-
-    def _removeBadBrTags(self):
-        '''retore modification date after migration complete'''
-        badBr = ( '<html></html>', '<div/>', )
-
-        logger.info('remove bad br tags...')
-        i = 0
-        brains = self.portal.portal_catalog(meta_type='MeetingItem')
-        for brain in brains:
-            item = brain.getObject()
-            changed = False
-            if item.getDecision() in badBr:
-                item.setDecision('')
-                changed = True
-            if item.getTextpv() in badBr:
-                item.setTextpv('')
-                changed = True
-            if item.getProjetpv() in badBr:
-                item.setProjetpv('')
-                changed = True
-            if item.getPv() in badBr:
-                item.setPv('')
-                changed = True
-            if changed:
-                i += 1
-                logger.info('Object %s corrected' % item.absolute_url())
-        logger.info('Done for "%s".' %(i))
 
     def _migrateMailRoles(self):
         '''Migrate mail roles'''
@@ -612,6 +546,18 @@ class Migrate_To_3_3(Migrator):
 
         logger.info('Done.')
 
+    def _adaptMeetingItemsEmptyTags(self):
+        '''Sets empty RichTextFields to <html></html> tag'''
+        logger.info('Setting empty RichTextFields to <html></html> tag...')
+
+        brains = self.portal.portal_catalog(meta_type='MeetingItem')
+        for brain in brains:
+            item = brain.getObject()
+            for field in fieldsToAdaptIfEmpty:
+                if getattr(item, field, None) in badEmptyTags:
+                    setattr(item, field, '<html></html>')
+        logger.info('Done.')
+
     def _adaptMailFolder(self):
         '''Modify the default view and redirection method of mail folder'''
         logger.info('Modifying the default view and redirection method of mail folder...')
@@ -728,6 +674,25 @@ class Migrate_To_3_3(Migrator):
 
         logger.info('Done.')
 
+    def _updateLocalRoles(self):
+        '''Update local roles on MeetingItems and CourrierFiles'''
+        logger.info('Updating local roles on MeetingItems and CourrierFiles...')
+
+        brains = self.portal.portal_catalog(meta_type='MeetingItem')
+        for brain in brains:
+            item = brain.getObject()
+            if item.isCopiesEnabled():
+                item.addAutoCopyGroups(isCreated=False)
+            item.updateLocalRoles()
+            item.adapted().onEdit(isCreated=False)
+
+        brains = self.portal.portal_catalog(meta_type='CourrierFile')
+        for brain in brains:
+            item = brain.getObject()
+            item.updateLocalRoles()
+
+        logger.info('Done.')
+
     def _updateDocumentViewerConfiguration(self):
         '''Modify the configuration of the collective.documentviewer product'''
         logger.info('Modifying the configuration of the collective.documentviewer product...')
@@ -748,45 +713,57 @@ class Migrate_To_3_3(Migrator):
 
         logger.info('Done.')
 
+    def _restoreModificationDate(self):
+        '''Set modification date to creation date on MeetingFiles and CourrierFiles'''
+        logger.info('Sets modification date to creation date on MeetingFiles and CourrierFiles...')
+
+        for type in typesToAdaptOCR:
+            brains = self.portal.portal_catalog(meta_type=type)
+            for brain in brains:
+                item = brain.getObject()
+                item.setModificationDate(item.CreationDate())
+                item.reindexObject(idxs=['ModificationDate'])
+
+        logger.info('Done.')
+
     def run(self):
         logger.info('Migrating to MeetingAndenne 3.3...')
-#        self._migrateItemDecisionReportTextAttributeOnConfigs()
-#        self._updateOnMeetingTransitionItemTransitionToTrigger()
-#        self._updateMimetypesRegistry()
-#        self._addMissingRolesAndGroups()
-#        self._addMeetingFormationType()
-#        self._migrateMeetingItemFormations()
-#        self._migrateMailRoles()
-#        self._cleanApplicationManager()
-#        self._removeUnusedGlobalRoles()
-#        self._removeUnusedPloneUsers()
-#        self._removeUselessMailTopics()
-#        self._removeUselessFCKEditorProperties()
-#        self._renameCategories()
-#        self._renameGroups()
-#        self._adaptCatalog()
-#        self._adaptUserProperties()
-#        self._adaptPloneMeetingConfig()
-#        self._adaptMeetingConfigs()
-#        self._adaptMailFolder()
-#        self._adaptMailSecurity()
-#        self._adaptOcrFlags()
-#        self._createMailTopics()
-#        self._createPODTemplates()
-#        self._updatePloneGroupsTitle()
-#        self._updateLocalMeetingItemsRoles()
-#        self._removeBadBrTags()
+        self._migrateItemDecisionReportTextAttributeOnConfigs()
+        self._updateOnMeetingTransitionItemTransitionToTrigger()
+        self._updateMimetypesRegistry()
+        self._addMissingRolesAndGroups()
+        self._addMeetingFormationType()
+        self._migrateMeetingItemFormations()
+        self._migrateMailRoles()
+        self._cleanApplicationManager()
+        self._removeUnusedGlobalRoles()
+        self._removeUnusedPloneUsers()
+        self._removeUselessMailTopics()
+        self._removeUselessFCKEditorProperties()
+        self._renameCategories()
+        self._renameGroups()
+        self._adaptCatalog()
+        self._adaptUserProperties()
+        self._adaptPloneMeetingConfig()
+        self._adaptMeetingConfigs()
+        self._adaptMeetingItemsEmptyTags()
+        self._adaptMailFolder()
+        self._adaptMailSecurity()
+        self._adaptOcrFlags()
+        self._createMailTopics()
+        self._createPODTemplates()
+        self._updatePloneGroupsTitle()
+        # reinstall so skins and so on are correct
+        self.reinstall(profiles=[u'profile-Products.MeetingAndenne:default', ])
+        self._updateLocalRoles()
+        self._updateDocumentViewerConfiguration()
+        # update catalogs after performing all those migration steps
+        self.refreshDatabase(catalogs=True,
+                             catalogsToRebuild=['portal_catalog',
+                                                'uid_catalog',
+                                                'reference_catalog', ],
+                             workflows=False)
         self._restoreModificationDate()
-#        self._renameAllGroups()
-# reinstall so skins and so on are correct
-#        self.reinstall(profiles=[u'profile-Products.MeetingAndenne:default', ])
-#        self._updateDocumentViewerConfiguration()
-# update catalogs after performing all those migration steps
-#        self.refreshDatabase(catalogs=True,
-#                             catalogsToRebuild=['portal_catalog',
-#                                                'uid_catalog',
-#                                                'reference_catalog', ],
-#                             workflows=False)
         self.finish()
 
 
@@ -801,7 +778,7 @@ def migrate(context):
        5)  Add the template used to create MeetingItemFormation objects
        6)  Migrate MeetingItemFormation objects
        7)  Migrate mail roles
-       8)  Remove some objects in Zope Control Panel which were not migrated properl
+       8)  Remove some objects in Zope Control Panel which were not migrated properly
        9)  Remove unused global roles
        10) Remove unused users present in portal_membership and acl_users
        11) Remove useless mail topics added by PloneMeeting migration
@@ -812,14 +789,18 @@ def migrate(context):
        16) Set CKeditor as default editor for everybody and remove useless properties
        17) Change ploneMeeting configuration
        18) Change various meetingConfigs properties
-       19) Modify the default view and redirection method of mail folder
-       20) Modify the local roles of every mail file
-       21) Modify the ocr flags stored with MeetingFile and CourrierFile objects
-       22) Create the topics used for mail management
-       23) Recreate the used POD templates
-       24) Make sure Plone groups linked to a MeetingGroup have a consistent title
-       25) Reinstall Products.MeetingAndenne so skin and so on are correct
-       26) Modify the configuration of the collective.documentviewer product
+       19) Set empty RichTextFields to <html></html> tag
+       20) Modify the default view and redirection method of mail folder
+       21) Modify the local roles of every mail file
+       22) Modify the ocr flags stored with MeetingFile and CourrierFile objects
+       23) Create the topics used for mail management
+       24) Recreate the used POD templates
+       25) Make sure Plone groups linked to a MeetingGroup have a consistent title
+       26) Reinstall Products.MeetingAndenne so skin and so on are correct
+       27) Update local roles on MeetingItems and CourrierFiles
+       28) Modify the configuration of the collective.documentviewer product
+       29) Rebuild portal, uid et reference catalogs
+       30) Set modification date to creation date on MeetingFiles and CourrierFiles
     '''
     Migrate_To_3_3(context).run()
 # ------------------------------------------------------------------------------
