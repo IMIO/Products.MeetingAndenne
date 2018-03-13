@@ -81,6 +81,11 @@ msgstr ""
 msgid "presented_items"
 msgstr ""
 
+# MeetingAdvice
+#. Default: "Reservation"
+msgid "reservation"
+msgstr ""
+
 # MeetingConfig
 #. Default: "If you check this box, when a meeting will be decided, if an item does not have a decision defined, this decision will be automatically filled with title and description of the item"
 msgid "init_item_decision_if_empty_on_decide"
@@ -455,6 +460,14 @@ msgstr ""
 
 #. Default: "pv writers"
 msgid "pvwriters"
+msgstr ""
+
+#. Default: "observer"
+msgid "observer"
+msgstr ""
+
+#. Default: "observers"
+msgid "observers"
 msgstr ""
 
 #. Default: "reviewer"

@@ -86,6 +86,11 @@ msgstr "Agent traitant"
 msgid "presented_items"
 msgstr "Procès-verbal de base"
 
+# MeetingAdvice
+#. Default: "Reservation"
+msgid "reservation"
+msgstr "Réservé"
+
 # MeetingConfig
 #. Default: "If you check this box, when a meeting will be decided, if an item does not have a decision defined, this decision will be automatically filled with title and description of the item"
 msgid "init_item_decision_if_empty_on_decide"
@@ -462,6 +467,14 @@ msgstr "Rédacteur de PV"
 msgid "pvwriters"
 msgstr "Rédacteurs de PV"
 
+#. Default: "Observer"
+msgid "observer"
+msgstr "Observateur"
+
+#. Default: "Observers"
+msgid "observers"
+msgstr "Tous les agents"
+
 #. Default: "Reviewer"
 msgid "reviewer"
 msgstr "Chef de service"
@@ -469,6 +482,3 @@ msgstr "Chef de service"
 #. Default: "Reviewers"
 msgid "reviewers"
 msgstr "Chefs de service"
-
-msgid "reservation"
-msgstr "Reserve"
