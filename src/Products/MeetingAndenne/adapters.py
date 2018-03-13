@@ -2044,7 +2044,7 @@ class MeetingItemCollegeAndenneWorkflowConditions(MeetingItemWorkflowConditions)
 
         userMeetingGroups = tool.getGroupsForUser(suffix="prereviewers")
         if item.getCategory() == "45-personnel":
-            return len(userMeetingGroups) > 0
+            return getattr(tool, "personnel") in userMeetingGroups
         else:
             return group in userMeetingGroups
 
@@ -2067,8 +2067,13 @@ class MeetingItemCollegeAndenneWorkflowConditions(MeetingItemWorkflowConditions)
 
         toolMembership = getToolByName(item, 'portal_membership')
         user = toolMembership.getAuthenticatedMember()
-        userMeetingGroups = tool.getGroupsForUser(suffix="prereviewers")
-        return group in userMeetingGroups or user.has_role('Manager', item)
+        if user.has_role('Manager', item):
+            return True
+ 
+        if item.getCategory() == "45-personnel":
+            return group == getattr(tool, "personnel")
+        else:
+            return group in tool.getGroupsForUser(suffix="prereviewers")
 
     security.declarePublic('mayCorrect')
     def mayCorrect(self, toPrevalidated = False):
