@@ -40,7 +40,7 @@
            factory="Products.MeetingAndenne.adapters.MeetingCollegeAndenneWorkflowConditions"
            provides="Products.MeetingAndenne.interfaces.IMeetingCollegeAndenneWorkflowConditions"/>
 
-  <!-- Adapters for Meeting, MeetingItem, MeetingConfig, MeetingFile and ToolPloneMeeting -->
+  <!-- Adapters for Meeting, MeetingItem, MeetingCategory, MeetingConfig, MeetingFile and ToolPloneMeeting -->
   <adapter for="Products.PloneMeeting.interfaces.IMeeting"
            factory="Products.MeetingAndenne.adapters.CustomMeetingAndenne"
            provides="Products.PloneMeeting.interfaces.IMeetingCustom"/>
@@ -48,6 +48,10 @@
   <adapter for="Products.PloneMeeting.interfaces.IMeetingItem"
            factory="Products.MeetingAndenne.adapters.CustomMeetingItemAndenne"
            provides="Products.PloneMeeting.interfaces.IMeetingItemCustom"/>
+
+  <adapter for="Products.PloneMeeting.interfaces.IMeetingCategory"
+           factory="Products.MeetingAndenne.adapters.CustomMeetingCategoryAndenne"
+           provides="Products.PloneMeeting.interfaces.IMeetingCategoryCustom"/>
 
   <adapter for="Products.PloneMeeting.interfaces.IMeetingItem"
            factory="Products.MeetingAndenne.MeetingItemFormation.MeetingItemFormation"

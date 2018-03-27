@@ -266,37 +266,6 @@ def configureSafeHtml(context, site):
                                                 'th': '1', 'thead': '1', 'tr': '1', 'tt': '1', 'u': '1', 'ul': '1' } )
     pt.reloadTransforms()
 
-def addPodTemplates(context):
-    """
-       Re-register Pod templates present in the default profile after deleting the existing ones
-    """
-    if isNotMeetingAndenneProfile(context):
-        return
-
-    logStep("Registering Pod Templates", context)
-    site = context.getSite()
-    source = context._profile_path
-    if not source:
-        return
-
-    data = ''
-    productname = '.' in PROJECTNAME and PROJECTNAME or 'Products.%s' % PROJECTNAME
-    profileModule = source[source.rfind(productname.replace('.', '/')):].replace('/', '.')
-    profileModule = profileModule.replace('\\', '.')
-    module_path = 'from %s.import_data import data' % profileModule
-    exec module_path
-
-    for configData in data.meetingConfigs:
-        if hasattr(site.portal_plonemeeting, configData.id):
-            cfg = getattr(site.portal_plonemeeting, configData.id)
-            folder = getattr(cfg, TOOL_FOLDER_POD_TEMPLATES)
-            oldTemplatesIds = folder.keys()
-            if len(oldTemplatesIds) > 0:
-                folder.manage_delObjects(list(oldTemplatesIds))
-            for template in configData.podTemplates:
-                cfg.addPodTemplate(template, source)
-
-
 def installMeetingAndenne(context):
     """ Run the default profile before being able to run the Andenne profile"""
     if not isMeetingAndenneConfigureProfile(context):

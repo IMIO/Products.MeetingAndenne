@@ -18,6 +18,17 @@
              expression=""
              inline="False"
              id="meetingandenne.js"/>
+
+ <javascript cacheable="False"
+             compression="safe"
+             cookable="False"
+             enabled="True"
+             expression=""
+             inline="False"
+             insert-before="++resource++collective.dynatree/dynatree-init.js"
+             id="dynatree-init.js"/>
+
+ <javascript id="++resource++collective.dynatree/dynatree-init.js" remove="true"/>
  <!-- ##/code-section jsregistry.xml -->
 
 </object>

@@ -2,4 +2,6 @@
 <object name="portal_memberdata" meta_type="PlonePAS MemberData Tool">
  <property name="gender" type="string"></property>
  <property name="function" type="string"></property>
+ <property name="defaultref" type="string"></property>
+ <property name="defaultgroup" type="string"></property>
 </object>

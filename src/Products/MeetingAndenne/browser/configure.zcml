@@ -40,6 +40,15 @@
         layer="..interfaces.IMeetingAndenneLayer"
         permission="plone.app.controlpanel.UsersAndGroups"/>
 
+    <!-- Overriden collective.dynatree views -->
+    <browser:page
+        name="at_widget_dynatree"
+        for="Products.Archetypes.interfaces.IBaseObject"
+        class="collective.dynatree.atwidget.DynatreeWidgetMacros"
+        template="templates/atwidget.pt"
+        layer="..interfaces.IMeetingAndenneLayer"
+        permission="zope2.View"/>
+
     <!-- overlay views used in present <-> absent management -->
     <browser:page
         name="welcomeuser"
@@ -100,7 +109,7 @@
         class=".views.ParseConvertedFilesView"
         layer="Products.MeetingAndenne.interfaces.IMeetingAndenneLayer"
         permission="cmf.ManagePortal"/>
-    
+
     <!-- Macros -->
     <browser:page
         name="ma-macros"

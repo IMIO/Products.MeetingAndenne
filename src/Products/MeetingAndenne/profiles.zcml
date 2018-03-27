@@ -26,14 +26,6 @@
       provides="Products.GenericSetup.interfaces.EXTENSION"
       for="Products.CMFPlone.interfaces.IPloneSiteRoot"/>
 
-  <genericsetup:importStep
-      name="addPodTemplate"
-      title="Add Pod Templates"
-      description="Registers the Pod Templates present in MeetingAndenne default profile"
-      handler="Products.MeetingAndenne.setuphandlers.addPodTemplates">
-    <depends name="PloneMeeting-postInstall" />
-  </genericsetup:importStep>
-
   <genericsetup:upgradeStep
       title="Migrate to MeetingAndenne 3.0"
       description="Performs migration from MeetingAndenne 1.9 to MeetingAndenne 3.0"
@@ -72,6 +64,14 @@
       source="3200"
       destination="3300"
       handler="Products.MeetingAndenne.migrations.migrate_to_3_3.migrate"
+      profile="Products.MeetingAndenne:default" />
+
+  <genericsetup:upgradeStep
+      title="Migrate to MeetingAndenne 3.3.1"
+      description="Performs migration from MeetingAndenne 3.3 to MeetingAndenne 3.3.1"
+      source="3300"
+      destination="3310"
+      handler="Products.MeetingAndenne.migrations.migrate_to_3_3_1.migrate"
       profile="Products.MeetingAndenne:default" />
 
   <!-- ##/code-section profiles.zcml-bottom -->

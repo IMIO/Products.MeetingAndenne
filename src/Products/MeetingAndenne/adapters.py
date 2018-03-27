@@ -24,8 +24,8 @@
 import cgi
 from appy.gen import No
 from persistent.mapping import PersistentMapping
-from zope.interface import implements
 from zope.i18n import translate
+from zope.interface import implements
 from collections import OrderedDict
 from AccessControl import ClassSecurityInfo
 from Products.Archetypes.atapi import DisplayList
@@ -43,11 +43,12 @@ from Products.PloneMeeting.Meeting import MeetingWorkflowActions, \
      MeetingWorkflowConditions, Meeting
 from Products.PloneMeeting.MeetingItem import MeetingItem, \
      MeetingItemWorkflowConditions, MeetingItemWorkflowActions
+from Products.PloneMeeting.MeetingCategory import MeetingCategory
 from Products.PloneMeeting.MeetingConfig import MeetingConfig
 from Products.PloneMeeting.MeetingFile import MeetingFile
 from Products.PloneMeeting.MeetingGroup import MeetingGroup
 from Products.PloneMeeting.ToolPloneMeeting import ToolPloneMeeting
-from Products.PloneMeeting.interfaces import IMeetingCustom, IMeetingItemCustom, \
+from Products.PloneMeeting.interfaces import IMeetingCustom, IMeetingItemCustom, IMeetingCategoryCustom, \
                                              IMeetingConfigCustom, IMeetingFileCustom, \
                                              IMeetingGroupCustom, IToolPloneMeetingCustom
 from Products.MeetingAndenne.interfaces import \
@@ -484,8 +485,8 @@ SafeHTML.scrub_html = scrub_html
 
 # ------------------------------------------------------------------------------
 class CustomMeetingAndenne(Meeting):
-    '''Adapter that adapts a meeting item implementing IMeetingItem to the
-       interface IMeetingItemCustom.'''
+    '''Adapter that adapts a meeting object implementing IMeeting to the
+       interface IMeetingCustom.'''
     implements(IMeetingCustom)
     security = ClassSecurityInfo()
 
@@ -691,20 +692,6 @@ class CustomMeetingAndenne(Meeting):
            exclude a personnal category from the meeting an realize a separate
            meeeting for this personal category. If allItems=True, we return
            late items AND items in order.'''
-        def getPrintableNumCategory(current_cat):
-            '''Method used here above.'''
-            current_cat_id = current_cat.getId()
-            current_cat_name = current_cat.Title()
-            current_cat_name = current_cat_name[0:2]
-            try:
-                catNum = int(current_cat_name)
-            except ValueError:
-                current_cat_name = current_cat_name[0:1]
-                try:
-                    catNum = int(current_cat_name)
-                except ValueError:
-                    catNum = current_cat_id
-            return catNum
 
         itemsGetter = self.context.getItems
         if late:
@@ -714,15 +701,15 @@ class CustomMeetingAndenne(Meeting):
             items = self.context.getItems() + self.context.getLateItems()
         user = self.context.portal_membership.getAuthenticatedMember()
 
-        # res contains all items by category, the key of res is the category
-        # number. Pay attention that the category number is obtain by extracting
-        # the 2 first caracters of the categoryname, thus the categoryname must
-        # be for exemple ' 2.travaux' or '10.Urbanisme. If not, the catnum takes
+        # res contains all items by category, the key of res being the category
+        # number. Pay attention that the category number is obtained by extracting
+        # the first 2 caracters of the category name, thus the categoryname must
+        # be for example ' 2.travaux' or '10.Urbanisme. If not, the catnum takes
         # the value of the id + 1000 to be sure to place those categories at the
         # end.
         res = {}
-        # First, we create the category and for each category, we create a
-        # dictionary that must contain the list of item in in res[catnum][1]
+        # First, we create the categories and for each category, we create a
+        # dictionary that must contain the list of items in res[catnum][1]
         for item in items:
             if user.has_permission("View", item):
 
@@ -735,14 +722,14 @@ class CustomMeetingAndenne(Meeting):
                     inuid = "ok"
                 if (inuid == "ok"):
                     current_cat = item.getCategory(theObject=True)
-                    catNum = getPrintableNumCategory(current_cat)
+                    catNum = current_cat.adapted().getRootCatNum()
                     if catNum in res:
                         res[catNum][1][item.getItemNumber()] = item
                     else:
                         res[catNum] = {}
-                        #first value of the list is the category object
+                        # first value of the list is the category object
                         res[catNum][0] = item.getCategory(True)
-                        #second value of the list is a list of items
+                        # second value of the list is a list of items
                         res[catNum][1] = {}
                         res[catNum][1][item.getItemNumber()] = item
 
@@ -785,8 +772,8 @@ class CustomMeetingAndenne(Meeting):
 
 # ------------------------------------------------------------------------------
 class CustomMeetingItemAndenne(MeetingItem):
-    '''Adapter that adapts a meeting item implementing IMeetingItem to the
-       interface IMeetingItemCustom.'''
+    '''Adapter that adapts a meeting item object implementing IMeetingItem to
+       the interface IMeetingItemCustom.'''
     implements(IMeetingItemCustom)
     security = ClassSecurityInfo()
 
@@ -834,20 +821,9 @@ class CustomMeetingItemAndenne(MeetingItem):
 
     security.declarePublic('getPrintableNumCategory')
     def getPrintableNumCategory(self):
-        '''Formats the category number to print in the templates.'''
+        '''Formats the category number to print only the root category number in the templates.'''
         current_cat = self.context.getCategory(theObject=True)
-        current_cat_id = current_cat.getId()
-        current_cat_name = current_cat.Title()
-        current_cat_name = current_cat_name[0:2]
-        try:
-            catNum = int(current_cat_name)
-        except ValueError:
-            current_cat_name = current_cat_name[0:1]
-            try:
-                catNum = int(current_cat_name)
-            except ValueError:
-                catNum = current_cat_id
-        return catNum
+        return str(current_cat.adapted().getRootCatNum())
 
     security.declarePublic('getSignatoriesForPrinting') 
     def getSignatoriesForPrinting (self, pos=0, level=0, useforpv=False, userepl=True):
@@ -1049,7 +1025,6 @@ class CustomMeetingItemAndenne(MeetingItem):
                     msg = u"%s" % delayAwareMsg
                 else:
                     msg = u""
-                
 
                 # display the author if advice was given
                 if withAuthor and not adviceType == NOT_GIVEN_ADVICE_VALUE:
@@ -1528,8 +1503,39 @@ class CustomMeetingItemAndenne(MeetingItem):
 
 
 # ------------------------------------------------------------------------------
+class CustomMeetingCategoryAndenne(MeetingCategory):
+    '''Adapter that adapts a meeting category object implementing IMeetingCategory
+       to the interface IMeetingCategoryCustom.'''
+    implements(IMeetingCategoryCustom)
+    security = ClassSecurityInfo()
+
+    def __init__(self, category):
+        self.context = category
+
+    security.declarePrivate('getRootCatNum')
+    def getRootCatNum(self):
+        try:
+            catRootNum = int(self.context.getId().split('-')[0])
+            if catRootNum > 100:
+                catRootNum = int(math.floor(catRootNum / 100)) * 100
+        except ValueError:
+            catRootNum = 0 
+        return catRootNum
+
+    ##### Functions used for template generation ############################
+
+    security.declarePublic('getRootTitle')
+    def getRootTitle(self):
+        return str(self.getRootCatNum()) + "." + self.context.getName().split('>')[0].split('.')[1]
+
+    security.declarePublic('getRootPVTitle')
+    def getRootPVTitle(self):
+        return self.context.getName().split('>')[0].split('.')[1][1:]
+
+
+# ------------------------------------------------------------------------------
 class CustomMeetingConfigAndenne(MeetingConfig):
-    '''Adapter that adapts a meeting config item implementing IMeetingConfig to the
+    '''Adapter that adapts a meeting config object implementing IMeetingConfig to the
        interface IMeetingConfigCustom.'''
     implements(IMeetingConfigCustom)
     security = ClassSecurityInfo()
@@ -1734,8 +1740,8 @@ class CustomMeetingConfigAndenne(MeetingConfig):
 
 # ------------------------------------------------------------------------------
 class CustomMeetingFileAndenne(MeetingFile):
-    '''Adapter that adapts a meeting File implementing IMeetingFile to the
-       interface IMeetingFileCustom.'''
+    '''Adapter that adapts a meeting file object implementing IMeetingFile to
+       the interface IMeetingFileCustom.'''
     implements(IMeetingFileCustom)
     security = ClassSecurityInfo()
 
@@ -1757,8 +1763,8 @@ class CustomMeetingFileAndenne(MeetingFile):
 
 # ------------------------------------------------------------------------------
 class CustomMeetingGroupAndenne(MeetingGroup):
-    '''Adapter that adapts a meeting group item implementing IMeetingGroup to the
-       interface IMeetingGroupCustom.'''
+    '''Adapter that adapts a meeting group object implementing IMeetingGroup to
+       the interface IMeetingGroupCustom.'''
     implements(IMeetingGroupCustom)
     security = ClassSecurityInfo()
 
@@ -1768,8 +1774,8 @@ class CustomMeetingGroupAndenne(MeetingGroup):
 
 # ------------------------------------------------------------------------------
 class CustomToolMeetingAndenne(ToolPloneMeeting):
-    '''Adapter that adapts the PloneMeeting tool implementing IToolPloneMeeting
-       to the interface IToolPloneMeetingCustom.'''
+    '''Adapter that adapts the PloneMeeting tool object implementing
+       IToolPloneMeeting to the interface IToolPloneMeetingCustom.'''
     implements(IToolPloneMeetingCustom)
     security = ClassSecurityInfo()
 
@@ -1883,7 +1889,7 @@ class CustomToolMeetingAndenne(ToolPloneMeeting):
 
 # ------------------------------------------------------------------------------
 class MeetingCollegeAndenneWorkflowActions(MeetingWorkflowActions):
-    '''Adapter that adapts a meeting item implementing IMeetingItem to the
+    '''Adapter that adapts a meeting object implementing IMeeting to the
        interface IMeetingCollegeWorkflowActions'''
 
     implements(IMeetingCollegeAndenneWorkflowActions)
@@ -1907,8 +1913,8 @@ class MeetingCollegeAndenneWorkflowActions(MeetingWorkflowActions):
 
 # ------------------------------------------------------------------------------
 class MeetingCollegeAndenneWorkflowConditions(MeetingWorkflowConditions):
-    '''Adapter that adapts a meeting item implementing IMeetingItem to the
-           interface IMeetingCollegeWorkflowConditions'''
+    '''Adapter that adapts a meeting object implementing IMeeting to the
+       interface IMeetingCollegeWorkflowConditions'''
 
     implements(IMeetingCollegeAndenneWorkflowConditions)
     security = ClassSecurityInfo()
@@ -1939,8 +1945,8 @@ class MeetingCollegeAndenneWorkflowConditions(MeetingWorkflowConditions):
 
 # ------------------------------------------------------------------------------
 class MeetingItemCollegeAndenneWorkflowActions(MeetingItemWorkflowActions):
-    '''Adapter that adapts a meeting item implementing IMeetingItem to the
-       interface IMeetingItemAndenneWorkflowActions'''
+    '''Adapter that adapts a meeting item object implementing IMeetingItem to
+       the interface IMeetingItemAndenneWorkflowActions'''
 
     implements(IMeetingItemCollegeAndenneWorkflowActions)
     security = ClassSecurityInfo()
@@ -2003,8 +2009,8 @@ class MeetingItemCollegeAndenneWorkflowActions(MeetingItemWorkflowActions):
 
 # ------------------------------------------------------------------------------
 class MeetingItemCollegeAndenneWorkflowConditions(MeetingItemWorkflowConditions):
-    '''Adapter that adapts a meeting item implementing IMeetingItem to the
-       interface IMeetingItemAndenneWorkflowConditions'''
+    '''Adapter that adapts a meeting item object implementing IMeetingItem to
+       the interface IMeetingItemAndenneWorkflowConditions'''
 
     implements(IMeetingItemCollegeAndenneWorkflowConditions)
     security = ClassSecurityInfo()
@@ -2098,6 +2104,7 @@ class MeetingItemCollegeAndenneWorkflowConditions(MeetingItemWorkflowConditions)
 # ------------------------------------------------------------------------------
 InitializeClass(CustomMeetingAndenne)
 InitializeClass(CustomMeetingItemAndenne)
+InitializeClass(CustomMeetingCategoryAndenne)
 InitializeClass(CustomMeetingConfigAndenne)
 InitializeClass(CustomMeetingFileAndenne)
 InitializeClass(CustomMeetingGroupAndenne)

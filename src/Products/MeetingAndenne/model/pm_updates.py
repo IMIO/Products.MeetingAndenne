@@ -20,6 +20,8 @@ from Products.PloneMeeting.MeetingGroup import MeetingGroup
 from Products.PloneMeeting.MeetingItem import MeetingItem
 from Products.PloneMeeting.MeetingUser import MeetingUser
 from Products.MeetingAndenne.MeetingItemFormation import MeetingItemFormation_schema
+from Products.MeetingAndenne.vocabularies import SubCategoriesVocabulary
+from collective.dynatree.atwidget import DynatreeWidget
 
 
 # Schema updates related to MeetingItem ----------------------------------------)
@@ -150,6 +152,20 @@ def update_item_schema(baseSchema):
     completeItemSchema['itemSignatories'].optional=True
     completeItemSchema['proposingGroup'].default_method="getDefaultProposingGroup"
 
+
+    completeItemSchema['category'].widget=DynatreeWidget(
+            condition="python: here.showCategory()",
+            description="Category",
+            description_msgid="item_category_descr",
+            label='Category',
+            label_msgid='PloneMeeting_label_category',
+            i18n_domain='PloneMeeting',
+            leafsOnly=True,
+            rootVisible=True,
+            selectMode=1,
+            sparse=False,
+        )
+    completeItemSchema['category'].vocabulary=SubCategoriesVocabulary()
 
 
     completeItemSchema.moveField('refdoc', pos='top')
