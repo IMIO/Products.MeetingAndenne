@@ -136,6 +136,16 @@ class Migrate_To_3_3_1(Migrator):
 
         logger.info('Done.')
 
+    def _updateMeetingConfigs(self):
+        '''Enable subcategories on College meetingConfig'''
+        logger.info('Enabling subcategories on College meetingConfig...')
+
+        for mc in self.portal.portal_plonemeeting.objectValues('MeetingConfig'):
+            if mc.getId() == 'meeting-config-college':
+                setattr(mc, 'useSubCategories', True)
+
+        logger.info('Done.')
+
     def _updatePloneGroupsTitle(self):
         '''Make sure Plone groups linked to a MeetingGroup have a consistent title'''
         logger.info('Making sure Plone groups linked to a MeetingGroup have a consistent title...')
@@ -154,6 +164,7 @@ class Migrate_To_3_3_1(Migrator):
         self._removeOldMeetingFormationTemplate()
         self._createCollegeCategories()
         self._createPODTemplates()
+        self._updateMeetingConfigs()
         self._updatePloneGroupsTitle()
         self.finish()
 
@@ -168,7 +179,8 @@ def migrate(context):
        4) Remove the template that was used by MeetingItemFormation objects
        5) Create the new categories and sub-categorie
        6) Recreate the used POD templates
-       7) Make sure Plone groups linked to a MeetingGroup have a consistent title
+       7) Enable subcategories on College meetingConfig
+       8) Make sure Plone groups linked to a MeetingGroup have a consistent title
     '''
     Migrate_To_3_3_1(context).run()
 # ------------------------------------------------------------------------------

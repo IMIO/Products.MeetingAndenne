@@ -28,33 +28,41 @@ class SubCategoriesVocabulary(object):
         """
         terms = OrderedDict()
         tree = OrderedDict()
-        res = []
+        ids = []
         cfg = instance.portal_plonemeeting.getMeetingConfig(instance)
 
-        for cat in cfg.getCategories():
-            try:
-                catnum = int(cat.id.split('-')[0])
-            except ValueError:
-                catnum = 0
-            if catnum >= 100:
-                res.append(cat.id)
-                catname = cat.getName()
-                catnum = str(int(math.floor(catnum / 100)) * 100)
-                if catnum in terms:
-                    terms[catnum][1].update( {cat.id: [catname.split('.')[0] + '.' + catname.split('>')[1], None]} )
+        if cfg.getUseSubCategories():
+            for cat in cfg.getCategories():
+                try:
+                    catnum = int(cat.id.split('-')[0])
+                except ValueError:
+                    catnum = 0
+                if catnum >= 100:
+                    ids.append(cat.id)
+                    catname = cat.getName()
+                    catnum = str(int(math.floor(catnum / 100)) * 100)
+                    if catnum in terms:
+                        terms[catnum][1].update( {cat.id: [catname.split('.')[0] + '.' + catname.split('>')[1], None]} )
+                    else:
+                        terms[catnum] = [catname.split('>')[0], OrderedDict( [(cat.id, [catname.split('.')[0] + '.' + catname.split('>')[1], None] )] )]
+
+            # make sure current category is listed
+            if instance.getCategory() and not instance.getCategory() in ids:
+                current_cat = instance.getCategory(theObject=True)
+                tree[current_cat.id] = [current_cat.getName(), None]
+
+            for key, value in terms.iteritems():
+                if len(value[1]) == 1:
+                    tree[value[1].keys()[0]] = [value[0], None]
                 else:
-                    terms[catnum] = [catname.split('>')[0], OrderedDict( [(cat.id, [catname.split('.')[0] + '.' + catname.split('>')[1], None] )] )]
-
-        # make sure current category is listed
-        if instance.getCategory() and not instance.getCategory() in res:
-            current_cat = instance.getCategory(theObject=True)
-            tree[current_cat.id] = [current_cat.getName(), None]
-
-        for key, value in terms.iteritems():
-            if len(value[1]) == 1:
-                tree[value[1].keys()[0]] = [value[0], None]
-            else:
-                tree[key] = value
+                    tree[key] = value
+        else:
+            for cat in cfg.getCategories():
+                try:
+                    catnum = int(cat.id.split('-')[0])
+                except ValueError:
+                    catnum = 0
+                tree[catnum] = (cat.getName(), None)
 
         return tree
 
