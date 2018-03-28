@@ -22,6 +22,7 @@
 # ------------------------------------------------------------------------------
 
 import cgi
+import math
 from appy.gen import No
 from persistent.mapping import PersistentMapping
 from zope.i18n import translate
@@ -1365,9 +1366,9 @@ class CustomMeetingItemAndenne(MeetingItem):
 
         #pv = self.context.getPv()
         #self.context.setPv(self.context.replaceBr(pv))
-
+        ItemCatNum=self.context.getCategory(theObject=True).adapted().getRootCatNum() 
         # Add local roles corresponding to the proposing group if item category is personnel or if item is confidential
-        if self.context.getCategory() == "45-personnel" or self.context.getIsconfidential() == True:
+        if ItemCatNum in [4300,45] or self.context.getIsconfidential() == True:
             meetingGroup = getattr(tool, self.context.getProposingGroup(), None)
             personnelGroup = getattr(tool, "personnel", None)
             cfg = tool.getMeetingConfig(self.context)
@@ -1382,7 +1383,7 @@ class CustomMeetingItemAndenne(MeetingItem):
 
             if 'pre_validation_keep_reviewer_permissions' in adaptations and meetingGroup.getUsePrevalidation():
                 MEETINGROLESTOADD['MeetingReviewer'] = ( meetingGroup, 'reviewers' )
-                if self.context.getCategory() == "45-personnel":
+                if ItemCatNum in [4300,45]:
                     MEETINGROLESTOADD['MeetingPreReviewer'] = ( personnelGroup, 'prereviewers' )
                     if self.context.getIsconfidential() == True:
                         MEETINGROLESTOADD['MeetingObserverLocal'] = ( meetingGroup, 'prereviewers' )
@@ -1390,7 +1391,7 @@ class CustomMeetingItemAndenne(MeetingItem):
                     MEETINGROLESTOADD['MeetingPreReviewer'] = ( meetingGroup, 'prereviewers' )
             else:
                 MEETINGROLESTOADD['MeetingPreReviewer'] = ( meetingGroup, 'prereviewers' )
-                if self.context.getCategory() == "45-personnel":
+                if ItemCatNum in [4300,45]:
                     MEETINGROLESTOADD['MeetingReviewer'] = ( personnelGroup, 'reviewers' )
                     if self.context.getIsconfidential() == True:
                         MEETINGROLESTOADD['MeetingObserverLocal'] = ( meetingGroup, 'reviewers' )
@@ -1602,6 +1603,7 @@ class CustomMeetingConfigAndenne(MeetingConfig):
         member = self.portal_membership.getAuthenticatedMember()
         groupIds = self.portal_groups.getGroupsForPrincipal(member)
         reviewProcessInfos = []
+        cat = []
         isPersonnel = False
         for groupId in groupIds:
             for reviewer_suffix, review_state in MEETINGREVIEWERS.items():
@@ -1625,7 +1627,14 @@ class CustomMeetingConfigAndenne(MeetingConfig):
                   }
         if isPersonnel:
             del params['reviewProcessInfo']
-            params['getCategory'] = '45-personnel'
+            catparams = {'portal_type': 'MeetingCategory','sort_on': 'getId','sort_order': 'ascending'}
+            catparams['getId'] = {'query':['4300-','4399-'],'range':'min:max'}
+            catcatalog = self.portal_catalog
+            catresults = catcatalog.searchResults(**catparams)
+            for c in catresults:
+                cat.append(c['getId'])
+            cat.append('45-personnel')
+            params['getCategory'] = {'query':cat,'operator':'or'}            
             params['review_state'] = 'proposed'
         # Manage filter
         if filterKey:
@@ -2031,7 +2040,7 @@ class MeetingItemCollegeAndenneWorkflowConditions(MeetingItemWorkflowConditions)
             return True
 
         userMeetingGroups = tool.getGroupsForUser(suffix="prereviewers")
-        if item.getCategory() == "45-personnel":
+        if item.getCategory(theObject=True).adapted().getRootCatNum() in [4300,45]:
             return getattr(tool, "personnel") in userMeetingGroups
         else:
             return group in userMeetingGroups
@@ -2058,7 +2067,7 @@ class MeetingItemCollegeAndenneWorkflowConditions(MeetingItemWorkflowConditions)
         if user.has_role('Manager', item):
             return True
 
-        if item.getCategory() == "45-personnel":
+        if item.getCategory(theObject=True).adapted().getRootCatNum() in [4300,45]:
             return group == getattr(tool, "personnel")
         else:
             return group in tool.getGroupsForUser(suffix="prereviewers")
