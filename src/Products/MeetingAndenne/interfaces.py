@@ -118,10 +118,6 @@ class IMeetingCollegeAndenneWorkflowConditions(IMeetingWorkflowConditions):
           Guard for the 'close' transitions
         """
 
-class IMeetingItemFormation(IMeetingItemCustom):
-    '''Marker interface for .MeetingAndenne.MeetingItemFormation'''
-    pass
-
 class ICourrierFile(Interface):
     '''Marker interface for .MeetingAndenne.CourrierFile'''
     pass

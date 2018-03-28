@@ -54,7 +54,7 @@ from Products.PloneMeeting.interfaces import IMeetingCustom, IMeetingItemCustom,
 from Products.MeetingAndenne.interfaces import \
      IMeetingItemCollegeAndenneWorkflowActions, IMeetingItemCollegeAndenneWorkflowConditions, \
      IMeetingCollegeAndenneWorkflowActions, IMeetingCollegeAndenneWorkflowConditions, \
-     IMeetingItemFormation, IOCRLanguageCustom
+     IOCRLanguageCustom
 from Products.MeetingAndenne.config import MAIL_TYPES
 from Products.MeetingAndenne.utils import *
 from Products.MeetingAndenne.SearcherAndenne import SearcherAndenne
@@ -1055,24 +1055,6 @@ class CustomMeetingItemAndenne(MeetingItem):
         return res.encode('utf-8')
 
     ### New functionalities ###
-
-    security.declarePublic('adapted')
-    def adapted(self):
-        '''Gets the "adapted" version of myself. If no custom adapter is found,
-           this method returns me.'''
-        if not hasattr(self, 'template'):
-            return getCustomAdapter(self)
-        else:
-            res = self
-            cmd = "res = I%s(self)" % getattr(self, 'template')
-            try:
-                exec cmd
-            except TypeError:
-                pass
-            return res
-
-    MeetingItem.adapted = adapted
-    # it'a a monkey patch because it's the only way to change the behaviour of the MeetingItem class
 
     security.declarePublic('updateMeetingItem')
     def updateMeetingItem(self):

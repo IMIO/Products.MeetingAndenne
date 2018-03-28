@@ -53,10 +53,6 @@
            factory="Products.MeetingAndenne.adapters.CustomMeetingCategoryAndenne"
            provides="Products.PloneMeeting.interfaces.IMeetingCategoryCustom"/>
 
-  <adapter for="Products.PloneMeeting.interfaces.IMeetingItem"
-           factory="Products.MeetingAndenne.MeetingItemFormation.MeetingItemFormation"
-           provides="Products.MeetingAndenne.interfaces.IMeetingItemFormation"/>
-
   <adapter for="Products.PloneMeeting.interfaces.IMeetingConfig"
            factory="Products.MeetingAndenne.adapters.CustomMeetingConfigAndenne"
            provides="Products.PloneMeeting.interfaces.IMeetingConfigCustom"/>

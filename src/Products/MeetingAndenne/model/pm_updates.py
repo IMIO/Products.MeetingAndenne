@@ -19,7 +19,6 @@ from Products.PloneMeeting.MeetingFile import MeetingFile
 from Products.PloneMeeting.MeetingGroup import MeetingGroup
 from Products.PloneMeeting.MeetingItem import MeetingItem
 from Products.PloneMeeting.MeetingUser import MeetingUser
-from Products.MeetingAndenne.MeetingItemFormation import MeetingItemFormation_schema
 from Products.MeetingAndenne.vocabularies import SubCategoriesVocabulary
 from collective.dynatree.atwidget import DynatreeWidget
 
@@ -76,7 +75,6 @@ def update_item_schema(baseSchema):
             TextField(
                 name='projetpv',
                 widget=RichWidget(
-                    condition="python: not here.adapted().isformation()",
                     rows=15,
                     label='Projetpv',
                     label_msgid='MeetingAndenne_label_projetpv',
@@ -143,7 +141,7 @@ def update_item_schema(baseSchema):
         ),
     )
 
-    completeItemSchema = baseSchema + specificSchema.copy() + MeetingItemFormation_schema.copy()
+    completeItemSchema = baseSchema + specificSchema.copy()
     completeItemSchema['title'].widget.condition="python: not hasattr(here, 'template') or not here.queryState()=='itemcreated' or here.portal_membership.getAuthenticatedMember().has_role('Manager')"    
 
     completeItemSchema['copyGroups'].write_permission="MeetingAndenne: Write copygroup"

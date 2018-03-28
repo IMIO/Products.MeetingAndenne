@@ -71,7 +71,6 @@ def initialize(context):
     # imports packages and types for registration
 
     import CourrierFile
-    import MeetingItemFormation
 
     # Initialize portal content
     all_content_types, all_constructors, all_ftis = process_types(
