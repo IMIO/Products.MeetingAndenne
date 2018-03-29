@@ -156,6 +156,14 @@ class Migrate_To_3_3_1(Migrator):
 
         logger.info('Done.')
 
+    def _refreshReviewProcessInfoIndex(self):
+        '''Refresh reviewProcessInfo index so that personnel points are correctly managed'''
+        logger.info('Refreshing reviewProcessInfo index so that personnel points are correctly managed...')
+
+        self.portal.portal_catalog.manage_reindexIndex(ids=['reviewProcessInfo'])
+
+        logger.info('Done.')
+
     def run(self):
         logger.info('Migrating to MeetingAndenne 3.3.1...')
         self._installCollectiveDynatree()
@@ -166,6 +174,7 @@ class Migrate_To_3_3_1(Migrator):
         self._createPODTemplates()
         self._updateMeetingConfigs()
         self._updatePloneGroupsTitle()
+        self._refreshReviewProcessInfoIndex()
         self.finish()
 
 
@@ -181,6 +190,7 @@ def migrate(context):
        6) Recreate the used POD templates
        7) Enable subcategories on College meetingConfig
        8) Make sure Plone groups linked to a MeetingGroup have a consistent title
+       9) Refresh reviewProcessInfo index so that personnel points are correctly managed
     '''
     Migrate_To_3_3_1(context).run()
 # ------------------------------------------------------------------------------

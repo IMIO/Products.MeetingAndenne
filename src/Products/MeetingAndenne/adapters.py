@@ -1366,9 +1366,12 @@ class CustomMeetingItemAndenne(MeetingItem):
 
         #pv = self.context.getPv()
         #self.context.setPv(self.context.replaceBr(pv))
-        ItemCatNum=self.context.getCategory(theObject=True).adapted().getRootCatNum() 
+
         # Add local roles corresponding to the proposing group if item category is personnel or if item is confidential
-        if ItemCatNum in [4300,45] or self.context.getIsconfidential() == True:
+        itemCatNum = self.context.getCategory(theObject=True).adapted().getRootCatNum()
+        personnel = itemCatNum in [4300,45]
+
+        if personnel or self.context.getIsconfidential() == True:
             meetingGroup = getattr(tool, self.context.getProposingGroup(), None)
             personnelGroup = getattr(tool, "personnel", None)
             cfg = tool.getMeetingConfig(self.context)
@@ -1383,7 +1386,7 @@ class CustomMeetingItemAndenne(MeetingItem):
 
             if 'pre_validation_keep_reviewer_permissions' in adaptations and meetingGroup.getUsePrevalidation():
                 MEETINGROLESTOADD['MeetingReviewer'] = ( meetingGroup, 'reviewers' )
-                if ItemCatNum in [4300,45]:
+                if personnel:
                     MEETINGROLESTOADD['MeetingPreReviewer'] = ( personnelGroup, 'prereviewers' )
                     if self.context.getIsconfidential() == True:
                         MEETINGROLESTOADD['MeetingObserverLocal'] = ( meetingGroup, 'prereviewers' )
@@ -1391,7 +1394,7 @@ class CustomMeetingItemAndenne(MeetingItem):
                     MEETINGROLESTOADD['MeetingPreReviewer'] = ( meetingGroup, 'prereviewers' )
             else:
                 MEETINGROLESTOADD['MeetingPreReviewer'] = ( meetingGroup, 'prereviewers' )
-                if ItemCatNum in [4300,45]:
+                if personnel:
                     MEETINGROLESTOADD['MeetingReviewer'] = ( personnelGroup, 'reviewers' )
                     if self.context.getIsconfidential() == True:
                         MEETINGROLESTOADD['MeetingObserverLocal'] = ( meetingGroup, 'reviewers' )
@@ -1603,12 +1606,8 @@ class CustomMeetingConfigAndenne(MeetingConfig):
         member = self.portal_membership.getAuthenticatedMember()
         groupIds = self.portal_groups.getGroupsForPrincipal(member)
         reviewProcessInfos = []
-        cat = []
-        isPersonnel = False
         for groupId in groupIds:
             for reviewer_suffix, review_state in MEETINGREVIEWERS.items():
-                if groupId.startswith('personnel'):
-                    isPersonnel = True
                 if groupId.endswith('_%s' % reviewer_suffix):
                     groupName = groupId[:-len(reviewer_suffix) - 1]
                     # specific management for workflows using the 'pre_validation' wfAdaptation
@@ -1625,17 +1624,6 @@ class CustomMeetingConfigAndenne(MeetingConfig):
                   'sort_on': sortKey,
                   'sort_order': sortOrder
                   }
-        if isPersonnel:
-            del params['reviewProcessInfo']
-            catparams = {'portal_type': 'MeetingCategory','sort_on': 'getId','sort_order': 'ascending'}
-            catparams['getId'] = {'query':['4300-','4399-'],'range':'min:max'}
-            catcatalog = self.portal_catalog
-            catresults = catcatalog.searchResults(**catparams)
-            for c in catresults:
-                cat.append(c['getId'])
-            cat.append('45-personnel')
-            params['getCategory'] = {'query':cat,'operator':'or'}            
-            params['review_state'] = 'proposed'
         # Manage filter
         if filterKey:
             params[filterKey] = prepareSearchValue(filterValue)

@@ -67,6 +67,7 @@
 
   <!-- Indexes -->
   <adapter name="sortable_sender" factory=".indexes.sortable_sender" />
+  <adapter name="reviewProcessInfo" factory=".indexes.reviewProcessInfo" />
 
   <!-- add the blob field to CourrierFile -->
   <adapter
