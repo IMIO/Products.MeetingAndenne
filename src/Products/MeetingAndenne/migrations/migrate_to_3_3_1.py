@@ -17,6 +17,12 @@ meetingFormationFields = ( 'training_type', 'training_purpose', 'training_startD
     'training_acceptanceGiro', 'template', 'templateStates'
 )
 
+templateDirectories = { 'cpas'                  : u'2040-cpas-tutelle', \
+                        'finances'              : u'3330-finances-f.o.v.', \
+                        'marches-publics'       : u'3900-marches-publics-autres', \
+                        'demande-de-formation-1': u'4360-personnel-missions-de-service',
+                      }
+
 # The migration class ----------------------------------------------------------
 class Migrate_To_3_3_1(Migrator):
 
@@ -73,27 +79,6 @@ class Migrate_To_3_3_1(Migrator):
 
         logger.info('Done.')
 
-    def _migrateMeetingFormationTemplates(self):
-        '''Migrate MeetingFormation template objects'''
-        logger.info('Migrating MeetingFormation template objects...')
-
-        collegeConfig = getattr(self.portal.portal_plonemeeting, 'meeting-config-college')
-        folder = getattr(collegeConfig, 'itemtemplates')
-        folders = []
-
-        if hasattr(folder, 'demande-de-formation-1'):
-            folders.append(folder['demande-de-formation-1'])
-
-        while len(folders) > 0:
-            folder = folders.pop()
-            for item in folder:
-                if folder[item].meta_type == 'ATFolder':
-                    folders.append(folder[item])
-                elif folder[item].meta_type == 'MeetingItem':
-                    folder[item].category = u'4360-personnel-missions-de-service'
-
-        logger.info('Done.')
-
     def _removeOldMeetingFormationTemplate(self):
         '''Remove the template that was used by MeetingItemFormation objects'''
         logger.info('Removing the template that was used by MeetingItemFormation object...')
@@ -146,6 +131,28 @@ class Migrate_To_3_3_1(Migrator):
 
         logger.info('Done.')
 
+    def _updateCollegeTemplateCategories(self):
+        '''Change categories to College template present in subdirectories'''
+        logger.info('Changing categories to College template present in subdirectories...')
+
+        collegeConfig = getattr(self.portal.portal_plonemeeting, 'meeting-config-college')
+        mainFolder = getattr(collegeConfig, 'itemtemplates')
+        folders = []
+
+        for directory, category in templateDirectories.iteritems():
+            if hasattr(mainFolder, 'demande-de-formation-1'):
+                folders.append(mainFolder[directory])
+
+                while len(folders) > 0:
+                    folder = folders.pop()
+                    for item in folder:
+                        if folder[item].meta_type == 'ATFolder':
+                            folders.append(folder[item])
+                        elif folder[item].meta_type == 'MeetingItem':
+                            folder[item].category = category
+
+        logger.info('Done.')
+
     def _updatePloneGroupsTitle(self):
         '''Make sure Plone groups linked to a MeetingGroup have a consistent title'''
         logger.info('Making sure Plone groups linked to a MeetingGroup have a consistent title...')
@@ -168,11 +175,11 @@ class Migrate_To_3_3_1(Migrator):
         logger.info('Migrating to MeetingAndenne 3.3.1...')
         self._installCollectiveDynatree()
         self._migrateMeetingItemFormationObjects()
-        self._migrateMeetingFormationTemplates()
         self._removeOldMeetingFormationTemplate()
         self._createCollegeCategories()
         self._createPODTemplates()
         self._updateMeetingConfigs()
+        self._updateCollegeTemplateCategories()
         self._updatePloneGroupsTitle()
         self._refreshReviewProcessInfoIndex()
         self.finish()
@@ -183,12 +190,12 @@ def migrate(context):
     '''This migration function:
 
        1) Install collective.dynatree and updated javascript from MeetingAndenne default profile
-       2) Migrate MeetingItemFormation objects
-       3) Migrate MeetingFormation template objects
-       4) Remove the template that was used by MeetingItemFormation objects
-       5) Create the new categories and sub-categorie
-       6) Recreate the used POD templates
-       7) Enable subcategories on College meetingConfig
+       2) Migrate MeetingFormation template objects
+       3) Remove the template that was used by MeetingItemFormation objects
+       4) Create the new categories and sub-categorie
+       5) Recreate the used POD templates
+       6) Enable subcategories on College meetingConfig
+       7) Change categories to College template present in subdirectories
        8) Make sure Plone groups linked to a MeetingGroup have a consistent title
        9) Refresh reviewProcessInfo index so that personnel points are correctly managed
     '''
