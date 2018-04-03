@@ -1368,9 +1368,13 @@ class CustomMeetingItemAndenne(MeetingItem):
         #self.context.setPv(self.context.replaceBr(pv))
 
         # Add local roles corresponding to the proposing group if item category is personnel or if item is confidential
-        itemCatNum = self.context.getCategory(theObject=True).adapted().getRootCatNum()
-        personnel = itemCatNum in [4300,45]
+        category = self.context.getCategory(theObject=True)
+        if category == '':
+            itemCatNum = 0
+        else:
+            itemCatNum = category.adapted().getRootCatNum()
 
+        personnel = itemCatNum in [4300,45]
         if personnel or self.context.getIsconfidential() == True:
             meetingGroup = getattr(tool, self.context.getProposingGroup(), None)
             personnelGroup = getattr(tool, "personnel", None)
