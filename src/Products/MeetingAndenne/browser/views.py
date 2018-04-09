@@ -109,144 +109,93 @@ class RunDocsplitOnBlobsView(BrowserView):
         catalog = getToolByName(self.context, 'portal_catalog')
         types = ('MeetingFile', 'CourrierFile')
         cpt = 0
-        date_range = {'query': (DateTime('2017-08-31 23:16:17'),),'range': 'max',}
         for type in types:
             if cpt >= CRON_BATCH_SIZE:
                 break
 
-            brains = catalog.queryCatalog({"meta_type":type,"created" : date_range})
-            acpt=len(brains)
-            qcpt = 1
+            brains = catalog(meta_type=type)
+            brainslen = len(brains)
+            qcpt = 0
             for brain in brains:
-                object = brain.getObject()
-                removeFlags = False
-                queueObject = False
-                annotations = IAnnotations(object)
+                qcpt += 1
+                try:
+                    object = brain.getObject()
+                    removeFlags = False
+                    queueObject = False
+                    annotations = IAnnotations(object)
 
-                needsOcr = getattr(object, 'needsOcr', None)
-                if needsOcr is None or needsOcr == False:
-                    if hasattr(object, 'needsOcr'):
-                        logger.info('Object has needsOcr = False : %s' % object.absolute_url())
-                        delattr(object, 'needsOcr')
-                    qcpt += 1
-                    continue
+                    needsOcr = getattr(object, 'needsOcr', None)
+                    if needsOcr is None or needsOcr == False:
+                        if hasattr(object, 'needsOcr'):
+                            logger.info('Object has needsOcr = False : %s' % object.absolute_url())
+                            delattr(object, 'needsOcr')
+                        continue
 
-                if not object.isConvertable():
-                    logger.info('Object not convertable : %s' % object.absolute_url())
-                    removeFlags = True
-                else:
-                    if not 'collective.documentviewer' in annotations:
-                        queueObject = True
+                    if not object.isConvertable():
+                        logger.info('Object not convertable : %s' % object.absolute_url())
+                        removeFlags = True
                     else:
-                        results = annotations['collective.documentviewer']
-                        if 'converting' in results and results['converting']:
+                        if not 'collective.documentviewer' in annotations:
+                            queueObject = True
+                        else:
+                            results = annotations['collective.documentviewer']
+                            if 'converting' in results and results['converting']:
+                                if not 'Products.MeetingAndenne' in annotations:
+                                    annotations['Products.MeetingAndenne'] = PersistentMapping()
+                                if 'converting' not in annotations['Products.MeetingAndenne']:
+                                    annotations['Products.MeetingAndenne']['converting'] = True
+                                    logger.warning('Object still under conversion : %s' % object.absolute_url())
+                                    cpt += 1
+                                    continue
+                                else:
+                                    logger.warning('Object conversion stuck : %s' % object.absolute_url())
+                                    queueObject = True
+                                    if object.meta_type == 'MeetingFile' and 'toPrint' in annotations['Products.MeetingAndenne']:
+                                        object.toPrint = annotations['Products.MeetingAndenne']['toPrint']
+                                    if 'stuckCount' not in annotations['Products.MeetingAndenne']:
+                                        annotations['Products.MeetingAndenne']['stuckCount'] = 1
+                                    else:
+                                        stuckCount = annotations['Products.MeetingAndenne']['stuckCount'] + 1
+                                        if stuckCount <= 3:
+                                            annotations['Products.MeetingAndenne']['stuckCount'] = stuckCount
+                                        else:
+                                            logger.error('Object not convertable after three trials : %s' % object.absolute_url())
+                                            object.toPrint = False
+                                            queueObject = False
+                                            removeFlags = True
+                            if 'successfully_converted' in results and results['successfully_converted']:
+                                removeFlags = True
+                            else:
+                                if 'successfully_converted' in results:
+                                    logger.error('Object conversion failed : %s' % object.absolute_url())
+                                queueObject = True
+                                if object.meta_type == 'MeetingFile':
+                                    if 'Products.MeetingAndenne' in annotations and 'toPrint' in annotations['Products.MeetingAndenne']:
+                                        object.toPrint = annotations['Products.MeetingAndenne']['toPrint']
+
+                    if removeFlags:
+                        delattr(object, 'needsOcr')
+                        if object.meta_type == 'MeetingFile' and 'Products.MeetingAndenne' in annotations:
+                            del annotations['Products.MeetingAndenne']
+                        continue
+
+                    if queueObject:
+                        if object.meta_type == "MeetingFile":
                             if not 'Products.MeetingAndenne' in annotations:
                                 annotations['Products.MeetingAndenne'] = PersistentMapping()
-                            if 'converting' not in annotations['Products.MeetingAndenne']:
-                                annotations['Products.MeetingAndenne']['converting'] = True
-                                logger.warning('Object still under conversion : %s' % object.absolute_url())
-                                cpt += 1
-                                qcpt += 1
-                                continue
-                            else:
-                                logger.warning('Object conversion stuck : %s' % object.absolute_url())
-                                queueObject = True
-                                if object.meta_type == 'MeetingFile' and 'toPrint' in annotations['Products.MeetingAndenne']:
-                                    object.toPrint = annotations['Products.MeetingAndenne']['toPrint']
-                                if 'stuckCount' not in annotations['Products.MeetingAndenne']:
-                                    annotations['Products.MeetingAndenne']['stuckCount'] = 1
-                                else:
-                                    stuckCount = annotations['Products.MeetingAndenne']['stuckCount'] + 1
-                                    if stuckCount <= 3:
-                                        annotations['Products.MeetingAndenne']['stuckCount'] = stuckCount
-                                    else:
-                                        logger.error('Object not convertable after three trials : %s' % object.absolute_url())
-                                        object.toPrint = False
-                                        queueObject = False
-                                        removeFlags = True
-                        if 'successfully_converted' in results and results['successfully_converted']:
-                            removeFlags = True
-                        else:
-                            if 'successfully_converted' in results:
-                                logger.error('Object conversion failed : %s' % object.absolute_url())
-                            queueObject = True
-                            if object.meta_type == 'MeetingFile':
-                                if 'Products.MeetingAndenne' in annotations and 'toPrint' in annotations['Products.MeetingAndenne']:
-                                    object.toPrint = annotations['Products.MeetingAndenne']['toPrint']
+                                annotations['Products.MeetingAndenne']['toPrint'] = object.toPrint
 
-                if removeFlags:
-                    delattr(object, 'needsOcr')
-                    if object.meta_type == 'MeetingFile' and 'Products.MeetingAndenne' in annotations:
-                        del annotations['Products.MeetingAndenne']
-                    continue
+                        convertToImages(object, None, force=True)
+                        logger.info('Object number %d queued on %d %s' %(qcpt, brainslen, type))
+                        cpt += 1
+                        if cpt >= CRON_BATCH_SIZE:
+                            break
+                except AttributeError:
+                    url = brain.getURL()
+                    logger.info('Object doesn\'t exist anymore : ' + url)
+                    catalog.uncatalog_object(url)
 
-                if queueObject:
-                    if object.meta_type == "MeetingFile":
-                        if not 'Products.MeetingAndenne' in annotations:
-                            annotations['Products.MeetingAndenne'] = PersistentMapping()
-                            annotations['Products.MeetingAndenne']['toPrint'] = object.toPrint
-                    
-                    convertToImages(object, None, force=True)
-                    logger.info('Object number %d queued on %d %s' %(qcpt,acpt,type))
-                    cpt += 1
-                    if cpt >= CRON_BATCH_SIZE:
-                        break
-                qcpt +=1
         logger.info('Added %d jobs in conversion queue' % cpt)
-
-class RunDocsplitdelete(BrowserView):
-    """
-      This is a view that is called as a maintenance task by Products.cron4plone.
-      As we use clear days to compute advice delays, it will be launched at 0:00
-      each night and update relevant items containing delay-aware advices still addable/editable.
-      It will also update the indexAdvisers portal_catalog index.
-    """
-    def __call__(self):
-        logger.info('Looking to see if there are  some items to delete in conversion queue.')
-        catalog = getToolByName(self.context, 'portal_catalog')
-        types = ('MeetingFile', 'CourrierFile')
-        cpt = 0
-        sitepath = self.context.getPhysicalPath()
-        async = getUtility(IAsyncService)
-        queue = async.getQueues()['']
-        date_range = {'query': (DateTime('2017-08-31 23:16:17'),),'range': 'max',}
-        for type in types:
-                         
-            brains = catalog.queryCatalog({"meta_type":type,"created" : date_range})
-            acpt=len(brains)
-            qcpt = 1
-            for brain in brains:
-                if cpt >= 10:
-                        break
-                object = brain.getObject()
-                removeFlags = False
-                queueObject = False
-                annotations = IAnnotations(object)
-                objpath = object.getPhysicalPath()            
-                if not object.isConvertable():
-                    logger.info('Object not convertable : %s' % object.absolute_url())
-                    removeFlags = True
-                else:
-                    if not 'collective.documentviewer' in annotations:
-                        continue
-                    else:
-                        results = annotations['collective.documentviewer']
-                        if 'converting' in results and results['converting']:                    
-                            # find the job		    
-                            jobs = [job for job in queue]
-                            for job in jobs:
-                                if isConversion(job, sitepath) and \
-                                        job.args[0] == objpath and job.args[3]=='admin':
-                                    try:
-                                        queue.remove(job)
-                                        settings = Settings(object)
-                                        settings.converting = False
-                                        cpt +=1
-                                        logger.info('remove from queue : %s in state %s ' % (job.args,job.status))
-                                    except LookupError:
-                                        pass                   
-                    
-        logger.info('%d item deleted in queue ' % cpt)
 
 class ParseConvertedFilesView(BrowserView):
     """
@@ -276,19 +225,23 @@ class ParseConvertedFilesView(BrowserView):
         logger.info(str(cpt) + ' objects parsed.')
 
         logger.info('Parsing MeetingFiles and CourrierFiles to see if all is correctly converted.')
-        brains = catalog.searchResults(meta_type='Meeting',
-                                       sort_on='getDate',
-                                       sort_order='ascending')
         annexUIDs = set()
+        brains = catalog.searchResults(meta_type='MeetingFile',
+                                       sort_on='Date',
+                                       sort_order='ascending')
         for brain in brains:
-            meeting = brain.getObject()
-            for item in meeting.getAllItems(ordered = True):
-                for annex in IAnnexable(item).getAnnexes():
-                    annexUID = annex.UID()
-                    path = join(gsettings.storage_location, annexUID[0], annexUID[1], annexUID)
-                    if not os.path.exists(path):
-                        logger.info(annex.absolute_url() + ' : Annex not converted !')
-                    annexUIDs.add(annexUID)
+            try:
+                annex = brain.getObject()
+                annexUID = annex.UID()
+                path = join(gsettings.storage_location, annexUID[0], annexUID[1], annexUID)
+                if not os.path.exists(path):
+                    logger.info(annex.absolute_url() + ' : Annex not converted !')
+                annexUIDs.add(annexUID)
+            except AttributeError:
+                url = brain.getURL()
+                logger.info('Object doesn\'t exist anymore : ' + url)
+                catalog.uncatalog_object(url)
+
         logger.info(str(len(annexUIDs)) + ' annexes in the database')
 
         mailUIDs = set()
@@ -322,3 +275,77 @@ class ParseConvertedFilesView(BrowserView):
                                 shutil.rmtree(uidpath)
                                 cpt += 1
         logger.info(str(cpt) + ' directories removed from the conversion results')
+
+class RepairAnnexesView(BrowserView):
+    """
+      This is a view that is called as a maintenance task by Products.cron4plone.
+      It will be launched at 0:30 every first day of month and will scavenge cataloged objects
+      that don't exist anymore. At the same time, it will report annexes and mails which were
+      not correctly processed by docsplit.
+    """
+    def __call__(self):
+        portal = api.portal.get()
+        gsettings = GlobalSettings(portal)
+        catalog = getToolByName(self.context, 'portal_catalog')
+        cpt = 0
+
+        brains = catalog.searchResults(meta_type='CourrierFile')
+        print (len(brains))
+        for brain in brains:
+            object = brain.getObject()
+            annexUID = object.UID()
+            path = join(gsettings.storage_location, annexUID[0], annexUID[1], annexUID)
+            if not os.path.exists(path):
+                object.needsOcr = True
+                object.toPrint = True
+
+                annotations = IAnnotations(object)
+                if 'collective.documentviewer' in annotations:
+                    del annotations['collective.documentviewer']
+                if 'Products.MeetingAndenne' in annotations:
+                    del annotations['Products.MeetingAndenne']
+                cpt += 1
+                logger.info('%d : Object flagged for OCR : %s' % (cpt, object.absolute_url()))
+
+        brains = catalog.searchResults(meta_type='MeetingFile')
+        print (len(brains))
+        for brain in brains:
+            object = brain.getObject()
+            annexUID = object.UID()
+            path = join(gsettings.storage_location, annexUID[0], annexUID[1], annexUID)
+            if not os.path.exists(path):
+                object.needsOcr = True
+                object.toPrint = True
+
+                annotations = IAnnotations(object)
+                if 'collective.documentviewer' in annotations:
+                    del annotations['collective.documentviewer']
+                if 'Products.MeetingAndenne' in annotations:
+                    del annotations['Products.MeetingAndenne']
+                cpt += 1
+                logger.info('%d : Object flagged for OCR : %s' % (cpt, object.absolute_url()))
+
+        logger.info("flagging for OCR finished")
+
+class RepairCourriersView(BrowserView):
+    """
+      This is a view that is called as a maintenance task by Products.cron4plone.
+      It will be launched at 0:30 every first day of month and will scavenge cataloged objects
+      that don't exist anymore. At the same time, it will report annexes and mails which were
+      not correctly processed by docsplit.
+    """
+    def __call__(self):
+        portal = api.portal.get()
+        gsettings = GlobalSettings(portal)
+        catalog = getToolByName(self.context, 'portal_catalog')
+        cpt = 0
+
+        brains = catalog.searchResults(meta_type='CourrierFile')
+        print (len(brains))
+        for brain in brains:
+            mail = brain.getObject()
+            if getattr(mail, 'saved_request', None) != None:
+                cpt += 1
+                del mail.saved_request
+
+        logger.info("Corrected %d mails" % (cpt, ))

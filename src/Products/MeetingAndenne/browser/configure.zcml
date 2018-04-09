@@ -95,18 +95,26 @@
         class=".views.RunDocsplitOnBlobsView"
         layer="Products.MeetingAndenne.interfaces.IMeetingAndenneLayer"
         permission="cmf.ManagePortal"/>
-    <browser:view
-        for="Products.CMFPlone.interfaces.siteroot.IPloneSiteRoot"
-        name="run-docsplit-delete"
-        class=".views.RunDocsplitdelete"
-        layer="Products.MeetingAndenne.interfaces.IMeetingAndenneLayer"
-        permission="cmf.ManagePortal"/>
 
     <!-- the maintenance task view that parses all converted files and cleans up the filesystem -->
     <browser:view
         for="Products.CMFPlone.interfaces.siteroot.IPloneSiteRoot"
         name="parse-converted-files"
         class=".views.ParseConvertedFilesView"
+        layer="Products.MeetingAndenne.interfaces.IMeetingAndenneLayer"
+        permission="cmf.ManagePortal"/>
+
+    <!-- repair scripts to be sometimes run manually -->
+    <browser:view
+        for="Products.CMFPlone.interfaces.siteroot.IPloneSiteRoot"
+        name="repair-annexes"
+        class=".views.RepairAnnexesView"
+        layer="Products.MeetingAndenne.interfaces.IMeetingAndenneLayer"
+        permission="cmf.ManagePortal"/>
+    <browser:view
+        for="Products.CMFPlone.interfaces.siteroot.IPloneSiteRoot"
+        name="repair-courriers"
+        class=".views.RepairCourriersView"
         layer="Products.MeetingAndenne.interfaces.IMeetingAndenneLayer"
         permission="cmf.ManagePortal"/>
 
