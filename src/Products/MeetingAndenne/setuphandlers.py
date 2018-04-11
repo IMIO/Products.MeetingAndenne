@@ -19,7 +19,7 @@ from Persistence import PersistentMapping
 from persistent.list import PersistentList
 from Products.MeetingAndenne.config import PROJECTNAME
 from Products.MeetingAndenne.config import DEPENDENCIES
-from Products.MeetingAndenne.config import CRON_PARAMS, CRON_VIEW
+from Products.MeetingAndenne.config import CRON_TASKS
 import os
 from Products.CMFCore.utils import getToolByName
 import transaction
@@ -98,16 +98,18 @@ def postInstall(context):
     # CourrierFile and MeetingFile objects until all migrated content is converted.
     cron_configlet = queryUtility(ICronConfiguration, 'cron4plone_config')
     if not cron_configlet.cronjobs:
-        cron_configlet.cronjobs = [CRON_PARAMS + CRON_VIEW]
+        cron_configlet.cronjobs = CRON_TASKS
     else:
         addCron = True
+        cronView = CRON_TASKS[0].split(' ')[-1]
         for cron in cron_configlet.cronjobs:
             cron = cron.split(' ')
-            if cron[-1] == CRON_VIEW:
+            if cron[-1] == cronView:
                 addCron = False
                 break
         if addCron:
-            cron_configlet.cronjobs.append(CRON_PARAMS + CRON_VIEW)
+            for task in CRON_TASKS:
+                cron_configlet.cronjobs.append(task)
 
 def updateRoleMappings(context):
     """after workflow changed update the roles mapping. this is like pressing

@@ -128,8 +128,9 @@ PERSONNEL_CATEGORIES = (4300, 45)
 SMALLEST_SUBCATEGORY = 100
 
 # cron4plone defines
-CRON_PARAMS = u'55 17 * * '
-CRON_VIEW = u'portal/@@run-docsplit-on-blobs'
+CRON_TASKS = [ u'55 17 * * portal/@@run-docsplit-on-blobs',
+               u'30 0 1 * portal/@@parse-converted-files',
+             ]
 CRON_BATCH_SIZE = 2500
 
 ##/code-section config-bottom
