@@ -96,6 +96,9 @@ def postInstall(context):
     # configure Products.cron4plone
     # add a call to @@run-docsplit-on-blobs that will run docsplit on a batch of
     # CourrierFile and MeetingFile objects until all migrated content is converted.
+    # add a call to @@parse-converted-files that will monthly check that all convertable
+    # objects are converted and that all conversion results are still linked to existing
+    # objects.
     cron_configlet = queryUtility(ICronConfiguration, 'cron4plone_config')
     if not cron_configlet.cronjobs:
         cron_configlet.cronjobs = CRON_TASKS
