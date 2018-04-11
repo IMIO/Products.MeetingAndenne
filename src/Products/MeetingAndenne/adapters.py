@@ -1462,7 +1462,6 @@ class CustomMeetingItemAndenne(MeetingItem):
         tool = self.portal_plonemeeting
         cfg = tool.getMeetingConfig(self)
         if cfg.getUseSubCategories():
-            import pdb; pdb.set_trace()
             cat = newItem.getCategory(theObject=True)
             if cat and cat.adapted().getRootCatNum() < SMALLEST_SUBCATEGORY:
                 newItem.category = ''

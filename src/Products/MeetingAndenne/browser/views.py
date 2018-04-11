@@ -191,7 +191,7 @@ class RunDocsplitOnBlobsView(BrowserView):
                         if cpt >= CRON_BATCH_SIZE:
                             break
                 except AttributeError:
-                    url = brain.getURL()
+                    url = brain.getPath()
                     logger.info('Object doesn\'t exist anymore : ' + url)
                     catalog.uncatalog_object(url)
 
@@ -238,7 +238,7 @@ class ParseConvertedFilesView(BrowserView):
                     logger.info(annex.absolute_url() + ' : Annex not converted !')
                 annexUIDs.add(annexUID)
             except AttributeError:
-                url = brain.getURL()
+                url = brain.getPath()
                 logger.info('Object doesn\'t exist anymore : ' + url)
                 catalog.uncatalog_object(url)
 
