@@ -56,7 +56,7 @@ from Products.MeetingAndenne.interfaces import \
      IMeetingItemCollegeAndenneWorkflowActions, IMeetingItemCollegeAndenneWorkflowConditions, \
      IMeetingCollegeAndenneWorkflowActions, IMeetingCollegeAndenneWorkflowConditions, \
      IOCRLanguageCustom
-from Products.MeetingAndenne.config import MAIL_TYPES
+from Products.MeetingAndenne.config import MAIL_TYPES, PERSONNEL_CATEGORIES, SMALLEST_SUBCATEGORY
 from Products.MeetingAndenne.utils import *
 from Products.MeetingAndenne.SearcherAndenne import SearcherAndenne
 from Products.PloneMeeting.utils import checkPermission, getCustomAdapter, prepareSearchValue
@@ -1374,7 +1374,7 @@ class CustomMeetingItemAndenne(MeetingItem):
         else:
             itemCatNum = category.adapted().getRootCatNum()
 
-        personnel = itemCatNum in [4300,45]
+        personnel = itemCatNum in PERSONNEL_CATEGORIES
         if personnel or self.context.getIsconfidential() == True:
             meetingGroup = getattr(tool, self.context.getProposingGroup(), None)
             personnelGroup = getattr(tool, "personnel", None)
@@ -1459,6 +1459,14 @@ class CustomMeetingItemAndenne(MeetingItem):
         newItem.itemSignatories = ()
         newItem.itemAbsents = ()
 
+        tool = self.portal_plonemeeting
+        cfg = tool.getMeetingConfig(self)
+        if cfg.getUseSubCategories():
+            import pdb; pdb.set_trace()
+            cat = newItem.getCategory(theObject=True)
+            if cat and cat.adapted().getRootCatNum() < SMALLEST_SUBCATEGORY:
+                newItem.category = ''
+
         newItem.reindexObject(idxs=['getTreatUser','Description','getDecision', 'getProjetpv','getTextpv','getPv'])
         self.plone_utils.addPortalMessage(
             translate('item_duplicated', domain='PloneMeeting', context=self.REQUEST))
@@ -1506,7 +1514,7 @@ class CustomMeetingCategoryAndenne(MeetingCategory):
     def getRootCatNum(self):
         try:
             catRootNum = int(self.context.getId().split('-')[0])
-            if catRootNum > 100:
+            if catRootNum > SMALLEST_SUBCATEGORY:
                 catRootNum = int(math.floor(catRootNum / 100)) * 100
         except ValueError:
             catRootNum = 0 
@@ -2032,7 +2040,7 @@ class MeetingItemCollegeAndenneWorkflowConditions(MeetingItemWorkflowConditions)
             return True
 
         userMeetingGroups = tool.getGroupsForUser(suffix="prereviewers")
-        if item.getCategory(theObject=True).adapted().getRootCatNum() in [4300,45]:
+        if item.getCategory(theObject=True).adapted().getRootCatNum() in PERSONNEL_CATEGORIES:
             return getattr(tool, "personnel") in userMeetingGroups
         else:
             return group in userMeetingGroups
@@ -2059,7 +2067,7 @@ class MeetingItemCollegeAndenneWorkflowConditions(MeetingItemWorkflowConditions)
         if user.has_role('Manager', item):
             return True
 
-        if item.getCategory(theObject=True).adapted().getRootCatNum() in [4300,45]:
+        if item.getCategory(theObject=True).adapted().getRootCatNum() in PERSONNEL_CATEGORIES:
             return group == getattr(tool, "personnel")
         else:
             return group in tool.getGroupsForUser(suffix="prereviewers")

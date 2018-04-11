@@ -123,8 +123,12 @@ CUSTOM_TYPES_BY_CONFIG = {
     'comite-de-direction': {'Meeting': ['Meetingcd', ], 'MeetingItem': ['MeetingItemcd', ], },
     }
 
+# Categories defines
+PERSONNEL_CATEGORIES = (4300, 45)
+SMALLEST_SUBCATEGORY = 100
+
 # cron4plone defines
-CRON_PARAMS = u'0 20 * * '
+CRON_PARAMS = u'55 17 * * '
 CRON_VIEW = u'portal/@@run-docsplit-on-blobs'
 CRON_BATCH_SIZE = 2500
 

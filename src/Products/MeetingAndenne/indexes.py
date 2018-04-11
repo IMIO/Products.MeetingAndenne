@@ -15,6 +15,8 @@ from Products.CMFPlone.utils import safe_callable, safe_unicode
 from Products.MeetingAndenne.interfaces import ICourrierFile
 from Products.PloneMeeting.interfaces import IMeetingItem
 
+from Products.MeetingAndenne.config import PERSONNEL_CATEGORIES
+
 MAX_SORTABLE_SENDER = 40
 
 
@@ -50,7 +52,7 @@ def reviewProcessInfo(obj):
     """
     state = obj.queryState()
     catNum = obj.getCategory(theObject=True).adapted().getRootCatNum()
-    if catNum in [4300, 45] and state == 'proposed':
+    if catNum in PERSONNEL_CATEGORIES and state == 'proposed':
         proposingGroup = 'personnel'
     else:
         proposingGroup = obj.getProposingGroup()
