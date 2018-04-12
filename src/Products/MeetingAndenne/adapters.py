@@ -837,7 +837,7 @@ class CustomMeetingItemAndenne(MeetingItem):
             # normal usage
             res = item.getItemSignatories(theObjects=True, includeDeleted=False, includeReplacements=userepl)       
         else:
-            # utiisé dans la partie adopté en séance des PV , pour que le  "Directeur General" et "Bourgmestre" soit affiché même si ils sont absent (on prend les signataire par defaut de la seance)
+            # utiisé dans la partie adopté en séance des PV pour que "Directeur Général" et "Bourgmestre" soient affichés même si ils sont absents (on prend les signataires par defaut de la seance)
             tool = getToolByName(self.context, 'portal_plonemeeting')
             cfg = tool.getMeetingConfig(self.context)
             for user in cfg.getMeetingUsers(usages=('signer',)):
@@ -847,12 +847,12 @@ class CustomMeetingItemAndenne(MeetingItem):
         if level == 1:
             return res[pos].Title()
         else:
-            # specialement utilisé pour l'affichae avant migration ou apres migration si la personne remplacante a été oubliée 
-            # Si c'est un echevin on remplace par bg ff, si c'est un secretaire en general on a deja un dg f.f dans la fonction  principale de celui qui remplace)
-            # le getduty revoit la fonction remplacé si includereplacement=true et qu'il y a vraiment un remplaçant inscrit (grace au fakemeetinguser revoyer à la place)
+            # Spécialement utilisé pour l'affichage avant migration ou après migration si la personne remplaçante a été oubliée.
+            # Si c'est un échevin, on remplace par bg f.f., si c'est un secrétaire, en general, on a déjà un dg f.f. dans la fonction principale de celui qui remplace.
+            # getDuty renvoit la fonction remplacée si includereplacement=true et qu'il y a vraiment un remplaçant inscrit (grâce au fakemeetinguser revoyé à la place).
             duty = res[pos].getDuty()
             if duty == "Echevin":
-                return "Bourgmestre f.f"
+                return "Bourgmestre f.f."
             else:
                 return duty
 
