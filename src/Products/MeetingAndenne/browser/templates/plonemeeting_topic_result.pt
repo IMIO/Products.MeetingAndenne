@@ -164,7 +164,7 @@
                                     isPrivacyViewable python: meetingItem.adapted().isPrivacyViewable()">
             <tal:comment replace="nothing">Icon to display</tal:comment>
             <tal:showTitle replace="structure python: tool.getColoredLink(meetingItem, showColors, highlight=True, inMeeting=True)"/>
-            <metal:itemMoreInfos use-macro="here/@@pm-macros/itemMoreInfos" />
+            <metal:itemMoreInfos use-macro="here/@@ma-macros/itemMoreInfos" />
             <tal:comment replace="nothing">Annexes</tal:comment>
             <table class="no-style-table" cellpadding="0" cellspacing="0" align="right"
                    tal:define="showAnnexes python: 'annexes' in visibleColumns;
