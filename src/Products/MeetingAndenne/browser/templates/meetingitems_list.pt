@@ -242,7 +242,7 @@
         <td tal:define="global shownItems python:shownItems+1" valign="top" class="pmLinks">
           <tal:comment replace="nothing">The title itself</tal:comment>
           <span tal:replace="structure python: tool.getColoredLink(meetingItem, showColors, inMeeting=itemsNumbering, meeting=meeting)"></span>
-            <metal:itemMoreInfos use-macro="here/@@pm-macros/itemMoreInfos" />
+            <metal:itemMoreInfos use-macro="here/@@ma-macros/itemMoreInfos" />
           <tal:comment replace="nothing">Item reference, annexes and decision-related annexes</tal:comment>
           <table class="no-style-table" cellpadding="0" cellspacing="0" width="100%">
            <tr valign="bottom">
