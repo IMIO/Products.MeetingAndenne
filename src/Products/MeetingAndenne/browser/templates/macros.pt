@@ -81,6 +81,32 @@
  <metal:view use-macro="context/@@ma-macros/viewMultiSelectField"/>
 </metal:field>
 
+<tal:comment replace="nothing">Tune to Display Pv in place of proposition de decision when user click on the glasses</tal:comment>
+<metal:itemMoreInfos define-macro="itemMoreInfos" i18n:domain="PloneMeeting">
+<tal:comment replace="nothing">Macro that display more informations about item depending
+on what is defined in MeetingConfig.itemsListVisibleFields, when user click on the glasses icon action.
+Fields are only displayed if :
+- not empty;
+- not already in visibleColumns (that can be the case for budgetInfos);
+- foe bufgetInfos, if budgetRelated is True.</tal:comment>
+    <span name="pmDescription"
+          class="pmMoreInfo"
+          tal:attributes="style python:'display: %s' % descrsStyle"
+          tal:define="mode string:view;
+                      context python: meetingItem;">
+        <tal:loop repeat="visibleField meetingConfig/getItemsListVisibleFields">
+            
+            <span tal:define="visibleField2 python: not meetingItem.getMeeting()==None and (meetingItem.getMeeting().queryState()=='decided' or meetingItem.getMeeting().queryState()=='frozen') and
+                              visibleField == 'decision' and 'textpv' or visibleField;
+                              field python: meetingItem.getField(visibleField2);"
+                  tal:condition="python: not meetingItem.fieldIsEmpty(visibleField) and ((visibleField == 'budgetInfos' and
+                                 meetingItem.getBudgetRelated() or not visibleField == 'budgetInfos') and True or False) and not visibleField in visibleColumns">
+                <span metal:use-macro="context/widgets/field/macros/view" />
+            </span>
+        </tal:loop>
+    </span>
+</metal:itemMoreInfos>
+
 <tal:comment replace="nothing">
   This macro allows to view the content of an ajax-editable MultiSelect field.
 </tal:comment>
