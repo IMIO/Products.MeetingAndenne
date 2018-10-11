@@ -58,11 +58,7 @@ class SubCategoriesVocabulary(object):
                     tree[key] = value
         else:
             for cat in cfg.getCategories():
-                try:
-                    catnum = int(cat.id.split('-')[0])
-                except ValueError:
-                    catnum = 0
-                tree[catnum] = (cat.getName(), None)
+                tree[cat.id] = (cat.getName(), None)
 
         return tree
 
