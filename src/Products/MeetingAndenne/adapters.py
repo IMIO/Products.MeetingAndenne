@@ -528,17 +528,19 @@ class CustomMeetingAndenne(Meeting):
         # pos 0 and level 1 is the first signatory (bg) with Name
         res = []
         meeting = self.getSelf()
-        if not useforpv:
-            # normal usage
-            res = meeting.getSignatories(theObjects=True, includeDeleted=False,includeReplacements=userepl)
-        else:
-            # utiisé dans la partie adopté en séance des PV , pour que le  "Directeur General" et "Bourgmestre" soit affiché même si ils sont absent (on prend les signataire par defaut de la seance)
-            tool = getToolByName(self.context, 'portal_plonemeeting')
-            cfg = tool.getMeetingConfig(self.context)
-            for user in cfg.getMeetingUsers(usages=('signer',)):
-                if user.getSignatureIsDefault():
-                    res.append(user)
+        duty=[["Bourgmestre","Echevin"],["Directeur général", "Directeur général adjoint","Directeur général f.f."]]
+        attendees = meeting.getAttendees(True)
+        res = meeting.getSignatories(theObjects=True, includeDeleted=False,includeReplacements=userepl)
 
+        
+         
+        if userepl and res[pos].getId() not in [attendee.getId() for attendee in attendees]:
+            # utilisé dans le cas ou le signataire coché n'est pas présent et donc dans ce cas on le remplace par le premier présent du même titre
+             
+            for attende in attendees:
+                if attende.getDuty() in duty[pos]:
+                    res[pos]=attende
+                    break
         if level == 1:
             return res[pos].Title()
         else:
@@ -833,16 +835,22 @@ class CustomMeetingItemAndenne(MeetingItem):
         res = []
         i = 0
         item = self.getSelf()
-        if not useforpv:
-            # normal usage
-            res = item.getItemSignatories(theObjects=True, includeDeleted=False, includeReplacements=userepl)       
-        else:
-            # utiisé dans la partie adopté en séance des PV pour que "Directeur Général" et "Bourgmestre" soient affichés même si ils sont absents (on prend les signataires par defaut de la seance)
-            tool = getToolByName(self.context, 'portal_plonemeeting')
-            cfg = tool.getMeetingConfig(self.context)
-            for user in cfg.getMeetingUsers(usages=('signer',)):
-                if user.getSignatureIsDefault():
-                    res.append(user)
+        meeting = item.getMeeting()
+        duty=[["Bourgmestre","Echevin"],["Directeur général", "Directeur général adjoint","Directeur général f.f."]]
+        attendees = meeting.getAttendees(True)
+        attendeeIds = []
+        for user in attendees:
+            if not ((not user.isPresent(self.context, meeting) and user.getId() not in self.context.getItemPresents()) or user.getId() in self.context.getItemAbsents()):
+                attendeeIds.append(user.getId())
+        res = item.getItemSignatories(theObjects=True, includeDeleted=False, includeReplacements=userepl)
+         
+        if userepl and res[pos].getId() not in attendeeIds:
+            # utilisé dans le cas ou le signataire coché n'est pas présent et donc dans ce cas on le remplace par le premier présent du même titre
+             
+            for attende in attendees:
+                if attende.getId() in attendeeIds and attende.getDuty() in duty[pos]:
+                    res[pos]=attende
+                    break
 
         if level == 1:
             return res[pos].Title()
