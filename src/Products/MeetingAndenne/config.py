@@ -33,14 +33,11 @@ PROJECTNAME = "MeetingAndenne"
 # Permissions
 DEFAULT_ADD_CONTENT_PERMISSION = "Add portal content"
 setDefaultRoles(DEFAULT_ADD_CONTENT_PERMISSION, ('Manager', 'Owner', 'Contributor'))
-
-## TO BE CHANGED ##
 ADD_CONTENT_PERMISSIONS = {
     'CourrierFile': 'Add portal content',
 }
 
-setDefaultRoles('Add portal content', ('Manager', 'CourrierManager'))
-## END ##
+setDefaultRoles('Add portal content', ('Manager', 'MeetingManager'))
 
 product_globals = globals()
 

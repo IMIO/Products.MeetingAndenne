@@ -6,6 +6,7 @@ logger = logging.getLogger('MeetingAndenne')
 from Products.PloneMeeting.config import MEETING_GROUP_SUFFIXES
 from Products.PloneMeeting.migrations import Migrator
 
+from Products.MeetingAndenne.config import ADD_CONTENT_PERMISSIONS
 from Products.MeetingAndenne.profiles.default.import_data import collegeTemplates
 from Products.MeetingAndenne.profiles.default.import_data import collegeCategories
 
@@ -171,6 +172,52 @@ class Migrate_To_3_3_1(Migrator):
 
         logger.info('Done.')
 
+    def _adaptMailFolder(self):
+        '''Changing security settings set on the mail root folder'''
+        logger.info('Changing security settings set on the mail root folder...')
+
+        folderPath = self.portal.portal_plonemeeting.adapted().getCourrierfakeFolder()
+        folder = self.portal.restrictedTraverse(folderPath)
+
+        groupId = 'courrierfake_meetingmanagers'
+        folder.manage_permission(ADD_CONTENT_PERMISSIONS['CourrierFile'], ('MeetingManager', 'Manager', ), acquire=0)
+        folder.manage_addLocalRoles(groupId, ('MeetingManager',))
+
+        logger.info('Done.')
+
+    def _adaptMailWorkflow(self):
+        '''Changing workflow so that MailViewers can not modifiy mails anymore'''
+        logger.info('Changing workflow so that MailViewers can not modifiy mails anymore...')
+
+        workflowTool = self.portal.portal_workflow
+        mailWorkflow = getattr(workflowTool, 'courrierfile_workflow', None)
+        if not mailWorkflow:
+            logger.warning("courrierfile_workflow doesn't exist")
+            return
+
+        state = mailWorkflow.states['not_processed']
+        state.setPermission('Modify portal content', 0, ['Manager', 'MeetingManager', 'Owner'])
+
+        logger.info('Done.')
+
+    def _updateMailRoleMappings(self):
+        '''Updating role-permission mappings on CourrierFile objects'''
+        logger.info('Updating role-permission mappings on CourrierFile objects...')
+
+        import pdb; pdb.set_trace()
+        wfs = {}
+        workflowTool = self.portal.portal_workflow
+        mailWorkflow = getattr(workflowTool, 'courrierfile_workflow', None)
+        if not mailWorkflow:
+            logger.warning("courrierfile_workflow doesn't exist")
+            return
+
+        wfs['courrierfile_workflow'] = mailWorkflow
+        count = workflowTool._recursiveUpdateRoleMappings(self.portal, wfs)
+        logger.info('%d objects have been updated.' % count)
+
+        logger.info('Done.')
+
     def run(self):
         logger.info('Migrating to MeetingAndenne 3.3.1...')
         self._installCollectiveDynatree()
@@ -182,6 +229,9 @@ class Migrate_To_3_3_1(Migrator):
         self._updateCollegeTemplateCategories()
         self._updatePloneGroupsTitle()
         self._refreshReviewProcessInfoIndex()
+        self._adaptMailFolder()
+        self._adaptMailWorkflow()
+        self._updateMailRoleMappings()
         self.finish()
 
 
@@ -189,15 +239,18 @@ class Migrate_To_3_3_1(Migrator):
 def migrate(context):
     '''This migration function:
 
-       1) Install collective.dynatree and updated javascript from MeetingAndenne default profile
-       2) Migrate MeetingFormation template objects
-       3) Remove the template that was used by MeetingItemFormation objects
-       4) Create the new categories and sub-categorie
-       5) Recreate the used POD templates
-       6) Enable subcategories on College meetingConfig
-       7) Change categories to College template present in subdirectories
-       8) Make sure Plone groups linked to a MeetingGroup have a consistent title
-       9) Refresh reviewProcessInfo index so that personnel points are correctly managed
+       1)  Install collective.dynatree and updated javascript from MeetingAndenne default profile
+       2)  Migrate MeetingFormation template objects
+       3)  Remove the template that was used by MeetingItemFormation objects
+       4)  Create the new categories and sub-categorie
+       5)  Recreate the used POD templates
+       6)  Enable subcategories on College meetingConfig
+       7)  Change categories to College template present in subdirectories
+       8)  Make sure Plone groups linked to a MeetingGroup have a consistent title
+       9)  Refresh reviewProcessInfo index so that personnel points are correctly managed
+       10) Change security settings set on the mail root folder
+       11) Change workflow so that MailViewers can not modifiy mails anymore
+       12) Update role-permission mappings on CourrierFile objects
     '''
     Migrate_To_3_3_1(context).run()
 # ------------------------------------------------------------------------------

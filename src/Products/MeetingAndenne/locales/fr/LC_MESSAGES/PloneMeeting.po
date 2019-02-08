@@ -41,6 +41,10 @@ msgstr "A.N.D.A.N.A. - Notification de réception de courrier"
 msgid "dest_user_item_descr"
 msgstr "Indiquez les utilisateurs qui pourront voir le document (en lecture seule)"
 
+#. Default: "Tell which groups can see the document (read-only)"
+msgid "dest_group_item_descr"
+msgstr "Indiquez les groupes qui pourront voir le document (en lecture seule)"
+
 #. Default: "Mail sender"
 msgid "MeetingAndenne_label_destOrigin"
 msgstr "Expéditeur du courrier"
@@ -48,6 +52,10 @@ msgstr "Expéditeur du courrier"
 #. Default: "Mail receiver"
 msgid "MeetingAndenne_label_destUsers"
 msgstr "Destinataire(s)"
+
+#. Default: "Copy groups"
+msgid "MeetingAndenne_label_destGroups"
+msgstr "Groupes en copie"
 
 #. Default: "Internal mail reference"
 msgid "MeetingAndenne_label_refCourrier"

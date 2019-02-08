@@ -94,7 +94,7 @@ schema = Schema((
         name='destUsers',
         widget=MultiSelectionWidget(
             size=10,
-            description="destUseritem",
+            description="DestUseritem",
             description_msgid="dest_user_item_descr",
             label='Destusers',
             label_msgid='MeetingAndenne_label_destUsers',
@@ -104,6 +104,23 @@ schema = Schema((
         multiValued=1,
         vocabulary='listDestUsers'
     ),
+
+    LinesField(
+        name='destGroups',
+        widget=MultiSelectionWidget(
+            size=10,
+            description="DestUserGroup",
+            description_msgid="dest_group_item_descr",
+            label='Destgroups',
+            label_msgid='MeetingAndenne_label_destGroups',
+            i18n_domain='PloneMeeting',
+        ),
+        default_method="getDefaultDestGroup",
+        enforceVocabulary=True,
+        multiValued=1,
+        vocabulary='listDestGroups'
+    ),
+
 ),
 )
 
@@ -194,27 +211,34 @@ class CourrierFile(ATBlob, BrowserDefaultMixin):
             return res[:-1]
         return res
 
-    security.declarePrivate('affectPermissions')
-    def affectPermissions(self, destuser):
-        '''Add the MeetingMailViewer permission to the user and all the groups he belongs to.'''
-        grp_tool = self.acl_users.source_groups
-        ploneUser = self.portal_membership.getMemberById(destuser)
-        if ploneUser:
-            groups = grp_tool.getGroupsForPrincipal(ploneUser)
-            groupsToAdd = set()
-            for group in groups:
-                explodedGroup = group.split('_')
-                if explodedGroup[1] in MEETING_GROUP_SUFFIXES and explodedGroup[1] != "pvwriters":
-                    groupsToAdd.add( explodedGroup[0] + '_mailviewers' )
-            for group in groupsToAdd:
-                self.manage_addLocalRoles( group, ('MeetingMailViewer', ) )
-            self.manage_addLocalRoles( destuser, ('MeetingMailViewer', ) )
+    security.declarePrivate('listDestGroups')
+    def listDestGroups(self):
+        '''List the groups that will be selectable in the copy groups ComboBox.'''
+        res = []
+        tool = self.portal_plonemeeting
+        for group in tool.getMeetingGroups():
+            res.append((group.id, group.getName()))
+        res = sorted(res, key = collateDisplayListsValues)
+        return res
+
+    security.declarePublic('getDefaultDestGroup')
+    def getDefaultDestGroup(self):
+        '''Return a default group to fill the destination groups field on mail creation
+           (useful when a user has more than 1 proposing group).'''
+        tool = self.portal_plonemeeting
+        membershipTool = self.portal_membership
+        user = membershipTool.getAuthenticatedMember()
+        proposingGroup = user.getProperty('defaultgroup')
+        res = tool.getMeetingGroups()
+        if proposingGroup and proposingGroup in [g.id for g in res]:
+            return proposingGroup
+        else:
+            return ''
 
     security.declarePrivate('at_post_create_script')
     def at_post_create_script(self):
         user = self.portal_membership.getAuthenticatedMember()
         self.manage_delLocalRoles( [user.getId()] )
-        self.manage_addLocalRoles( user.getId(), ('Owner', ) )
         self.setCreationLocalRoles()
         self.sendMailIfRelevant()
         self.deletefile()
@@ -244,30 +268,42 @@ class CourrierFile(ATBlob, BrowserDefaultMixin):
 
     security.declareProtected('Modify portal content', 'setCreationLocalRoles')
     def setCreationLocalRoles(self):
-        '''Add the MeetingMailViewer following mail creation depending on mail filename.'''
+        '''Add the MeetingMailViewer role following mail creation depending on mail filename.'''
         title = self.Title()
         title = title.split('_')
         if title[0] == 'autotitre':
             groupToAdd = title[1] + '_mailviewers'
-            self.manage_addLocalRoles( groupToAdd, ('MeetingMailViewer', ) )
+            self.manage_addLocalRoles( groupToAdd, ('Owner', ) )
         else:
             self.updateLocalRoles()
 
     security.declareProtected('Modify portal content', 'updateLocalRoles')
     def updateLocalRoles(self):
-        # Add the local roles corresponding to the selected destUsers.
-        # We give the MailViewer role to the selected users
-        # that will give them a read and modify access to the item
+        # Add the local roles corresponding to the selected destUsers and destGroups.
+        # We give the MailViewer role to the selected users and groups
+        # that will give them a read-only access to the item.
+        # Moreover, the currently logged in user is given the Owner role to keep a
+        # write access on the item.
         portal = self.portal_url.getPortalObject()
+        tool = self.portal_plonemeeting
+        membershipTool = self.portal_membership
+        user = membershipTool.getAuthenticatedMember()
+
         destUsers = self.getDestUsers()
-        rolesToRemove = list()
+        destGroups = self.getDestGroups()
         localRoles = self.get_local_roles()
         for role in localRoles:
-            if role[0] != 'admin':
-                self.manage_delLocalRoles( (role[0], ) )
+            self.manage_delLocalRoles( (role[0], ) )
+
+        self.manage_addLocalRoles( user.id, ('Owner', ) )
+
         if destUsers:
             for destUser in destUsers:
-                self.affectPermissions( destUser )
+                self.manage_addLocalRoles( destUser, ('MeetingMailViewer', ) )
+        if destGroups:
+            for destGroup in destGroups:
+                groupToAdd = destGroup + '_mailviewers'
+                self.manage_addLocalRoles( groupToAdd, ('MeetingMailViewer', ) )
 
     security.declarePrivate('sendMailIfRelevant')
     def sendMailIfRelevant(self):
