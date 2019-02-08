@@ -204,7 +204,6 @@ class Migrate_To_3_3_1(Migrator):
         '''Updating role-permission mappings on CourrierFile objects'''
         logger.info('Updating role-permission mappings on CourrierFile objects...')
 
-        import pdb; pdb.set_trace()
         wfs = {}
         workflowTool = self.portal.portal_workflow
         mailWorkflow = getattr(workflowTool, 'courrierfile_workflow', None)
