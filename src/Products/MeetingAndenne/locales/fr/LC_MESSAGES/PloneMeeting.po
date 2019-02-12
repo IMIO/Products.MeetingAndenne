@@ -270,7 +270,7 @@ msgid "searchalldecisions"
 msgstr "Tous les PVs"
 
 #. Default: "Mails to service"
-msgid "searchallmailsingroup"
+msgid "searchallmailsincopy"
 msgstr "Courriers du service"
 
 #. Default: "Scanned mails"

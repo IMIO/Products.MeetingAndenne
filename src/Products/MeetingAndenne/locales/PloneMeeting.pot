@@ -265,7 +265,7 @@ msgid "searchalldecisions"
 msgstr ""
 
 #. Default: "Mails to service"
-msgid "searchallmailsingroup"
+msgid "searchallmailsincopy"
 msgstr ""
 
 #. Default: "Scanned mails"

@@ -3,10 +3,11 @@
 import logging
 logger = logging.getLogger('MeetingAndenne')
 
-from Products.PloneMeeting.config import MEETING_GROUP_SUFFIXES
+from Products.PloneMeeting.config import MEETING_GROUP_SUFFIXES, TOPIC_TAL_EXPRESSION, \
+                                         TOPIC_TYPE, TOPIC_SEARCH_SCRIPT
 from Products.PloneMeeting.migrations import Migrator
 
-from Products.MeetingAndenne.config import ADD_CONTENT_PERMISSIONS
+from Products.MeetingAndenne.config import ADD_CONTENT_PERMISSIONS, MAIL_TOPICS
 from Products.MeetingAndenne.profiles.default.import_data import collegeTemplates
 from Products.MeetingAndenne.profiles.default.import_data import collegeCategories
 
@@ -173,7 +174,7 @@ class Migrate_To_3_3_1(Migrator):
         logger.info('Done.')
 
     def _adaptMailFolder(self):
-        '''Changing security settings set on the mail root folder'''
+        '''Change security settings set on the mail root folder'''
         logger.info('Changing security settings set on the mail root folder...')
 
         folderPath = self.portal.portal_plonemeeting.adapted().getCourrierfakeFolder()
@@ -186,7 +187,7 @@ class Migrate_To_3_3_1(Migrator):
         logger.info('Done.')
 
     def _adaptMailWorkflow(self):
-        '''Changing workflow so that MailViewers can not modifiy mails anymore'''
+        '''Change workflow so that MailViewers can not modifiy mails anymore'''
         logger.info('Changing workflow so that MailViewers can not modifiy mails anymore...')
 
         workflowTool = self.portal.portal_workflow
@@ -197,6 +198,73 @@ class Migrate_To_3_3_1(Migrator):
 
         state = mailWorkflow.states['not_processed']
         state.setPermission('Modify portal content', 0, ['Manager', 'MeetingManager', 'Owner'])
+
+        logger.info('Done.')
+
+    def _adaptCourrierFilesCatalogIndexes(self):
+        '''Adapt indexes definitions linked to CourrierFiles'''
+        logger.info('Adapting indexes definitions linked to CourrierFiles...')
+
+        catalog = self.portal.portal_catalog
+        zopeCatalog = catalog._catalog
+
+        if not 'getDestGroups' in zopeCatalog.indexes:
+            catalog.addIndex('getDestGroups', 'KeywordIndex')
+
+        logger.info('Done.')
+
+    def _migrateCourrierFiles(self):
+        '''Fill the new copy groups field on all CourrierFile objects'''
+        logger.info('Filling the new copy groups field on all CourrierFile objects...')
+
+        for brain in self.portal.portal_catalog(meta_type='CourrierFile'):
+            item = brain.getObject()
+            groupsToAssign = []
+            localRoles = item.get_local_roles()
+            for role in localRoles:
+                tokens = role[0].split('_')
+                if len(tokens) > 1 and tokens[-1] == 'mailviewers':
+                    groupsToAssign.append( '_'.join( tokens[:-1] ) )
+
+            item.destGroups = groupsToAssign
+            item.reindexObject(idxs=['getDestGroups', ])
+
+        logger.info('Done.')
+
+    def _createMailTopics(self):
+        '''Create the topics used for mail management'''
+        logger.info('Creating the topics used for mail management...')
+
+        mc = self.portal.portal_plonemeeting.adapted().getCourrierfakeConfig()
+        ids = mc.topics.objectIds()
+        if len(ids) > 0:
+            ids = list(ids)
+            mc.topics.manage_delObjects(ids)
+
+        for topicId, topicCriteria, sortCriterion, searchScriptId, topic_tal_expr in MAIL_TOPICS:
+            mc.topics.invokeFactory('Topic', topicId)
+            topic = getattr(mc.topics, topicId)
+            topic.setExcludeFromNav(True)
+            topic.setTitle(topicId)
+            for criterionName, criterionType, criterionValue in topicCriteria:
+                criterion = topic.addCriterion(field=criterionName, criterion_type=criterionType)
+                if criterionValue is not None:
+                    if criterionType == 'ATPortalTypeCriterion':
+                        concernedType = criterionValue[0]
+                        topic.manage_addProperty(TOPIC_TYPE, concernedType, 'string')
+                        # This is necessary to add a script doing the search
+                        # when the it is too complicated for a topic.
+                        topic.manage_addProperty(TOPIC_SEARCH_SCRIPT, searchScriptId, 'string')
+                        # Add a tal expression property
+                        topic.manage_addProperty(TOPIC_TAL_EXPRESSION, topic_tal_expr, 'string')
+                    criterion.setValue(criterionValue)
+            topic.setLimitNumber(True)
+            topic.setItemCount(50)
+            topic.setSortCriterion(sortCriterion, True)
+            topic.setCustomView(True)
+            topic.setCustomViewFields(['destUsers', 'destOrigin', 'refcourrier', 'Title'])
+            # call processForm passing dummy values so existing values are not touched
+            topic.processForm( values = {'dummy': None} )
 
         logger.info('Done.')
 
@@ -230,6 +298,9 @@ class Migrate_To_3_3_1(Migrator):
         self._refreshReviewProcessInfoIndex()
         self._adaptMailFolder()
         self._adaptMailWorkflow()
+        self._adaptCourrierFilesCatalogIndexes()
+        self._migrateCourrierFiles()
+        self._createMailTopics()
         self._updateMailRoleMappings()
         self.finish()
 
@@ -249,7 +320,10 @@ def migrate(context):
        9)  Refresh reviewProcessInfo index so that personnel points are correctly managed
        10) Change security settings set on the mail root folder
        11) Change workflow so that MailViewers can not modifiy mails anymore
-       12) Update role-permission mappings on CourrierFile objects
+       12) Adapt indexes definitions linked to CourrierFiles
+       13) Fill the new copy groups field on all CourrierFile objects
+       14) Create the topics used for mail management
+       15) Update role-permission mappings on CourrierFile objects
     '''
     Migrate_To_3_3_1(context).run()
 # ------------------------------------------------------------------------------

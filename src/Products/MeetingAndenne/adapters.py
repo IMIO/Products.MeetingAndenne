@@ -1688,9 +1688,9 @@ class CustomMeetingConfigAndenne(MeetingConfig):
     MeetingConfig.listMailColumns = listMailColumns
     # it'a a monkey patch because it's the only way to add a behaviour to the MeetingItem class
 
-    security.declarePublic('searchMailsInCopy')
-    def searchMailsInCopy(self, sortKey, sortOrder, filterKey, filterValue, **kwargs):
-        '''Returns the list of mails for which the user is in copy.'''
+    security.declarePublic('searchMyMails')
+    def searchMyMails(self, sortKey, sortOrder, filterKey, filterValue, **kwargs):
+        '''Returns the list of mails for which the user is a recipient.'''
         member = self.portal_membership.getAuthenticatedMember()
 
         params = {'portal_type': 'CourrierFile',
@@ -1707,7 +1707,35 @@ class CustomMeetingConfigAndenne(MeetingConfig):
         # Perform the query in portal_catalog
         return self.portal_catalog(**params)
 
-    MeetingConfig.searchMailsInCopy = searchMailsInCopy
+    MeetingConfig.searchMyMails = searchMyMails
+    # it'a a monkey patch because it's the only way to change the behaviour of the MeetingConfig class
+
+    security.declarePublic('searchAllMailsInCopy')
+    def searchAllMailsInCopy(self, sortKey, sortOrder, filterKey, filterValue, **kwargs):
+        '''Returns the list of mails for which the user is in copy.'''
+        tool = getToolByName(self, 'portal_plonemeeting')
+        mailGroups = tool.getGroupsForUser(suffix='mailviewers')
+        if len(mailGroups) > 0:
+            mailGroups = [group.id for group in mailGroups]
+
+        params = {'portal_type': 'CourrierFile',
+                  'getDestGroups': mailGroups,
+                  'sort_on': sortKey,
+                  'sort_order': sortOrder,
+                  }
+
+        if tool.isManager(self):
+            del params['getDestGroups']
+
+        # Manage filter
+        if filterKey:
+            params[filterKey] = prepareSearchValue(filterValue)
+        # update params with kwargs
+        params.update(kwargs)
+        # Perform the query in portal_catalog
+        return self.portal_catalog(**params)
+
+    MeetingConfig.searchAllMailsInCopy = searchAllMailsInCopy
     # it'a a monkey patch because it's the only way to change the behaviour of the MeetingConfig class
 
     MeetingConfig.listAdviceTypesOrg=MeetingConfig.listAdviceTypes

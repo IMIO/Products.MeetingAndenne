@@ -109,7 +109,7 @@ schema = Schema((
         name='destGroups',
         widget=MultiSelectionWidget(
             size=10,
-            description="DestUserGroup",
+            description="DestGroupitem",
             description_msgid="dest_group_item_descr",
             label='Destgroups',
             label_msgid='MeetingAndenne_label_destGroups',
@@ -288,6 +288,9 @@ class CourrierFile(ATBlob, BrowserDefaultMixin):
         tool = self.portal_plonemeeting
         membershipTool = self.portal_membership
         user = membershipTool.getAuthenticatedMember()
+        defaultProposingGroup = user.getProperty('defaultgroup')
+        isManager = tool.isManager(self)
+        groupsToAdd = set()
 
         destUsers = self.getDestUsers()
         destGroups = self.getDestGroups()
@@ -297,13 +300,21 @@ class CourrierFile(ATBlob, BrowserDefaultMixin):
 
         self.manage_addLocalRoles( user.id, ('Owner', ) )
 
+        if destGroups:
+            for destGroup in destGroups:
+                if (not isManager) or defaultProposingGroup != destGroup:
+                    groupsToAdd.add(destGroup + '_mailviewers')
+
         if destUsers:
             for destUser in destUsers:
                 self.manage_addLocalRoles( destUser, ('MeetingMailViewer', ) )
-        if destGroups:
-            for destGroup in destGroups:
-                groupToAdd = destGroup + '_mailviewers'
-                self.manage_addLocalRoles( groupToAdd, ('MeetingMailViewer', ) )
+                defaultGroup = membershipTool.getMemberById(destUser).getProperty('defaultgroup')
+                if defaultGroup != '':
+                    groupsToAdd.add(defaultGroup + '_mailviewers')
+
+
+        for groupToAdd in groupsToAdd:
+            self.manage_addLocalRoles( groupToAdd, ('MeetingMailViewer', ) )
 
     security.declarePrivate('sendMailIfRelevant')
     def sendMailIfRelevant(self):

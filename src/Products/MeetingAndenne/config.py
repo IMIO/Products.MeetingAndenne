@@ -87,12 +87,12 @@ MAIL_TOPICS = (
     # My items.
     ( 'searchmymails',
     (  ('Type', 'ATPortalTypeCriterion', ('CourrierFile',)),
-    ), 'CreationDate', 'searchMailsInCopy', '',
+    ), 'CreationDate', 'searchMyMails', '',
     ),
     # Mails in group : need a script to do this search.
-    ( 'searchallmailsingroup',
+    ( 'searchallmailsincopy',
     (  ('Type', 'ATPortalTypeCriterion', ('CourrierFile',)),
-    ), 'CreationDate', '', '',
+    ), 'CreationDate', 'searchAllMailsInCopy', '',
     ),
     # Scanned mails : these were added by a robot.
     ( 'searchmailrobot',
