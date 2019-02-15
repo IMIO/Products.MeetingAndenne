@@ -303,18 +303,19 @@ class CourrierFile(ATBlob, BrowserDefaultMixin):
         if destGroups:
             for destGroup in destGroups:
                 if (not isManager) or defaultProposingGroup != destGroup:
-                    groupsToAdd.add(destGroup + '_mailviewers')
+                    groupsToAdd.add(destGroup)
 
         if destUsers:
             for destUser in destUsers:
                 self.manage_addLocalRoles( destUser, ('MeetingMailViewer', ) )
                 defaultGroup = membershipTool.getMemberById(destUser).getProperty('defaultgroup')
                 if defaultGroup != '':
-                    groupsToAdd.add(defaultGroup + '_mailviewers')
-
+                    groupsToAdd.add(defaultGroup)
 
         for groupToAdd in groupsToAdd:
-            self.manage_addLocalRoles( groupToAdd, ('MeetingMailViewer', ) )
+            self.manage_addLocalRoles( groupToAdd + '_mailviewers', ('MeetingMailViewer', ) )
+
+        self.destGroups = tuple( groupsToAdd )
 
     security.declarePrivate('sendMailIfRelevant')
     def sendMailIfRelevant(self):
