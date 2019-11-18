@@ -1,11 +1,17 @@
-Products.MeetingCommunes Changelog
-==================================
+Products.MeetingAndenne Changelog
+=================================
 
-Older versions than 3.0 can be found at http://svn.communesplone.org/svn/communesplone/MeetingCommunes/tags/
-The Products.MeetingCommunes version must be the same as the Products.PloneMeeting version
+Older versions than 3.0 can be found at http://svn.communesplone.org/svn/communesplone/MeetingAndenne/tags/
+The Products.MeetingAndenne version must be the same as the Products.PloneMeeting version
 
-3.3 (2015-02-27)
+3.3.1 (2019-11-18)
+------------------
+- To be completed later
+
+3.3 (2018-03-26)
 ----------------
+- To be completed later
+
 - Updated regarding changes in PloneMeeting
 - Removed profile 'examples' that loaded examples in english
 - Removed dependencies already defined in PloneMeeting's setup.py
@@ -65,3 +71,7 @@ The Products.MeetingCommunes version must be the same as the Products.PloneMeeti
 - Added possibility to give, modify and view an advice on created item
 - Added possibility to define a decision of replacement when an item is delayed
 - Added new workflow adaptation to add publish state with hidden decision for no meeting-manager
+
+2.0.1 (2016-05-20)
+------------------
+- To be completed later
