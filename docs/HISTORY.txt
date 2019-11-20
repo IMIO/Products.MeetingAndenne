@@ -4,7 +4,7 @@ Products.MeetingAndenne Changelog
 Older versions than 3.0 can be found at http://svn.communesplone.org/svn/communesplone/MeetingAndenne/tags/
 The Products.MeetingAndenne version must be the same as the Products.PloneMeeting version
 
-3.3.1 (2019-11-18)
+3.3.1 (2019-11-20)
 ------------------
 - To be completed later
 
