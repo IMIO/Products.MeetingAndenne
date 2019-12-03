@@ -4,6 +4,11 @@ Products.MeetingAndenne Changelog
 Older versions than 3.0 can be found at http://svn.communesplone.org/svn/communesplone/MeetingAndenne/tags/
 The Products.MeetingAndenne version must be the same as the Products.PloneMeeting version
 
+3.3.2 (TBD)
+-----------
+- Added parameter uppercase to Meeting.getDisplayableName which is False by default
+- Changed a bunch of templates
+
 3.3.1 (2019-11-20)
 ------------------
 - To be completed later

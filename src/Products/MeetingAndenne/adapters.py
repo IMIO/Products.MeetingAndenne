@@ -56,7 +56,8 @@ from Products.MeetingAndenne.interfaces import \
      IMeetingItemCollegeAndenneWorkflowActions, IMeetingItemCollegeAndenneWorkflowConditions, \
      IMeetingCollegeAndenneWorkflowActions, IMeetingCollegeAndenneWorkflowConditions, \
      IOCRLanguageCustom
-from Products.MeetingAndenne.config import MAIL_TYPES, PERSONNEL_CATEGORIES, SMALLEST_SUBCATEGORY
+from Products.MeetingAndenne.config import MAIL_TYPES, PERSONNEL_CATEGORIES, SMALLEST_SUBCATEGORY, \
+                                           REPLACEMENT_DUTY_OVERRIDES
 from Products.MeetingAndenne.utils import *
 from Products.MeetingAndenne.SearcherAndenne import SearcherAndenne
 from Products.PloneMeeting.utils import checkPermission, getCustomAdapter, prepareSearchValue
@@ -496,12 +497,23 @@ class CustomMeetingAndenne(Meeting):
 
     ##### Functions used for template generation ############################
 
+    security.declarePrivate('getReplacingUsers')
+    def getReplacingUsers(self):
+        repl = self.getSelf().getUserReplacements()
+        res = []
+        for present in repl.itervalues():
+            res.append(present)
+        return res
+
     security.declarePublic('getDisplayableName')
-    def getDisplayableName(self, withHour=True):
+    def getDisplayableName(self, withHour=True, uppercase=False):
         '''Formats the name of a meeting in the way it is printed in templates.'''
         meeting = self.getSelf()
         if not withHour:
-            return meeting.portal_plonemeeting.formatMeetingDate(meeting=meeting, withHour=withHour)
+            res = meeting.portal_plonemeeting.formatMeetingDate(meeting=meeting, withHour=withHour)
+            if uppercase:
+                return res.upper()
+            return res
 
         if meeting.__class__.__name__ == 'mybrains':
             # It is a meeting brain, take the 'date_attr' metadata
@@ -516,42 +528,49 @@ class CustomMeetingAndenne(Meeting):
             h = date.strftime(fmt)
         else:
             h = ''
-        return meeting.portal_plonemeeting.formatMeetingDate(meeting=meeting, withHour=False) + h
+        res = meeting.portal_plonemeeting.formatMeetingDate(meeting=meeting, withHour=False) + h
+        if uppercase:
+            return res.upper()
+        return res
 
     Meeting.getDisplayableName = getDisplayableName
     # it'a a monkey patch because it's the only way to add a behaviour to the Meeting class
 
     security.declarePublic('getSignatoriesForPrinting') 
     def getSignatoriesForPrinting (self, pos=0, level=0, useforpv=False, userepl=True):
-        '''To be changed.'''
-        # new from plonemeeting 3.3 :print sigantories in template relative to position ans level. pos 0 and level 0 is the first sigantory (bg) and function.
-        # pos 0 and level 1 is the first signatory (bg) with Name
-        res = []
+        '''Gets the signatories to be printed in templates. Position is linked to the different signatories.
+           For each signatory, level 0 is his duty and level 1 is his name.
+           useforpv is used to manage the case where the mandatary's duty should be replaced by "Président".
+           userepl is used to take replacements into account when selecting signatories and duties.'''
         meeting = self.getSelf()
-        duty=[["Bourgmestre","Echevin"],["Directeur général", "Directeur général adjoint","Directeur général f.f."]]
-        attendees = meeting.getAttendees(True)
-        res = meeting.getSignatories(theObjects=True, includeDeleted=False,includeReplacements=userepl)
+        res = meeting.getSignatories(theObjects=True, includeDeleted=False, includeReplacements=userepl)
 
-        
-         
-        if userepl and res[pos].getId() not in [attendee.getId() for attendee in attendees]:
-            # utilisé dans le cas ou le signataire coché n'est pas présent et donc dans ce cas on le remplace par le premier présent du même titre
-             
-            for attende in attendees:
-                if attende.getDuty() in duty[pos]:
-                    res[pos]=attende
-                    break
         if level == 1:
             return res[pos].Title()
-        else:
-            # specialement utilisé pour l'affichae avant migration ou apres migration si la personne remplacante a été oubliée
-            # Si c'est un echevin on remplace par bg ff, si c'est un secretaire en general on a deja un dg f.f dans la fonction  principale de celui qui remplace)
-            # le getduty revoit la fonction remplacé si includereplacement=true et qu'il y a vraiment un remplaçant inscrit (grace au fakemeetinguser revoyer à la place)
-            duty = res[pos].getDuty()
-            if duty == "Echevin":
-                return "Bourgmestre f.f"
-            else:
-                return duty
+
+        replacing = False
+        repl = self.getReplacingUsers()
+        if res[pos].id in repl:
+            replacing = True
+
+        if pos == 0 and useforpv == True:
+            if replacing:
+                return "Président f.f."
+            return "Président"
+
+        if replacing and getattr(res[pos], 'originalDuty', '') in REPLACEMENT_DUTY_OVERRIDES:
+            return res[pos].originalDuty
+
+        return res[pos].getDuty()
+
+    security.declarePublic('getCertifiedSignatures') 
+    def getCertifiedSignatures(self):
+        '''Gets the certified signatures for this meeting. Always force computation with signatures
+           defined in the related MeetingConfig object.'''
+        meeting = self.getSelf()
+        tool = getToolByName(meeting, 'portal_plonemeeting')
+        cfg = tool.getMeetingConfig(meeting)
+        return cfg.getCertifiedSignatures(computed=True)
 
     security.declarePublic('getStrikedAssembly')
     def getStrikedAssembly(self, groupByDuty=True, strikefirst=True, strikemidle=True, strikelast=False, userepl=True):
