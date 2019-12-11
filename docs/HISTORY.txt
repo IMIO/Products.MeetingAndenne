@@ -7,7 +7,10 @@ The Products.MeetingAndenne version must be the same as the Products.PloneMeetin
 3.3.2 (TBD)
 -----------
 - Added parameter uppercase to Meeting.getDisplayableName which is False by default
-- Changed a bunch of templates
+- Changed a bunch of ODT templates
+- Removed description from the copied fields list
+- Changed page templates so description field is hidden if empty or read-only for legacy purpose
+- Corrected a bug where PV are not shown when using glasses icon in MeetingItemsLists
 
 3.3.1 (2019-11-20)
 ------------------
