@@ -43,3 +43,9 @@ def collateDisplayListsKeys(displayListTuple):
 def collateDisplayListsValues(displayListTuple):
     '''Function used to collate DisplayLists tuples by value.'''
     return locale.strxfrm(displayListTuple[1])
+
+def getMeetingUser(obj, id):
+    '''Gets the MeetingUser object defined on a given obj (item or meeting)
+       and having the given id.'''
+    cfg = obj.portal_plonemeeting.getMeetingConfig(obj)
+    return getattr(cfg.meetingusers, id, None)

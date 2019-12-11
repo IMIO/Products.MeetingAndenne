@@ -56,11 +56,11 @@ from Products.MeetingAndenne.interfaces import \
      IMeetingItemCollegeAndenneWorkflowActions, IMeetingItemCollegeAndenneWorkflowConditions, \
      IMeetingCollegeAndenneWorkflowActions, IMeetingCollegeAndenneWorkflowConditions, \
      IOCRLanguageCustom
-from Products.MeetingAndenne.config import MAIL_TYPES, PERSONNEL_CATEGORIES, SMALLEST_SUBCATEGORY, \
-                                           REPLACEMENT_DUTY_OVERRIDES
+from Products.MeetingAndenne.config import MAIL_TYPES, PERSONNEL_CATEGORIES, SMALLEST_SUBCATEGORY
 from Products.MeetingAndenne.utils import *
 from Products.MeetingAndenne.SearcherAndenne import SearcherAndenne
-from Products.PloneMeeting.utils import checkPermission, getCustomAdapter, prepareSearchValue
+from Products.PloneMeeting.utils import checkPermission, getCustomAdapter, prepareSearchValue, \
+                                        FakeMeetingUser
 from Products.PloneMeeting.model import adaptations
 from Products.PloneMeeting.model.adaptations import WF_DOES_NOT_EXIST_WARNING, WF_APPLIED
 from DateTime import DateTime
@@ -505,6 +505,14 @@ class CustomMeetingAndenne(Meeting):
             res.append(present)
         return res
 
+    security.declarePrivate('getReplacingUsersDict')
+    def getReplacingUsersDict(self):
+        repl = self.getSelf().getUserReplacements()
+        res = {}
+        for absent in repl.iterkeys():
+            res[repl[absent]] = absent
+        return res
+
     security.declarePublic('getDisplayableName')
     def getDisplayableName(self, withHour=True, uppercase=False):
         '''Formats the name of a meeting in the way it is printed in templates.'''
@@ -536,7 +544,7 @@ class CustomMeetingAndenne(Meeting):
     Meeting.getDisplayableName = getDisplayableName
     # it'a a monkey patch because it's the only way to add a behaviour to the Meeting class
 
-    security.declarePublic('getSignatoriesForPrinting') 
+    security.declarePublic('getSignatoriesForPrinting')
     def getSignatoriesForPrinting (self, pos=0, level=0, useforpv=False, userepl=True):
         '''Gets the signatories to be printed in templates. Position is linked to the different signatories.
            For each signatory, level 0 is his duty and level 1 is his name.
@@ -548,22 +556,15 @@ class CustomMeetingAndenne(Meeting):
         if level == 1:
             return res[pos].Title()
 
-        replacing = False
-        repl = self.getReplacingUsers()
-        if res[pos].id in repl:
-            replacing = True
-
         if pos == 0 and useforpv == True:
-            if replacing:
+            repl = self.getReplacingUsers()
+            if res[pos].id in repl:
                 return "Président f.f."
             return "Président"
 
-        if replacing and getattr(res[pos], 'originalDuty', '') in REPLACEMENT_DUTY_OVERRIDES:
-            return res[pos].originalDuty
-
         return res[pos].getDuty()
 
-    security.declarePublic('getCertifiedSignatures') 
+    security.declarePublic('getCertifiedSignatures')
     def getCertifiedSignatures(self):
         '''Gets the certified signatures for this meeting. Always force computation with signatures
            defined in the related MeetingConfig object.'''
@@ -847,41 +848,55 @@ class CustomMeetingItemAndenne(MeetingItem):
         current_cat = self.context.getCategory(theObject=True)
         return str(current_cat.adapted().getRootCatNum())
 
-    security.declarePublic('getSignatoriesForPrinting') 
+    security.declarePublic('getSignatoriesForPrinting')
     def getSignatoriesForPrinting (self, pos=0, level=0, useforpv=False, userepl=True):
-        # new from plonemeeting 3.3 :print sigantories in template relative to position ans level. pos 0 and level 0 is the first sigantory (bg) and function. 
-        # pos 0 and level 1 is the first signatory (bg) with Name
-        res = []
-        i = 0
+        '''Gets the signatories to be printed in templates. Position is linked to the different signatories.
+           For each signatory, level 0 is his duty and level 1 is his name.
+           useforpv is used to manage the case where the mandatary's duty should be replaced by "Président".
+           userepl is used to take replacements into account when selecting signatories and duties.'''
         item = self.getSelf()
         meeting = item.getMeeting()
-        duty=[["Bourgmestre","Echevin"],["Directeur général", "Directeur général adjoint","Directeur général f.f."]]
-        attendees = meeting.getAttendees(True)
-        attendeeIds = []
-        for user in attendees:
-            if not ((not user.isPresent(self.context, meeting) and user.getId() not in self.context.getItemPresents()) or user.getId() in self.context.getItemAbsents()):
-                attendeeIds.append(user.getId())
+
+        itemAttendees = item.getAttendees(includeReplacements=True)
+        itemAttendeesIds = item.getAttendeesIds(attendees=itemAttendees)
+
+        meetingAttendees = meeting.getAttendees(theObjects=True, includeDeleted=False, includeReplacements=True)
+        replDict = meeting.adapted().getReplacingUsersDict()
+
+        # The following part is used for rare cases where a signatory of the Meeting is absent for this
+        # particular MeetingItem. So he must be replaced by the attendee following him in the attendees
+        # list of the item who has to keep the replacementDuty given to the absent for the MeetingItem.
         res = item.getItemSignatories(theObjects=True, includeDeleted=False, includeReplacements=userepl)
-         
-        if userepl and res[pos].getId() not in attendeeIds:
-            # utilisé dans le cas ou le signataire coché n'est pas présent et donc dans ce cas on le remplace par le premier présent du même titre
-             
-            for attende in attendees:
-                if attende.getId() in attendeeIds and attende.getDuty() in duty[pos]:
-                    res[pos]=attende
-                    break
+        users = []
+        for user in res:
+            if user.id not in itemAttendeesIds:
+                nextUser = False
+                found = False
+                for attendee in meetingAttendees:
+                    if nextUser and attendee in itemAttendees:
+                        if user.id in replDict:
+                            user = getMeetingUser(item, replDict[user.id])
+                        users.append(FakeMeetingUser(attendee.id, attendee, user))
+                        replDict[attendee.id] = user.id
+                        found = True
+                        break
+                    if attendee.id == user.id:
+                        nextUser = True
+                if not found:
+                    users.append(user)
+            else:
+                users.append(user)
+        res = users
 
         if level == 1:
             return res[pos].Title()
-        else:
-            # Spécialement utilisé pour l'affichage avant migration ou après migration si la personne remplaçante a été oubliée.
-            # Si c'est un échevin, on remplace par bg f.f., si c'est un secrétaire, en general, on a déjà un dg f.f. dans la fonction principale de celui qui remplace.
-            # getDuty renvoit la fonction remplacée si includereplacement=true et qu'il y a vraiment un remplaçant inscrit (grâce au fakemeetinguser revoyé à la place).
-            duty = res[pos].getDuty()
-            if duty == "Echevin":
-                return "Bourgmestre f.f."
-            else:
-                return duty
+
+        if pos == 0 and useforpv == True:
+            if res[pos].id in replDict:
+                return "Président f.f."
+            return "Président"
+
+        return res[pos].getDuty()
 
     security.declarePublic('getStrikedItemAssembly')
     def getStrikedItemAssembly(self, groupByDuty=True, strikefirst=True, strikemidle=True, strikelast=False, userepl=True):
@@ -1252,6 +1267,66 @@ class CustomMeetingItemAndenne(MeetingItem):
         return DisplayList(tuple(res)).sortedByValue()
 
     MeetingItem.listAssociatedGroups = listAssociatedGroups
+    # it'a a monkey patch because it's the only way to change the behaviour of the MeetingItem class
+
+    security.declarePublic('getAttendees')
+    def getAttendees(self, usage=None, includeDeleted=False,
+                     includeAbsents=False, includeReplacements=False):
+        '''Returns the attendees for this item. Takes into account
+           self.itemAbsents, excepted if p_includeAbsents is True. It also
+           takes into account self.itemPresents. If a given
+           p_usage is defined, the method returns only users having this
+           p_usage.'''
+        res = []
+        if usage == 'signer':
+            raise 'Please use MeetingItem.getItemSignatories instead.'
+        if not self.hasMeeting():
+            return res
+        # Prevent wrong parameters use
+        if includeDeleted and usage:
+            includeDeleted = False
+        itemAbsents = ()
+        itemPresents = self.getItemPresents()
+        meeting = self.getMeeting()
+        if not includeAbsents:
+            # item absents are absents for the item, absents from an item before this one
+            # and lateAttendees that still not arrived
+            itemAbsents = list(self.getItemAbsents()) + meeting.getDepartures(self, when='before', alsoEarlier=True)
+        # remove lateAttendees that arrived before this item
+        lateAttendees = meeting.getLateAttendees()
+        arrivedLateAttendees = meeting.getEntrances(self, when='during') + meeting.getEntrances(self, when='before')
+        stillNotArrivedLateAttendees = set(lateAttendees).difference(set(arrivedLateAttendees))
+        itemAbsents = itemAbsents + list(stillNotArrivedLateAttendees)
+        for attendee in meeting.getAttendees(True,
+                                             includeDeleted=includeDeleted,
+                                             includeReplacements=includeReplacements):
+            if attendee.id in itemAbsents and attendee.id not in itemPresents:
+                continue
+            if not usage or (usage in attendee.getUsages()):
+                res.append(attendee)
+        return res
+
+    MeetingItem.getAttendees = getAttendees
+    # it'a a monkey patch because it's the only way to change the behaviour of the MeetingItem class
+
+    security.declarePublic('getAttendeesIds')
+    def getAttendeesIds(self, usage=None, includeDeleted=False,
+                     includeAbsents=False, includeReplacements=False,
+                     attendees=None):
+        '''Returns the attendees ids for this item. Takes into account
+           self.itemAbsents, excepted if p_includeAbsents is True. It also
+           takes into account self.itemPresents. If a given
+           p_usage is defined, the method returns only users having this
+           p_usage. If an array of attendees in passed in argument, the
+           ids are simply extracted from this array.'''
+        res = []
+        if attendees is None:
+            attendees = self.getAttendees(usage, includeDeleted, includeAbsents, includeReplacements)
+        for attendee in attendees:
+            res.append(attendee.id)
+        return res
+
+    MeetingItem.getAttendeesIds = getAttendeesIds
     # it'a a monkey patch because it's the only way to change the behaviour of the MeetingItem class
 
     security.declareProtected('Modify portal content', 'onWelcomePerson')
