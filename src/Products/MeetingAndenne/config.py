@@ -57,8 +57,9 @@ ANDENNEROLES['mailviewers'] = 'MeetingMailViewer'
 
 PMconfig.MEETINGROLES.update(ANDENNEROLES)
 PMconfig.MEETING_GROUP_SUFFIXES = PMconfig.MEETINGROLES.keys()
-PMconfig.DEFAULT_COPIED_FIELDS = ['title', 'description', 'detailedDescription', 'motivation','decision', 'budgetInfos', 'budgetRelated', 'privacy','sendToAuthority','refdoc','yourrefdoc','projetpv','textpv','pv']
-
+PMconfig.DEFAULT_COPIED_FIELDS = ['title', 'detailedDescription', 'motivation', 'decision', 'budgetInfos', \
+                                  'budgetRelated', 'privacy', 'sendToAuthority', 'refdoc', 'yourrefdoc', \
+                                  'projetpv', 'textpv', 'pv']
 
 # Mail types static define
 MAIL_TYPES = DisplayList((
