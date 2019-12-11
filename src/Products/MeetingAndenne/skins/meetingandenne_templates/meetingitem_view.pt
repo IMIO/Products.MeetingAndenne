@@ -368,21 +368,11 @@
     <metal:people use-macro="here/@@ma-macros/itemPeople"/>
 
     <tal:comment replace="nothing">Description</tal:comment>
-    <tal:field define="fieldName python: 'description'; ajaxEdit python:True">
+    <tal:field define="fieldName python: 'description'" tal:condition="python: not context.fieldIsEmpty('description')">
        <metal:f use-macro="context/@@pm-macros/viewContentField"/>
     </tal:field>
     <tal:comment replace="nothing">Detailed description</tal:comment>
     <tal:field define="fieldName python: 'detailedDescription'; ajaxEdit python:True">
-       <metal:f use-macro="context/@@pm-macros/viewContentField"/>
-    </tal:field>
-
-    <tal:comment replace="nothing">Budgetary informations, manage fields budgetRelated and budgetInfos</tal:comment>
-    <tal:block condition="python: 'budgetInfos' in usedAttrs">
-        <metal:budgetInfos use-macro="here/@@pm-macros/budgetInfos" />
-    </tal:block>
-
-    <tal:comment replace="nothing">Motivation</tal:comment>
-    <tal:field define="fieldName python: 'motivation'; ajaxEdit python:True">
        <metal:f use-macro="context/@@pm-macros/viewContentField"/>
     </tal:field>
 
@@ -405,6 +395,16 @@
 
     <tal:comment replace="nothing">PV</tal:comment>
     <tal:field condition="python: not context.adapted().israpcolaucon()" define="fieldName python: 'pv'; ajaxEdit python:True">
+       <metal:f use-macro="context/@@pm-macros/viewContentField"/>
+    </tal:field>
+
+    <tal:comment replace="nothing">Budgetary informations, manage fields budgetRelated and budgetInfos</tal:comment>
+    <tal:block condition="python: 'budgetInfos' in usedAttrs">
+        <metal:budgetInfos use-macro="here/@@pm-macros/budgetInfos" />
+    </tal:block>
+
+    <tal:comment replace="nothing">Motivation</tal:comment>
+    <tal:field define="fieldName python: 'motivation'; ajaxEdit python:True">
        <metal:f use-macro="context/@@pm-macros/viewContentField"/>
     </tal:field>
 
