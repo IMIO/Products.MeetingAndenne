@@ -95,8 +95,7 @@ Fields are only displayed if :
           tal:define="mode string:view;
                       context python: meetingItem;">
         <tal:loop repeat="visibleField meetingConfig/getItemsListVisibleFields">
-            
-            <span tal:define="visibleField2 python: not meetingItem.getMeeting()==None and (meetingItem.getMeeting().queryState()=='decided' or meetingItem.getMeeting().queryState()=='frozen') and
+            <span tal:define="visibleField2 python: not meetingItem.getMeeting()==None and meetingItem.getMeeting().queryState()!='created' and
                               visibleField == 'decision' and 'textpv' or visibleField;
                               field python: meetingItem.getField(visibleField2);"
                   tal:condition="python: not meetingItem.fieldIsEmpty(visibleField) and ((visibleField == 'budgetInfos' and

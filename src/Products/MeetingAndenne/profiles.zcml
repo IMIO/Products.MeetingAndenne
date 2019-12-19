@@ -34,6 +34,14 @@
       handler="Products.MeetingAndenne.migrations.migrate_to_3_3_1.migrate"
       profile="Products.MeetingAndenne:default" />
 
+  <genericsetup:upgradeStep
+      title="Migrate to MeetingAndenne 3.3.2"
+      description="Performs migration from MeetingAndenne 3.3.1 to MeetingAndenne 3.3.2"
+      source="3310"
+      destination="3320"
+      handler="Products.MeetingAndenne.migrations.migrate_to_3_3_2.migrate"
+      profile="Products.MeetingAndenne:default" />
+
   <!-- ##/code-section profiles.zcml-bottom -->
 
 </configure>
