@@ -56,8 +56,7 @@ from Products.MeetingAndenne.interfaces import \
      IMeetingItemCollegeAndenneWorkflowActions, IMeetingItemCollegeAndenneWorkflowConditions, \
      IMeetingCollegeAndenneWorkflowActions, IMeetingCollegeAndenneWorkflowConditions, \
      IOCRLanguageCustom
-from Products.MeetingAndenne.config import MAIL_TYPES, PERSONNEL_CATEGORIES, SMALLEST_SUBCATEGORY, \
-                                           REPLACEMENT_DUTY_OVERRIDES
+from Products.MeetingAndenne.config import MAIL_TYPES, PERSONNEL_CATEGORIES, SMALLEST_SUBCATEGORY
 from Products.MeetingAndenne.utils import *
 from Products.MeetingAndenne.SearcherAndenne import SearcherAndenne
 from Products.PloneMeeting.utils import checkPermission, getCustomAdapter, prepareSearchValue
@@ -822,6 +821,17 @@ class CustomMeetingItemAndenne(MeetingItem):
         elif itemState == 'refused_and_closed':
             res.append(('refused.png', 'icon_help_refused'))
         return res
+
+    def initDecisionFieldsIfEmpty(self):
+        '''If textpv or pv field is empty, it will be initialized with an empty.'''
+        if not self.getTextpv():
+            self.setTextpv("<html></html>")
+
+        if not self.getPv():
+            self.setPv("<html></html>")
+
+    MeetingItem.initDecisionFieldsIfEmpty = initDecisionFieldsIfEmpty
+    # it'a a monkey patch because it's the only way to add a behaviour to the MeetingItem class
 
     ##### End Overrides MeetingCommunes MeetingItemCustom adapter ###########
 
@@ -1942,18 +1952,17 @@ class MeetingCollegeAndenneWorkflowActions(MeetingWorkflowActions):
 
     def doDecide(self, stateChange):
         '''We pass every item that is 'presented' in the 'itemfrozen'
-           state.  It is the case for late items. Moreover, if
+           state. It is the case for late items. Moreover, if
            MeetingConfig.initItemDecisionIfEmptyOnDecide is True, we
-           initialize the decision field with content of Title+Description
-           if decision field is empty.'''
+           initialize projetpv and pv fields if they are empty.'''
         tool = getToolByName(self.context, 'portal_plonemeeting')
         cfg = tool.getMeetingConfig(self.context)
         initializeDecision = cfg.getInitItemDecisionIfEmptyOnDecide()
         for item in self.context.getAllItems(ordered=True):
             if initializeDecision:
-                # If deliberation (motivation+decision) is empty,
-                # initialize it the decision field
-                item._initDecisionFieldIfEmpty()
+                # If textpv or pv is empty, initialize it to avoid
+                # the on-the-fly edit bug
+                item.initDecisionFieldsIfEmpty()
 
 
 # ------------------------------------------------------------------------------
