@@ -1554,8 +1554,11 @@ class CustomMeetingItemAndenne(MeetingItem):
         user = self.portal_membership.getAuthenticatedMember()
         newItem = self.clone(newOwnerId=user.id, cloneEventAction='Duplicate')
         if (user.has_permission('MeetingAndenne: Read pv', self)):
-            newItem.setDecision(self.getTextpv())
-            newItem.setProjetpv(self.getPv())
+            if not newItem.fieldIsEmpty('textpv'):
+                newItem.setDecision(self.getTextpv())
+            if not newItem.fieldIsEmpty('pv'):
+                newItem.setProjetpv(self.getPv())
+
         newItem.setTreatUser(user.id)
         newItem.itemPresents = ()
         newItem.itemSignatories = ()
@@ -1568,7 +1571,7 @@ class CustomMeetingItemAndenne(MeetingItem):
             if cat and cat.adapted().getRootCatNum() < SMALLEST_SUBCATEGORY:
                 newItem.category = ''
 
-        newItem.reindexObject(idxs=['getTreatUser','Description','getDecision', 'getProjetpv','getTextpv','getPv'])
+        newItem.reindexObject(idxs=['getTreatUser', 'Description', 'getDecision', 'getProjetpv', 'getTextpv', 'getPv'])
         self.plone_utils.addPortalMessage(
             translate('item_duplicated', domain='PloneMeeting', context=self.REQUEST))
         return self.REQUEST.RESPONSE.redirect(newItem.absolute_url())
@@ -2065,8 +2068,10 @@ class MeetingItemCollegeAndenneWorkflowActions(MeetingItemWorkflowActions):
     def doItemFreeze (self, stateChange):
         member = self.context.portal_membership.getAuthenticatedMember()
         if (member.has_permission('MeetingAndenne: Write pv', self.context)):
-            self.context.setPv(self.context.getProjetpv())
-            self.context.setTextpv(self.context.getDecision())
+            if not self.context.fieldIsEmpty('projetpv'):
+                self.context.setPv(self.context.getProjetpv())
+            if not self.context.fieldIsEmpty('decision'):
+                self.context.setTextpv(self.context.getDecision())
 
     security.declarePrivate('doPre_accept')
     def doPre_accept(self, stateChange):
