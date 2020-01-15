@@ -11,6 +11,15 @@ from Products.MeetingAndenne.profiles.default.import_data import collegeTemplate
 # The migration class ----------------------------------------------------------
 class Migrate_To_3_3_2(Migrator):
 
+    def _removeInitItemDecisionIfEmptyOnDecide(self):
+        '''Remove the useless initItemDecisionIfEmptyOnDecide attribute from every
+           MeetingConfigs.'''
+        logger.info('Removing useless attribute \'initItemDecisionIfEmptyOnDecide\' of every MeetingConfigs...')
+        for cfg in self.portal.portal_plonemeeting.objectValues('MeetingConfig'):
+            if hasattr(cfg, 'initItemDecisionIfEmptyOnDecide'):
+                delattr(cfg, 'initItemDecisionIfEmptyOnDecide')
+        logger.info('Done.')
+
     def _createPODTemplates(self):
         '''Recreate the used POD templates'''
         logger.info('Recreating the used POD templates...')
@@ -32,6 +41,7 @@ class Migrate_To_3_3_2(Migrator):
 
     def run(self):
         logger.info('Migrating to MeetingAndenne 3.3.2...')
+        self._removeInitItemDecisionIfEmptyOnDecide()
         self._createPODTemplates()
         self.finish()
 
@@ -40,7 +50,8 @@ class Migrate_To_3_3_2(Migrator):
 def migrate(context):
     '''This migration function:
 
-       1)  Recreate the used POD templates
+       1)  Remove useless attribute 'initItemDecisionIfEmptyOnDecide' field from every meetingConfigs
+       2)  Recreate the used POD templates
     '''
     Migrate_To_3_3_2(context).run()
 # ------------------------------------------------------------------------------
