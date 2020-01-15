@@ -288,17 +288,6 @@ def update_config_schema(baseSchema):
     specificSchema = Schema((
 
             BooleanField(
-                name='initItemDecisionIfEmptyOnDecide',
-                default=True,
-                widget=BooleanField._properties['widget'](
-                    description="InitItemDecisionIfEmptyOnDecide",
-                    description_msgid="init_item_decision_if_empty_on_decide",
-                    label='Inititemdecisionifemptyondecide',
-                    label_msgid='MeetingAndenne_label_initItemDecisionIfEmptyOnDecide',
-                    i18n_domain='PloneMeeting'),
-                write_permission=WriteRiskyConfig,
-            ),
-            BooleanField(
                 name='useSubCategories',
                 default=False,
                 widget=BooleanField._properties['widget'](

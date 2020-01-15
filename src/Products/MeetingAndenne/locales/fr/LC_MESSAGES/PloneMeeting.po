@@ -104,10 +104,6 @@ msgstr "Réservé"
 msgid "init_item_decision_if_empty_on_decide"
 msgstr "Si cette case est cochée, lorsqu'une séance passera 'En rédaction du PV', pour tous les points dont le champ 'Décision' est vide, ce champ sera automatiquement rempli avec une concaténation de ce qui est défini dans le titre et la description du point."
 
-#. Default: "Initialize the item decision when deciding meeting"
-msgid "MeetingAndenne_label_initItemDecisionIfEmptyOnDecide"
-msgstr "Initialiser le champ décision des points lorsque la séance passe 'En rédaction du PV'?"
-
 #. Default: "If you check this box, subcategories system will be activated. This system uses numbers higher than 100 to define categories"
 msgid "use_sub_categories_descr"
 msgstr "Si cette case est cochée, le système de sous-catégories sera activé. Ce système emploie des nombres supérieurs à 100 pour définir les catégories."

@@ -99,10 +99,6 @@ msgstr ""
 msgid "init_item_decision_if_empty_on_decide"
 msgstr ""
 
-#. Default: "Initialize the item decision when deciding meeting"
-msgid "MeetingAndenne_label_initItemDecisionIfEmptyOnDecide"
-msgstr ""
-
 #. Default: "If you check this box, subcategories system will be activated. This system uses numbers higher than 100 to define categories"
 msgid "use_sub_categories_descr"
 msgstr ""

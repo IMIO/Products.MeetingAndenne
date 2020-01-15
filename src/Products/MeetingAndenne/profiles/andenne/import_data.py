@@ -1307,7 +1307,6 @@ collegeMeeting.enableAnnexToPrint = True
 collegeMeeting.annexToPrintDefault = True
 collegeMeeting.annexDecisionToPrintDefault = True
 collegeMeeting.annexAdviceToPrintDefault = False
-collegeMeeting.initItemDecisionIfEmptyOnDecide = False
 collegeMeeting.shortName = 'College'
 collegeMeeting.meetingFileTypes = [annexe, annexeBudget, annexeCahier,
                                    annexeDecision, annexeAvis, annexeAvisLegal]
