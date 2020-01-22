@@ -11,6 +11,9 @@ The Products.MeetingAndenne version must be the same as the Products.PloneMeetin
 - Removed description from the copied fields list
 - Changed page templates so description field is hidden if empty or read-only for legacy purpose
 - Corrected a bug where PV are not shown when using glasses icon in MeetingItemsLists
+- Removed initDecisionFieldsIfEmpty field on MeetingItems
+- Corrected a bug where the edit-on-the-fly of PV were not working correctly when field is empty
+  and detected as plain-text
 
 3.3.1 (2019-11-20)
 ------------------
