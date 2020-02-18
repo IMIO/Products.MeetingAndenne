@@ -29,8 +29,8 @@
 
   <tal:comment replace="nothing">Form for appending a new annex.</tal:comment>
   <form name="annexForm"
-        tal:define="appendPerm python: relatedTo == 'item_decision' and 'PloneMeeting: Write decision annex' or 'PloneMeeting: Add annex';
-                    formAction python: relatedTo == 'item_decision' and 'annexes_decision_form' or 'annexes_form';"
+        tal:define="appendPerm python: (relatedTo == 'item_decision' and 'PloneMeeting: Write decision annex') or (relatedTo == 'item_pv' and 'MeetingAndenne: Add pv annex') or 'PloneMeeting: Add annex';
+                    formAction python: (relatedTo == 'item_decision' and 'annexes_decision_form') or (relatedTo == 'item_pv' and 'annexes_pv_form') or 'annexes_form';"
         tal:condition="python: member.has_permission(appendPerm, context)"
         tal:attributes="action python: context.absolute_url() + '/' + formAction"
         method="post" enctype="multipart/form-data">
