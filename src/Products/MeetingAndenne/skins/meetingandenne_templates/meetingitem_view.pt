@@ -413,6 +413,7 @@
     <table width="100%" cellpadding="1" cellspacing="1"
            tal:define="hasAnnexes python: context.hasAnnexesWhere(relatedTo='item');
                        hasAnnexesDecision python: context.hasAnnexesWhere(relatedTo='item_decision');
+                       hasAnnexesPV python: context.hasAnnexesWhere(relatedTo='item_pv');
                        hasAdvices python: (meetingConfig.getUseAdvices() and context.displayAdvices())">
         <tr style="vertical-align: top;">
             <td class="itemAnnexesCell" width="50%">
@@ -427,7 +428,11 @@
                                 tal:condition="python: member.has_permission('PloneMeeting: Read decision annex', context) and hasAnnexesDecision">
                                 <metal:annexes use-macro="obj/@@annexes-macros/annexesIcons"/>
                             </td>
-                            <td tal:condition="python: not hasAnnexes and not hasAnnexesDecision">
+                            <td tal:define="relatedTo string:item_pv"
+                                tal:condition="hasAnnexesPV">
+                                <metal:annexes use-macro="obj/@@annexes-macros/annexesIcons"/>
+                            </td>
+                            <td tal:condition="python: not hasAnnexes and not hasAnnexesDecision and not hasAnnexesPV">
                                 <span>-</span>
                             </td>
                         </tr>

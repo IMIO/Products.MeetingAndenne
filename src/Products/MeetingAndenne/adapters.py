@@ -35,6 +35,7 @@ from Products.CMFPlone.utils import set_own_login_name, safe_unicode
 from Products.CMFCore.permissions import ModifyPortalContent, ReviewPortalContent
 from Products.CMFCore.utils import getToolByName
 from plone import api
+from plone.memoize import ram
 from plone.app.users.browser.personalpreferences import UserDataPanelAdapter
 from plone.app.users.browser.personalpreferences import PersonalPreferencesPanelAdapter
 from imio.helpers.xhtml import xhtmlContentIsEmpty
@@ -1579,6 +1580,28 @@ class CustomMeetingItemAndenne(MeetingItem):
         return self.REQUEST.RESPONSE.redirect(newItem.absolute_url())
 
     MeetingItem.onDuplicate = onDuplicate
+    # it'a a monkey patch because it's the only way to change the behaviour of the MeetingItem class
+
+    def showAnnexesTab_cachekey(method, self, decisionRelated=False, pvRelated=False):
+        '''cachekey method for self.showAnnexesTab.'''
+        return (str(self.REQUEST.debug), decisionRelated, pvRelated)
+
+    MeetingItem.showAnnexesTab_cachekey = showAnnexesTab_cachekey
+    # it'a a monkey patch because it's the only way to change the behaviour of the MeetingItem class
+
+    security.declarePublic('showAnnexesTab')
+    @ram.cache(showAnnexesTab_cachekey)
+    def showAnnexesTab(self, decisionRelated=False, pvRelated=False):
+        '''Must we show the "Annexes" (or "Decision-related annexes" or "PV-related annnexes") tab ?'''
+        if self.isTemporary() or self.isDefinedInTool():
+            return False
+        tool = getToolByName(self, 'portal_plonemeeting')
+        cfg = tool.getMeetingConfig(self)
+        if cfg.getFileTypes(relatedTo=((pvRelated and 'item_pv') or (decisionRelated and 'item_decision') or 'item')):
+            return True
+        return False
+
+    MeetingItem.showAnnexesTab = showAnnexesTab
     # it'a a monkey patch because it's the only way to change the behaviour of the MeetingItem class
 
     ### functionalities linked to rap-col-au-con ###

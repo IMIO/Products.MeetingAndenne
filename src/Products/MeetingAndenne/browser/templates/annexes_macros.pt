@@ -317,6 +317,11 @@
               i18n:translate="AnnexesDecisionShort"></span>
         <span class="discreet">:</span>
       </td>
+      <td tal:condition="python: relatedTo == 'item_pv'">
+        <span class="discreet" style="padding-left: 0.7em;"
+              i18n:translate="AnnexesPVShort"></span>
+        <span class="discreet">:</span>
+      </td>
       <td tal:repeat="annexesGroup annexesByType" class="noPadding">
         <tal:comment replace="nothing">Several annexes of this type are present</tal:comment>
         <dl class="actionMenuAX"
