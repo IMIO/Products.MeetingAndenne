@@ -120,6 +120,11 @@ msgstr "Sélectionnez les groupes que le créateur d'un point pourra sélectionn
 msgid "MeetingAndenne_label_selectableAssociatedGroups"
 msgstr "Groupes qui pourront être associés"
 
+# MeetingFileType
+#. Default: "Item PV annex"
+msgid "meetingfiletype_related_to_item_pv"
+msgstr "Annexe après clôture d'un point"
+
 # MeetingGroup
 #. Default: "Use prevalidation with this group"
 msgid "MeetingAndenne_label_usePrevalidation"
@@ -209,6 +214,10 @@ msgstr "Référence rappel (Vos références)"
 #. Default: "Budgetary informations"
 msgid "PloneMeeting_label_budgetInfos"
 msgstr "Données budgétaires"
+
+#. Default: "Annexes (pv)"
+msgid "AnnexesPVShort"
+msgstr "Annexes (après PV)"
 
 # Portlets
 #. Default: "create a mail"

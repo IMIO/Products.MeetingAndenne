@@ -178,6 +178,11 @@ msgstr ""
 msgid "refuse_and_close"
 msgstr ""
 
+# Annexes
+#. Default: "Annexes (to the PV)"
+msgid "AnnexesPV"
+msgstr ""
+
 # User data
 #. Default: "Male"
 msgid "Male"

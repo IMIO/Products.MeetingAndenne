@@ -115,6 +115,11 @@ msgstr ""
 msgid "MeetingAndenne_label_selectableAssociatedGroups"
 msgstr ""
 
+# MeetingFileType
+#. Default: "Item PV annex"
+msgid "meetingfiletype_related_to_item_pv"
+msgstr ""
+
 # MeetingGroup
 #. Default: "Use prevalidation with this group"
 msgid "MeetingAndenne_label_usePrevalidation"
@@ -203,6 +208,10 @@ msgstr ""
 
 #. Default: "Budgetary informations"
 msgid "PloneMeeting_label_budgetInfos"
+msgstr ""
+
+#. Default: "Annexes (pv)"
+msgid "AnnexesPVShort"
 msgstr ""
 
 # Portlets

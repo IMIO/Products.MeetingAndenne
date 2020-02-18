@@ -184,6 +184,11 @@ msgstr "Traiter"
 msgid "refuse_and_close"
 msgstr "Clôturer le PV en écriture"
 
+# Annexes
+#. Default: "Annexes (to the PV)"
+msgid "AnnexesPV"
+msgstr "Annexes (après clôture)"
+
 # User data
 #. Default: "Male"
 msgid "Male"
