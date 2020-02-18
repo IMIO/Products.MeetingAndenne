@@ -47,11 +47,13 @@ from Products.PloneMeeting.MeetingItem import MeetingItem, \
 from Products.PloneMeeting.MeetingCategory import MeetingCategory
 from Products.PloneMeeting.MeetingConfig import MeetingConfig
 from Products.PloneMeeting.MeetingFile import MeetingFile
+from Products.PloneMeeting.MeetingFileType import MeetingFileType
 from Products.PloneMeeting.MeetingGroup import MeetingGroup
 from Products.PloneMeeting.ToolPloneMeeting import ToolPloneMeeting
 from Products.PloneMeeting.interfaces import IMeetingCustom, IMeetingItemCustom, IMeetingCategoryCustom, \
                                              IMeetingConfigCustom, IMeetingFileCustom, \
-                                             IMeetingGroupCustom, IToolPloneMeetingCustom
+                                             IMeetingFileTypeCustom, IMeetingGroupCustom, \
+                                             IToolPloneMeetingCustom, IAnnexable
 from Products.MeetingAndenne.interfaces import \
      IMeetingItemCollegeAndenneWorkflowActions, IMeetingItemCollegeAndenneWorkflowConditions, \
      IMeetingCollegeAndenneWorkflowActions, IMeetingCollegeAndenneWorkflowConditions, \
@@ -1877,11 +1879,79 @@ class CustomMeetingFileAndenne(MeetingFile):
             and put it in the indexExtractedText index if tool.extractTextFromFiles is True.
 
             However, as we use collective.documentviewer and SearchableText,
-            we have to monkjey patch this function and always return an empty string.'''
+            we have to monkey patch this function and always return an empty string.'''
         return ''
 
     MeetingFile.indexExtractedText = indexExtractedText
     # it'a a monkey patch because it's the only way to change the behaviour of the MeetingFile class
+
+
+# ------------------------------------------------------------------------------
+class CustomMeetingFileTypeAndenne(MeetingFileType):
+    '''Adapter that adapts a meeting file type object implementing
+       IMeetingFileType to the interface IMeetingFileTypeCustom.'''
+    implements(IMeetingFileTypeCustom)
+    security = ClassSecurityInfo()
+
+    def __init__(self, item):
+        self.context = item
+
+    security.declarePrivate('listOtherMCCorrespondences')
+    def listOtherMCCorrespondences(self):
+        '''Vocabulary for the otherMCCorrespondence field, also
+           used for the subTypes.otherMCCorrespondence column.
+           This will only appear for the 'item', 'item_decision' and
+           'item_pv' relatedTo MeetingFileType as advices are not
+           transfered to another MC.'''
+        # display also inactive MeetingConfigs because during configuration
+        # we can define thses values before activating the new meetingConfig
+        # and we do not have to manage inactive meetingConfigs consistency
+        tool = getToolByName(self, 'portal_plonemeeting')
+        currentCfgId = self.getParentNode().getParentNode().getId()
+        relatedToVocab = self.listRelatedTo()
+        res = []
+        for cfg in tool.objectValues('MeetingConfig'):
+            cfgId = cfg.getId()
+            if cfgId == currentCfgId:
+                continue
+            fileTypes = cfg.getFileTypes(relatedTo='item')
+            fileTypes = fileTypes + cfg.getFileTypes(relatedTo='item_decision')
+            fileTypes = fileTypes + cfg.getFileTypes(relatedTo='item_pv')
+            for fileType in fileTypes:
+                res.append(('%s__filetype__%s' % (cfg.getId(), fileType['id']),
+                            u'%s -> %s -> %s' % (unicode(cfg.Title(), 'utf-8'),
+                                                 self.displayValue(relatedToVocab, fileType['relatedTo']),
+                                                 unicode(fileType['name'], 'utf-8'))))
+        return DisplayList(tuple(res))
+
+    MeetingFileType.listOtherMCCorrespondences = listOtherMCCorrespondences
+    # it'a a monkey patch because it's the only way to change the behaviour of the MeetingFileType class
+
+    security.declarePrivate('listRelatedTo')
+    def listRelatedTo(self):
+        ''' This method lists to what an annex can be related to. It is monkey
+            patched to add the possibility to add annexes to closed points.'''
+        res = []
+        res.append(('item',
+                    translate('meetingfiletype_related_to_item',
+                              domain='PloneMeeting',
+                              context=self.REQUEST)))
+        res.append(('item_decision',
+                    translate('meetingfiletype_related_to_item_decision',
+                              domain='PloneMeeting',
+                              context=self.REQUEST)))
+        res.append(('item_pv',
+                    translate('meetingfiletype_related_to_item_pv',
+                              domain='PloneMeeting',
+                              context=self.REQUEST)))
+        res.append(('advice',
+                    translate('meetingfiletype_related_to_advice',
+                              domain='PloneMeeting',
+                              context=self.REQUEST)))
+        return DisplayList(tuple(res))
+
+    MeetingFileType.listRelatedTo = listRelatedTo
+    # it'a a monkey patch because it's the only way to change the behaviour of the MeetingFileType class
 
 
 # ------------------------------------------------------------------------------
@@ -2217,6 +2287,7 @@ InitializeClass(CustomMeetingItemAndenne)
 InitializeClass(CustomMeetingCategoryAndenne)
 InitializeClass(CustomMeetingConfigAndenne)
 InitializeClass(CustomMeetingFileAndenne)
+InitializeClass(CustomMeetingFileTypeAndenne)
 InitializeClass(CustomMeetingGroupAndenne)
 InitializeClass(CustomToolMeetingAndenne)
 InitializeClass(MeetingCollegeAndenneWorkflowActions)

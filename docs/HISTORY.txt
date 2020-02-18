@@ -14,6 +14,7 @@ The Products.MeetingAndenne version must be the same as the Products.PloneMeetin
 - Removed initDecisionFieldsIfEmpty field on MeetingItems
 - Corrected a bug where the edit-on-the-fly of PV were not working correctly when field is empty
   and detected as plain-text
+- Added a custom MeetingFileType used to add annexes on PVs
 
 3.3.1 (2019-11-20)
 ------------------

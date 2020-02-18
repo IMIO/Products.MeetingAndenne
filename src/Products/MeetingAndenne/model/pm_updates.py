@@ -16,6 +16,7 @@ from Products.PloneMeeting.config import WriteRiskyConfig
 from Products.PloneMeeting.Meeting import Meeting
 from Products.PloneMeeting.MeetingConfig import MeetingConfig
 from Products.PloneMeeting.MeetingFile import MeetingFile
+from Products.PloneMeeting.MeetingFileType import MeetingFileType
 from Products.PloneMeeting.MeetingGroup import MeetingGroup
 from Products.PloneMeeting.MeetingItem import MeetingItem
 from Products.PloneMeeting.MeetingUser import MeetingUser
@@ -229,6 +230,34 @@ def update_file_schema(baseSchema):
 MeetingFile.schema = update_file_schema(MeetingFile.schema)
 
 
+# Schema updates related to MeetingFileType ----------------------------------------
+def update_filetype_schema(baseSchema):
+#    specificSchema = Schema((
+#
+#            StringField(
+#                name='relatedTo',
+#                default='item',
+#                widget=SelectionWidget(
+#                    description_msgid="related_to_descr",
+#                    description="RelatedTo",
+#                    label='Relatedto',
+#                    label_msgid='PloneMeeting_label_relatedTo',
+#                    i18n_domain='PloneMeeting',
+#                ),
+#                enforceVocabulary=True,
+#                write_permission="PloneMeeting: Write risky config",
+#                vocabulary='listRelatedTo',
+#            ),
+#        ),
+#    )
+#
+#    completeFileSchema = baseSchema + specificSchema.copy()
+    completeFileTypeSchema = baseSchema
+
+    return completeFileTypeSchema
+MeetingFileType.schema = update_filetype_schema(MeetingFileType.schema)
+
+
 # Schema updates related to MeetingGroup ---------------------------------------
 def update_group_schema(baseSchema):
     specificSchema = Schema((
@@ -314,7 +343,6 @@ def update_config_schema(baseSchema):
                 enforceVocabulary=True,
                 write_permission=WriteRiskyConfig,
             ),
-
         ),
     )
 
