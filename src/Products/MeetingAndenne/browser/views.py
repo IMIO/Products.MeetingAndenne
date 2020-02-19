@@ -313,7 +313,7 @@ class RepairAnnexesView(BrowserView):
             object = brain.getObject()
             annexUID = object.UID()
             path = join(gsettings.storage_location, annexUID[0], annexUID[1], annexUID)
-            if not os.path.exists(path):
+            if not os.path.exists(path) and object.findRelatedTo() != 'item_pv':
                 object.needsOcr = True
                 object.toPrint = True
 

@@ -1896,6 +1896,70 @@ class CustomMeetingFileAndenne(MeetingFile):
     def __init__(self, item):
         self.context = item
 
+    security.declarePublic('at_post_create_script')
+    def at_post_create_script(self):
+        # We define here a PloneMeeting-specific modification date for this
+        # annex. Indeed, we can't use the standard Plone modification_date for
+        # the PloneMeeting color system because some events like parent state
+        # changes update security settings on annexes and modification_date is
+        # updated.
+        tool = getToolByName(self, 'portal_plonemeeting')
+        self.pm_modification_date = self.modification_date
+        tool.rememberAccess(self.UID(), commitNeeded=False)
+        parent = self.getParent()
+        if parent:
+            # update parent.annexIndex if it was not already set
+            # by the conversion process for example
+            annexIndexUids = [annex['UID'] for annex in parent.annexIndex]
+            if not self.UID() in annexIndexUids:
+                IAnnexable(parent).updateAnnexIndex()
+            parent.alreadyUsedAnnexNames.append(self.id)
+        # at the end of creation, we know now self.relatedTo
+        # and we can manage the self.toPrint default value
+        cfg = tool.getMeetingConfig(self)
+        if self.findRelatedTo() == 'item_pv':
+            self.setToPrint(False)
+        elif self.findRelatedTo() == 'item_decision':
+            self.setToPrint(cfg.getAnnexDecisionToPrintDefault())
+        elif self.findRelatedTo() == 'item':
+            self.setToPrint(cfg.getAnnexToPrintDefault())
+        else:
+            # relatedTo == 'advice'
+            self.setToPrint(cfg.getAnnexAdviceToPrintDefault())
+        # at the end of creation, we know now self.meetingFileType
+        # and we can manage the self.isConfidential default value
+        mft = self.getMeetingFileType(theData=True)
+        self.setIsConfidential(mft['isConfidentialDefault'])
+        # Call sub-product code if any
+        self.adapted().onEdit(isCreated=True)
+        # Add text-extraction-related attributes
+        # Should not do it and remove the object from the index if it's PV related.
+        if self.findRelatedTo() == 'item_pv':
+            catalog = getToolByName(self, 'portal_catalog')
+            catalog.uncatalog_object('/'.join(self.getPhysicalPath()))
+            return
+        rq = self.REQUEST
+        self.needsOcr = rq.get('needs_ocr', None) is not None
+        self.ocrLanguage = rq.get('ocr_language', None)
+        # Reindexing the annex may have the effect of extracting text from the
+        # binary content, if tool.extractTextFromFiles is True (see method
+        # MeetingFile.indexExtractedText).
+        self.reindexObject()
+
+    MeetingFile.at_post_create_script = at_post_create_script
+    # it'a a monkey patch because it's the only way to change the behaviour of the MeetingFile class
+
+    security.declarePrivate('at_post_edit_script')
+    def at_post_edit_script(self):
+        self.adapted().onEdit(isCreated=False)
+
+        if self.findRelatedTo() == 'item_pv':
+            catalog = getToolByName(self, 'portal_catalog')
+            catalog.uncatalog_object('/'.join(self.getPhysicalPath()))
+
+    MeetingFile.at_post_edit_script = at_post_edit_script
+    # it'a a monkey patch because it's the only way to change the behaviour of the MeetingFile class
+
     security.declarePublic('indexExtractedText')
     def indexExtractedText(self):
         ''' This method should extract text from the binary content of this object
