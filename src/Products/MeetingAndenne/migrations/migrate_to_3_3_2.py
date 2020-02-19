@@ -3,7 +3,12 @@
 import logging
 logger = logging.getLogger('MeetingAndenne')
 
+from Acquisition import aq_base
+
+from Products.CMFCore.utils import getToolByName
+
 from Products.PloneMeeting.migrations import Migrator
+from Products.PloneMeeting.profiles import MeetingFileTypeDescriptor
 
 from Products.MeetingAndenne.profiles.default.import_data import collegeTemplates
 
@@ -39,10 +44,80 @@ class Migrate_To_3_3_2(Migrator):
 
         logger.info('Done.')
 
+    def _addAnnexesPVActions(self):
+        '''Add actions on MeetingItems used to add annexes on PVs'''
+        logger.info('Adding actions on MeetingItems used to add annexes on PVs...')
+
+        types = self.portal.portal_types
+        meetingItemType = getattr(types, 'MeetingItem')
+
+        idx = None
+        cpt = 0
+        alreadyPresent = False
+        for action in meetingItemType._actions:
+            cpt += 1
+            if action.id == 'annexes_pv_form':
+                alreadyPresent = True
+                break
+
+            if action.id == 'annexes_decision_form':
+                idx = cpt
+
+        if not alreadyPresent:
+            meetingItemType.addAction(id='annexes_pv_form',
+                                      name='AnnexesPV',
+                                      action='string:${object_url}/annexes_pv_form',
+                                      condition='python:here.showAnnexesTab(pvRelated=True)',
+                                      permission='',
+                                      category='object'
+                                     )
+            actions = meetingItemType._cloneActions()
+            if idx < len(actions):
+                actions.insert(idx, actions.pop())
+            meetingItemType._actions = tuple( actions )
+
+        for cfg in self.portal.portal_plonemeeting.objectValues('MeetingConfig'):
+            if cfg.id != 'courrierfake':
+                cfg.updatePortalTypes()
+
+        logger.info('Done.')
+
+    def _addPVAnnexesTypes(self):
+        '''Add MeetingItemTypes used with annexes on PVs'''
+        logger.info('Adding MeetingItemTypes used with annexes on PVs...')
+
+        mfts = []
+        mfts.append(MeetingFileTypeDescriptor(id='noteExecution',
+                                              title=u'Note d\'exécution signée',
+                                              theIcon='executionNote.png',
+                                              predefinedTitle='',
+                                              relatedTo='item_pv',
+                                              active=True))
+        mfts.append(MeetingFileTypeDescriptor(id='deliberation',
+                                              title=u'Délibération signée',
+                                              theIcon='executionNote.png',
+                                              predefinedTitle='',
+                                              relatedTo='item_pv',
+                                              active=True))
+        # find the icon path so we can give it to MeetingConfig.addFileType
+        mcProfilePath = [profile for profile in self.context.listProfileInfo() if 'id' in profile
+                         and profile['id'] == u'Products.MeetingAndenne:default'][0]['path']
+        for cfg in self.portal.portal_plonemeeting.objectValues('MeetingConfig'):
+            if cfg.id != 'meeting-config-college':
+                continue
+            for mft in mfts:
+                if not hasattr(aq_base(cfg.meetingfiletypes), mft.id):
+                    cfg.addFileType(mft, source=mcProfilePath)
+
+        logger.info('Done.')
+
     def run(self):
         logger.info('Migrating to MeetingAndenne 3.3.2...')
         self._removeInitItemDecisionIfEmptyOnDecide()
         self._createPODTemplates()
+        self._addAnnexesPVActions()
+        self._addPVAnnexesTypes()
+
         self.finish()
 
 
@@ -52,6 +127,8 @@ def migrate(context):
 
        1)  Remove useless attribute 'initItemDecisionIfEmptyOnDecide' field from every meetingConfigs
        2)  Recreate the used POD templates
+       3)  Add actions on MeetingItems used to add annexes on PVs
+       4)  Add MeetingItemTypes used with annexes on PVs
     '''
     Migrate_To_3_3_2(context).run()
 # ------------------------------------------------------------------------------
