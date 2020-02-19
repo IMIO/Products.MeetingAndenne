@@ -8,6 +8,7 @@
              i18n:domain="plone">
  <permission>Access contents information</permission>
  <permission>Delete objects</permission>
+ <permission>MeetingAndenne: Add pv annex</permission>
  <permission>MeetingAndenne: Read pv</permission>
  <permission>MeetingAndenne: Write copygroup</permission>
  <permission>MeetingAndenne: Write pv</permission>
@@ -42,6 +43,10 @@
    <permission-role>Reader</permission-role>
   </permission-map>
   <permission-map name="Delete objects"
+                  acquired="False">
+   <permission-role>Manager</permission-role>
+  </permission-map>
+  <permission-map name="MeetingAndenne: Add pv annex"
                   acquired="False">
    <permission-role>Manager</permission-role>
   </permission-map>
@@ -196,6 +201,13 @@
                   acquired="False">
    <permission-role>Manager</permission-role>
   </permission-map>
+  <permission-map name="MeetingAndenne: Add pv annex"
+                  acquired="False">
+   <permission-role>Manager</permission-role>
+   <permission-role>MeetingManager</permission-role>
+   <permission-role>MeetingMailViewer</permission-role>
+   <permission-role>Owner</permission-role>
+  </permission-map>
   <permission-map name="MeetingAndenne: Read pv"
                   acquired="False">
    <permission-role>Manager</permission-role>
@@ -335,6 +347,10 @@
    <permission-role>Reader</permission-role>
   </permission-map>
   <permission-map name="Delete objects"
+                  acquired="False">
+   <permission-role>Manager</permission-role>
+  </permission-map>
+  <permission-map name="MeetingAndenne: Add pv annex"
                   acquired="False">
    <permission-role>Manager</permission-role>
   </permission-map>
@@ -489,6 +505,13 @@
                   acquired="False">
    <permission-role>Manager</permission-role>
   </permission-map>
+  <permission-map name="MeetingAndenne: Add pv annex"
+                  acquired="False">
+   <permission-role>Manager</permission-role>
+   <permission-role>MeetingManager</permission-role>
+   <permission-role>MeetingMailViewer</permission-role>
+   <permission-role>Owner</permission-role>
+  </permission-map>
   <permission-map name="MeetingAndenne: Read pv"
                   acquired="False">
    <permission-role>Manager</permission-role>
@@ -628,6 +651,10 @@
    <permission-role>Reader</permission-role>
   </permission-map>
   <permission-map name="Delete objects"
+                  acquired="False">
+   <permission-role>Manager</permission-role>
+  </permission-map>
+  <permission-map name="MeetingAndenne: Add pv annex"
                   acquired="False">
    <permission-role>Manager</permission-role>
   </permission-map>
@@ -782,6 +809,13 @@
                   acquired="False">
    <permission-role>Manager</permission-role>
   </permission-map>
+  <permission-map name="MeetingAndenne: Add pv annex"
+                  acquired="False">
+   <permission-role>Manager</permission-role>
+   <permission-role>MeetingManager</permission-role>
+   <permission-role>MeetingMailViewer</permission-role>
+   <permission-role>Owner</permission-role>
+  </permission-map>
   <permission-map name="MeetingAndenne: Read pv"
                   acquired="False">
    <permission-role>Manager</permission-role>
@@ -920,6 +954,10 @@
    <permission-role>Manager</permission-role>
    <permission-role>Owner</permission-role>
   </permission-map>
+  <permission-map name="MeetingAndenne: Add pv annex"
+                  acquired="False">
+   <permission-role>Manager</permission-role>
+  </permission-map>
   <permission-map name="MeetingAndenne: Read pv"
                   acquired="False">
    <permission-role>Manager</permission-role>
@@ -1038,6 +1076,10 @@
                   acquired="False">
    <permission-role>Manager</permission-role>
    <permission-role>MeetingManager</permission-role>
+  </permission-map>
+  <permission-map name="MeetingAndenne: Add pv annex"
+                  acquired="False">
+   <permission-role>Manager</permission-role>
   </permission-map>
   <permission-map name="MeetingAndenne: Read pv"
                   acquired="False">
@@ -1183,6 +1225,10 @@
    <permission-role>Reader</permission-role>
   </permission-map>
   <permission-map name="Delete objects"
+                  acquired="False">
+   <permission-role>Manager</permission-role>
+  </permission-map>
+  <permission-map name="MeetingAndenne: Add pv annex"
                   acquired="False">
    <permission-role>Manager</permission-role>
   </permission-map>
@@ -1338,6 +1384,10 @@
    <permission-role>Manager</permission-role>
    <permission-role>MeetingManager</permission-role>
   </permission-map>
+  <permission-map name="MeetingAndenne: Add pv annex"
+                  acquired="False">
+   <permission-role>Manager</permission-role>
+  </permission-map>
   <permission-map name="MeetingAndenne: Read pv"
                   acquired="False">
    <permission-role>Manager</permission-role>
@@ -1479,6 +1529,10 @@
    <permission-role>Manager</permission-role>
    <permission-role>MeetingReviewer</permission-role>
   </permission-map>
+  <permission-map name="MeetingAndenne: Add pv annex"
+                  acquired="False">
+   <permission-role>Manager</permission-role>
+  </permission-map>
   <permission-map name="MeetingAndenne: Read pv"
                   acquired="False">
    <permission-role>Manager</permission-role>
@@ -1616,6 +1670,10 @@
    <permission-role>Reader</permission-role>
   </permission-map>
   <permission-map name="Delete objects"
+                  acquired="False">
+   <permission-role>Manager</permission-role>
+  </permission-map>
+  <permission-map name="MeetingAndenne: Add pv annex"
                   acquired="False">
    <permission-role>Manager</permission-role>
   </permission-map>
@@ -1770,6 +1828,13 @@
                   acquired="False">
    <permission-role>Manager</permission-role>
   </permission-map>
+  <permission-map name="MeetingAndenne: Add pv annex"
+                  acquired="False">
+   <permission-role>Manager</permission-role>
+   <permission-role>MeetingManager</permission-role>
+   <permission-role>MeetingMailViewer</permission-role>
+   <permission-role>Owner</permission-role>
+  </permission-map>
   <permission-map name="MeetingAndenne: Read pv"
                   acquired="False">
    <permission-role>Manager</permission-role>
@@ -1912,6 +1977,10 @@
                   acquired="False">
    <permission-role>Manager</permission-role>
    <permission-role>MeetingManager</permission-role>
+  </permission-map>
+  <permission-map name="MeetingAndenne: Add pv annex"
+                  acquired="False">
+   <permission-role>Manager</permission-role>
   </permission-map>
   <permission-map name="MeetingAndenne: Read pv"
                   acquired="False">

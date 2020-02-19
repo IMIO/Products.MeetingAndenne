@@ -8,6 +8,7 @@ from Acquisition import aq_base
 from Products.CMFCore.utils import getToolByName
 
 from Products.PloneMeeting.migrations import Migrator
+from Products.PloneMeeting.model.adaptations import performWorkflowAdaptations
 from Products.PloneMeeting.profiles import MeetingFileTypeDescriptor
 
 from Products.MeetingAndenne.profiles.default.import_data import collegeTemplates
@@ -111,12 +112,28 @@ class Migrate_To_3_3_2(Migrator):
 
         logger.info('Done.')
 
+    def _updateItemWorkflow(self):
+        '''Reapply modified workflow on MeetingItems'''
+        logger.info('Reapplying modified workflow on MeetingItems...')
+
+        wfTool = getToolByName(self.portal, 'portal_workflow')
+        ps = getToolByName(self.portal, 'portal_setup')
+        ps.runImportStepFromProfile(u'profile-Products.MeetingAndenne:default', 'workflow')
+
+        for cfg in self.portal.portal_plonemeeting.objectValues('MeetingConfig'):
+            performWorkflowAdaptations(self.portal, cfg, logger)
+
+        wfTool.updateRoleMappings()
+
+        logger.info('Done.')
+
     def run(self):
         logger.info('Migrating to MeetingAndenne 3.3.2...')
         self._removeInitItemDecisionIfEmptyOnDecide()
         self._createPODTemplates()
         self._addAnnexesPVActions()
         self._addPVAnnexesTypes()
+        self._updateItemWorkflow()
 
         self.finish()
 
@@ -129,6 +146,7 @@ def migrate(context):
        2)  Recreate the used POD templates
        3)  Add actions on MeetingItems used to add annexes on PVs
        4)  Add MeetingItemTypes used with annexes on PVs
+       5)  Reapply modified workflow on MeetingItems
     '''
     Migrate_To_3_3_2(context).run()
 # ------------------------------------------------------------------------------

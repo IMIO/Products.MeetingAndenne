@@ -16,6 +16,7 @@ The Products.MeetingAndenne version must be the same as the Products.PloneMeetin
   and detected as plain-text
 - Added a custom MeetingFileType used to add annexes on PVs
 - Removed annxes on PVs from the catalog
+- Modified MeetingItemCollegeAndenne workflow to change permissions linked to annexes on PVs
 
 3.3.1 (2019-11-20)
 ------------------
