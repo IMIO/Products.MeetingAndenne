@@ -116,6 +116,7 @@ class Migrate_To_3_3_2(Migrator):
         '''Reapply modified workflow on MeetingItems'''
         logger.info('Reapplying modified workflow on MeetingItems...')
 
+        catalog = getToolByName(self.portal, 'portal_catalog')
         wfTool = getToolByName(self.portal, 'portal_workflow')
         ps = getToolByName(self.portal, 'portal_setup')
         ps.runImportStepFromProfile(u'profile-Products.MeetingAndenne:default', 'workflow')
@@ -123,6 +124,7 @@ class Migrate_To_3_3_2(Migrator):
         for cfg in self.portal.portal_plonemeeting.objectValues('MeetingConfig'):
             performWorkflowAdaptations(self.portal, cfg, logger)
 
+        catalog.reindexIndex('allowedRolesAndUsers', None)
         wfTool.updateRoleMappings()
 
         logger.info('Done.')
