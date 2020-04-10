@@ -51,6 +51,7 @@ from Products.PloneMeeting.MeetingFile import MeetingFile
 from Products.PloneMeeting.MeetingFileType import MeetingFileType
 from Products.PloneMeeting.MeetingGroup import MeetingGroup
 from Products.PloneMeeting.ToolPloneMeeting import ToolPloneMeeting
+from Products.PloneMeeting.adapters import AnnexableAdapter
 from Products.PloneMeeting.interfaces import IMeetingCustom, IMeetingItemCustom, IMeetingCategoryCustom, \
                                              IMeetingConfigCustom, IMeetingFileCustom, \
                                              IMeetingFileTypeCustom, IMeetingGroupCustom, \
@@ -486,6 +487,85 @@ def scrub_html(self, orig):
     return strip_outer(etree.tostring(tree, encoding='utf-8').strip())
 
 SafeHTML.scrub_html = scrub_html
+
+
+# ------------------------------------------------------------------------------
+class CustomAnnexableAdapter(AnnexableAdapter):
+    '''Adapter that adapts an annexable object implementing IItem to the
+       interface IAnnexable.'''
+
+    def addAnnex(self, idCandidate, annex_title, annex_file,
+                 relatedTo, meetingFileTypeUID, **kwargs):
+        '''This function is overridden to take into account the PV annex
+           MeetingFileType'''
+        # first of all, check if we can actually add the annex
+        if relatedTo == 'item_decision':
+            if not checkPermission("PloneMeeting: Write decision annex", self.context):
+                raise Unauthorized
+        elif relatedTo == 'item_pv':
+            if not checkPermission("MeetingAndenne: Add pv annex", self.context):
+                raise Unauthorized
+        else:
+            # we use the "PloneMeeting: Add annex" permission for item normal annexes and advice annexes
+            if not checkPermission("PloneMeeting: Add annex", self.context):
+                raise Unauthorized
+
+        # if we can, proceed
+        if not idCandidate:
+            idCandidate = annex_file.filename
+        # Split leading underscore(s); else, Plone argues that you do not have the
+        # rights to create the annex
+        idCandidate = idCandidate.lstrip('_')
+        # Normalize idCandidate
+        idCandidate = self.context.plone_utils.normalizeString(idCandidate)
+        i = 0
+        idMayBeUsed = False
+        while not idMayBeUsed:
+            i += 1
+            if not self.isValidAnnexId(idCandidate):
+                # We need to find another name (prepend a number)
+                elems = idCandidate.rsplit('.', 1)
+                baseName = elems[0]
+                if len(elems) == 1:
+                    ext = ''
+                else:
+                    ext = '.%s' % elems[1]
+                idCandidate = '%s%d%s' % (baseName, i, ext)
+            else:
+                # Ok idCandidate is good!
+                idMayBeUsed = True
+
+        newAnnexId = self.context.invokeFactory('MeetingFile', id=idCandidate)
+        newAnnex = getattr(self.context, newAnnexId)
+        newAnnex.setFile(annex_file, **kwargs)
+        newAnnex.setTitle(annex_title)
+        newAnnex.setMeetingFileType(meetingFileTypeUID)
+
+        # do some specific stuffs if we are adding an annex on an item, not on an advice
+        if self.context.meta_type == 'MeetingItem':
+            # Add the annex creation to item history
+            self.context.updateHistory('add',
+                                       newAnnex,
+                                       decisionRelated=(relatedTo == 'item_decision'))
+            # Invalidate advices if needed and adding a normal annex
+            if relatedTo == 'item' and self.context.willInvalidateAdvices():
+                self.context.updateAdvices(invalidate=True)
+
+            # Potentially I must notify MeetingManagers through email.
+            if self.context.wfConditions().meetingIsPublished():
+                self.context.sendMailIfRelevant('annexAdded', 'MeetingManager', isRole=True)
+
+        # After processForm that itself calls at_post_create_script,
+        # current user may loose permission to edit
+        # the object because we copy item permissions.
+        newAnnex.processForm()
+        # display a warning portal message if annex size is large
+        if newAnnex.warnSize():
+            self.context.plone_utils.addPortalMessage(_("The annex that you just added has a large size and could be "
+                                                        "difficult to download by users wanting to view it!"),
+                                                      type='warning')
+        userId = self.context.portal_membership.getAuthenticatedMember().getId()
+        logger.info('Annex at %s uploaded by "%s".' % (newAnnex.absolute_url_path(), userId))
 
 
 # ------------------------------------------------------------------------------
@@ -1882,6 +1962,7 @@ class CustomMeetingConfigAndenne(MeetingConfig):
             for ploneGroup in meetingPloneGroups:
                 res.append((ploneGroup.id, ploneGroup.getProperty('title')))
         return DisplayList(tuple(res))
+
     MeetingConfig.listSelectableAssociatedGroups = listSelectableAssociatedGroups
     # it'a a monkey patch because it's the only way to change the behaviour of the MeetingConfig class
 

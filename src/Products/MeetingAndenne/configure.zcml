@@ -65,6 +65,11 @@
            factory="Products.MeetingAndenne.adapters.CustomToolMeetingAndenne"
            provides="Products.PloneMeeting.interfaces.IToolPloneMeetingCustom"/>
 
+  <!-- Adapter for AnnexableAdapter -->
+  <adapter for="OFS.interfaces.IItem"
+           factory="Products.MeetingAndenne.adapters.CustomAnnexableAdapter"
+           provides="Products.PloneMeeting.interfaces.IAnnexable"/>
+
   <!-- Indexes -->
   <adapter name="sortable_sender" factory=".indexes.sortable_sender" />
   <adapter name="reviewProcessInfo" factory=".indexes.reviewProcessInfo" />
