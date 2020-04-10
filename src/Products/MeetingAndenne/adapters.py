@@ -38,9 +38,11 @@ from plone import api
 from plone.memoize import ram
 from plone.app.users.browser.personalpreferences import UserDataPanelAdapter
 from plone.app.users.browser.personalpreferences import PersonalPreferencesPanelAdapter
+from imio.actionspanel.utils import unrestrictedRemoveGivenObject
 from imio.helpers.xhtml import xhtmlContentIsEmpty
 from Products.PloneMeeting.config import ITEM_NO_PREFERRED_MEETING_VALUE, \
-     TOPIC_SEARCH_SCRIPT, TOPIC_SEARCH_FILTERS, TOPIC_TYPE, MEETINGREVIEWERS, NOT_GIVEN_ADVICE_VALUE
+     TOPIC_SEARCH_SCRIPT, TOPIC_SEARCH_FILTERS, TOPIC_TYPE, MEETINGREVIEWERS, NOT_GIVEN_ADVICE_VALUE, \
+     DEFAULT_COPIED_FIELDS
 from Products.PloneMeeting.Meeting import MeetingWorkflowActions, \
      MeetingWorkflowConditions, Meeting
 from Products.PloneMeeting.MeetingItem import MeetingItem, \
@@ -1350,6 +1352,25 @@ class CustomMeetingItemAndenne(MeetingItem):
         return DisplayList(tuple(res)).sortedByValue()
 
     MeetingItem.listAssociatedGroups = listAssociatedGroups
+    # it'a a monkey patch because it's the only way to change the behaviour of the MeetingItem class
+
+    MeetingItem.originalClone = MeetingItem.clone
+
+    security.declarePublic('customClone')
+    def customClone(self, copyAnnexes=True, newOwnerId=None, cloneEventAction=None,
+                    destFolder=None, copyFields=DEFAULT_COPIED_FIELDS, newPortalType=None,
+                    keepProposingGroup=False):
+        '''Clones the item in the PloneMeetingFolder of the current user, or p_newOwnerId if given.
+           This custom version removes the PV annexes if any as duplicating them is not coherent.'''
+        newItem = self.originalClone(copyAnnexes, newOwnerId, cloneEventAction, destFolder, copyFields,
+                           newPortalType, keepProposingGroup)
+        for annex in newItem.objectValues('MeetingFile'):
+            if annex.findRelatedTo() == 'item_pv':
+                unrestrictedRemoveGivenObject(annex)
+
+        return newItem
+
+    MeetingItem.clone = customClone
     # it'a a monkey patch because it's the only way to change the behaviour of the MeetingItem class
 
     security.declarePublic('getAttendees')
