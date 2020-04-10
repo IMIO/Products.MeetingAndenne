@@ -18,6 +18,7 @@ The Products.MeetingAndenne version must be the same as the Products.PloneMeetin
 - Removed annxes on PVs from the catalog
 - Modified MeetingItemCollegeAndenne workflow to change permissions linked to annexes on PVs
 - Added a custom AnnexableAdapter to recognize the new permissions added in the workflow
+- Added a new event so adding an annex on a PV can send a mail message to copyGroups
 
 3.3.1 (2019-11-20)
 ------------------

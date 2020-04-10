@@ -1968,7 +1968,78 @@ class CustomMeetingConfigAndenne(MeetingConfig):
         d = "PloneMeeting"
         res.add("reservation", translate('reservation', domain=d, context=self.REQUEST))
         return res
+
     MeetingConfig.listAdviceTypes = listAdviceTypes
+    # it'a a monkey patch because it's the only way to change the behaviour of the MeetingConfig class
+
+    security.declarePublic('listItemEvents')
+    def listItemEvents(self):
+        '''Lists the events related to items that will trigger a mail being
+           sent.'''
+        d = 'PloneMeeting'
+        res = [
+            ("lateItem", translate('event_late_item',
+                                   domain=d,
+                                   context=self.REQUEST)),
+            ("itemPresented", translate('event_item_presented',
+                                        domain=d,
+                                        context=self.REQUEST)),
+            ("itemUnpresented", translate('event_item_unpresented',
+                                          domain=d,
+                                          context=self.REQUEST)),
+            ("itemDelayed", translate('event_item_delayed',
+                                      domain=d,
+                                      context=self.REQUEST)),
+            ("annexAdded", translate('event_add_annex',
+                                     domain=d,
+                                     context=self.REQUEST)),
+            # relevant if advices are enabled
+            ("adviceToGive", translate('event_advice_to_give',
+                                       domain=d,
+                                       context=self.REQUEST)),
+            ("adviceEdited", translate('event_add_advice',
+                                       domain=d,
+                                       context=self.REQUEST)),
+            ("adviceInvalidated", translate('event_invalidate_advice',
+                                            domain=d,
+                                            context=self.REQUEST)),
+            # relevant if askToDiscuss is enabled
+            ("askDiscussItem", translate('event_ask_discuss_item',
+                                         domain=d,
+                                         context=self.REQUEST)),
+            # relevant if clone to another MC is enabled
+            ("itemClonedToThisMC", translate('event_item_clone_to_this_mc',
+                                             domain=d,
+                                             context=self.REQUEST)),
+            # relevant if annex conversion is enabled
+            ("annexConversionError", translate('event_item_annex_conversion_error',
+                                               domain=d,
+                                               context=self.REQUEST)),
+            # relevant if wfAdaptation 'return to proposing group' is enabled
+            ("returnedToProposingGroup", translate('event_item_returned_to_proposing_group',
+                                                   domain=d,
+                                                   context=self.REQUEST)),
+            ("returnedToMeetingManagers", translate('event_item_returned_to_meeting_managers',
+                                                    domain=d,
+                                                    context=self.REQUEST)), ]
+
+        # add custom mail notifications added by subproducs
+        for extra_item_event in self.adapted().extraItemEvents():
+            res.append((extra_item_event,
+                        translate(extra_item_event,
+                                  domain=d,
+                                  context=self.REQUEST)))
+
+        # a notification can also be sent on every item transition
+        # create a separated result (res_transitions) so we can easily sort it
+        item_transitions = self.listTransitions('Item')
+        res_transitions = []
+        for item_transition_id, item_transition_name in item_transitions:
+            res_transitions.append(("item_state_changed_%s" % item_transition_id, item_transition_name))
+
+        return DisplayList(tuple(res)) + DisplayList(res_transitions).sortedByValue()
+
+    MeetingConfig.listItemEvents = listItemEvents
     # it'a a monkey patch because it's the only way to change the behaviour of the MeetingConfig class
 
     security.declarePublic('listSelectableAssociatedGroups')
@@ -1986,6 +2057,10 @@ class CustomMeetingConfigAndenne(MeetingConfig):
 
     MeetingConfig.listSelectableAssociatedGroups = listSelectableAssociatedGroups
     # it'a a monkey patch because it's the only way to change the behaviour of the MeetingConfig class
+
+    security.declarePublic('extraItemEvents')
+    def extraItemEvents(self):
+        return ("event_add_pv_annex", )
 
 
 # ------------------------------------------------------------------------------
@@ -2039,6 +2114,9 @@ class CustomMeetingFileAndenne(MeetingFile):
         if self.findRelatedTo() == 'item_pv':
             catalog = getToolByName(self, 'portal_catalog')
             catalog.uncatalog_object('/'.join(self.getPhysicalPath()))
+            annexType = self.getMeetingFileType(theRealObject=True).getName()
+            sendMailToCopyGroupsIfRelevant(self.getParent(), 'event_add_pv_annex',
+                mapping = { 'itemType': annexType, })
             return
         rq = self.REQUEST
         self.needsOcr = rq.get('needs_ocr', None) is not None
