@@ -127,6 +127,20 @@ class Migrate_To_3_3_2(Migrator):
 
         logger.info('Done.')
 
+    def _addPVAnnexEvent(self):
+        '''Add a custom event to the list of item events that generates emails'''
+        logger.info('Adding a custom event to the list of item events that generates emails...')
+
+        for cfg in self.portal.portal_plonemeeting.objectValues('MeetingConfig'):
+            if cfg.id != 'meeting-config-college':
+                continue
+            itemEvents = list(cfg.getMailItemEvents())
+            if not 'event_add_pv_annex' in itemEvents:
+                itemEvents.append('event_add_pv_annex')
+                cfg.setMailItemEvents(tuple(itemEvents))
+
+        logger.info('Done.')
+
     def run(self):
         logger.info('Migrating to MeetingAndenne 3.3.2...')
         self._removeInitItemDecisionIfEmptyOnDecide()
@@ -134,6 +148,7 @@ class Migrate_To_3_3_2(Migrator):
         self._addAnnexesPVActions()
         self._addPVAnnexesTypes()
         self._updateItemWorkflow()
+        self._addPVAnnexEvent()
 
         self.finish()
 
@@ -147,6 +162,7 @@ def migrate(context):
        3)  Add actions on MeetingItems used to add annexes on PVs
        4)  Add MeetingItemTypes used with annexes on PVs
        5)  Reapply modified workflow on MeetingItems
+       6)  Add a custom event to the list of item events that generates emails
     '''
     Migrate_To_3_3_2(context).run()
 # ------------------------------------------------------------------------------
