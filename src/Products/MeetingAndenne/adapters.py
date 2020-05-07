@@ -182,6 +182,8 @@ def customPerformWorkflowAdaptations(site, meetingConfig, logger, specificAdapta
                 props={'guard_expr': 'python:here.wfConditions().mayCorrect(toPrevalidated = True)'})
             logger.info(WF_APPLIED % ("pre_validation_keep_reviewer_permissions patched for MeetingAndenne", meetingConfig.getId()))
 
+import Products.PloneMeeting.ToolPloneMeeting
+Products.PloneMeeting.ToolPloneMeeting.performWorkflowAdaptations = customPerformWorkflowAdaptations
 adaptations.performWorkflowAdaptations = customPerformWorkflowAdaptations
 
 
