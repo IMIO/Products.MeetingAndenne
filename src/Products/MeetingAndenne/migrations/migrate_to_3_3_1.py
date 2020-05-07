@@ -8,8 +8,8 @@ from Products.PloneMeeting.config import MEETING_GROUP_SUFFIXES, TOPIC_TAL_EXPRE
 from Products.PloneMeeting.migrations import Migrator
 
 from Products.MeetingAndenne.config import ADD_CONTENT_PERMISSIONS, MAIL_TOPICS
-from Products.MeetingAndenne.profiles.default.import_data import collegeTemplates
-from Products.MeetingAndenne.profiles.default.import_data import collegeCategories
+from Products.MeetingAndenne.profiles.andenne.import_data import collegeTemplates
+from Products.MeetingAndenne.profiles.andenne.import_data import collegeCategories
 
 meetingFormationFields = ( 'training_type', 'training_purpose', 'training_startDate', \
     'training_endDate', 'training_periodicity', 'training_organiser', 'training_place', \
@@ -110,7 +110,7 @@ class Migrate_To_3_3_1(Migrator):
 
         # find the templates path so we can read and store them in the PodTemplate objects
         mcProfilePath = [profile for profile in self.context.listProfileInfo() if 'id' in profile
-                         and profile['id'] == u'Products.MeetingAndenne:default'][0]['path']
+                         and profile['id'] == u'Products.MeetingAndenne:andenne'][0]['path']
         for cfg in self.portal.portal_plonemeeting.objectValues('MeetingConfig'):
             if cfg.id == 'meeting-config-college':
                 templatesIds = cfg.podtemplates.keys()

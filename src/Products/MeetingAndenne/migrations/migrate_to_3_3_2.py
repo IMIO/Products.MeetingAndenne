@@ -11,7 +11,7 @@ from Products.PloneMeeting.migrations import Migrator
 from Products.PloneMeeting.model.adaptations import performWorkflowAdaptations
 from Products.PloneMeeting.profiles import MeetingFileTypeDescriptor
 
-from Products.MeetingAndenne.profiles.default.import_data import collegeTemplates
+from Products.MeetingAndenne.profiles.andenne.import_data import collegeTemplates
 
 
 # The migration class ----------------------------------------------------------
@@ -32,7 +32,7 @@ class Migrate_To_3_3_2(Migrator):
 
         # find the templates path so we can read and store them in the PodTemplate objects
         mcProfilePath = [profile for profile in self.context.listProfileInfo() if 'id' in profile
-                         and profile['id'] == u'Products.MeetingAndenne:default'][0]['path']
+                         and profile['id'] == u'Products.MeetingAndenne:andenne'][0]['path']
         for cfg in self.portal.portal_plonemeeting.objectValues('MeetingConfig'):
             if cfg.id == 'meeting-config-college':
                 templatesIds = cfg.podtemplates.keys()
@@ -102,7 +102,7 @@ class Migrate_To_3_3_2(Migrator):
                                               active=True))
         # find the icon path so we can give it to MeetingConfig.addFileType
         mcProfilePath = [profile for profile in self.context.listProfileInfo() if 'id' in profile
-                         and profile['id'] == u'Products.MeetingAndenne:default'][0]['path']
+                         and profile['id'] == u'Products.MeetingAndenne:andenne'][0]['path']
         for cfg in self.portal.portal_plonemeeting.objectValues('MeetingConfig'):
             if cfg.id != 'meeting-config-college':
                 continue
