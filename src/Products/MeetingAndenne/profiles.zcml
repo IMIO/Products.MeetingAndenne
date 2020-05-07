@@ -22,6 +22,7 @@
   <genericsetup:registerProfile
       name="andenne"
       title="PloneMeeting / For Andenne"
+      directory="profiles/andenne"
       description="PloneMeeting City College and Council of Andenne"
       provides="Products.GenericSetup.interfaces.EXTENSION"
       for="Products.CMFPlone.interfaces.IPloneSiteRoot"/>
