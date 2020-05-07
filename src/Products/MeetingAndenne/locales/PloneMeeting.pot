@@ -214,7 +214,7 @@ msgstr ""
 msgid "PloneMeeting_label_budgetInfos"
 msgstr ""
 
-#. Default: "Annexes (pv)"
+#. Default: "Signed documents"
 msgid "AnnexesPVShort"
 msgstr ""
 
@@ -252,11 +252,11 @@ msgid "This portlet shows mails."
 msgstr ""
 
 # Mails (item-related)
-#. Default: "${meetingConfigTitle} - ${meetingTitle} - An annex was just added to an item."
+#. Default: "${meetingConfigTitle} - ${meetingTitle} - A {itemType} was just added to an item."
 msgid "event_add_pv_annex_mail_subject"
 msgstr ""
 
-#. Default: "A ${itemType} has been added to the item '${itemTitle}' that is already closed. You can access this item here: ${objectUrl}."
+#. Default: "A ${itemType} has been added to the item '${itemTitle}' which you are in copy of.\n\r\n\rYou can access this item here: ${objectUrl}."
 msgid "event_add_pv_annex_mail_body"
 msgstr ""
 

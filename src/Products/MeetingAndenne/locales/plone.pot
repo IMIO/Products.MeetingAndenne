@@ -179,7 +179,7 @@ msgid "refuse_and_close"
 msgstr ""
 
 # Annexes
-#. Default: "Annexes (to the PV)"
+#. Default: "Signed documents"
 msgid "AnnexesPV"
 msgstr ""
 

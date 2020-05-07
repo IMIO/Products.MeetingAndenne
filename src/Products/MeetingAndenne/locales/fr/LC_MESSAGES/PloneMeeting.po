@@ -219,9 +219,9 @@ msgstr "Référence rappel (Vos références)"
 msgid "PloneMeeting_label_budgetInfos"
 msgstr "Données budgétaires"
 
-#. Default: "Annexes (pv)"
+#. Default: "Signed documents"
 msgid "AnnexesPVShort"
-msgstr "Annexes (après PV)"
+msgstr Documents signés"
 
 # Portlets
 #. Default: "create a mail"
@@ -257,13 +257,13 @@ msgid "This portlet shows mails."
 msgstr "Ce portlet affiche les contrôles employés pour la gestion des courriers."
 
 # Mails (item-related)
-#. Default: "${meetingConfigTitle} - ${meetingTitle} - An annex was just added to an item."
+#. Default: "${meetingConfigTitle} - ${meetingTitle} - A {itemType} was just added to an item."
 msgid "event_add_pv_annex_mail_subject"
-msgstr "${meetingConfigTitle} - ${meetingTitle} - Une annexe vient d'être ajoutée à un point."
+msgstr "${meetingConfigTitle} - ${meetingTitle} - Une {itemType} vient d'être ajoutée à un point."
 
-#. Default: "A ${itemType} has been added to the item '${itemTitle}' that is already closed. You can access this item here: ${objectUrl}."
+#. Default: "A ${itemType} has been added to the item '${itemTitle}' which you are in copy of.\n\r\n\rYou can access this item here: ${objectUrl}."
 msgid "event_add_pv_annex_mail_body"
-msgstr "Une ${itemType} a été ajoutée au point '${itemTitle}' alors qu'il est déjà clôturé. Accédez à ce point ici: ${objectUrl}."
+msgstr "Une ${itemType} a été ajoutée au point '${itemTitle}' pour lequel vous êtes en copie.\n\r\n\rAccédez à ce point ici: ${objectUrl}."
 
 # Presents
 #. Default: "This person has joined the meeting while discussing this item."

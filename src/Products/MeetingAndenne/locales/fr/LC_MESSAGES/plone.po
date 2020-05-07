@@ -185,9 +185,9 @@ msgid "refuse_and_close"
 msgstr "Clôturer le PV en écriture"
 
 # Annexes
-#. Default: "Annexes (to the PV)"
+#. Default: "Signed documents"
 msgid "AnnexesPV"
-msgstr "Annexes (après clôture)"
+msgstr "Documents signés"
 
 # User data
 #. Default: "Male"
