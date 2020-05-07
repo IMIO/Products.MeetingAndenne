@@ -15,6 +15,18 @@ msgstr ""
 msgid "hs_welcome_title"
 msgstr ""
 
+#. Default: "Welcome"
+msgid "front_page_title"
+msgstr ""
+
+#. Default: "ANDANA allows you to manage communal applications."
+msgid "front_page_description"
+msgstr ""
+
+#. Default: "<p>ANDANA body in HTML format.</p>"
+msgid "front_page_description"
+msgstr ""
+
 # CourrierFile
 #. Default: "Observations"
 msgid "CourrierFile_label_description"

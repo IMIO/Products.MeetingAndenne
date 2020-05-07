@@ -19,6 +19,18 @@ msgstr ""
 msgid "hs_welcome_title"
 msgstr "Bienvenue sur ANDANA!"
 
+#. Default: "Welcome"
+msgid "front_page_title"
+msgstr "Bienvenue"
+
+#. Default: "ANDANA allows you to manage communal applications."
+msgid "front_page_description"
+msgstr "ANDANA (Application Nouvelle De l'Administration Numérisée d'Andenne) permet de gérer des applicatifs communaux (courrier entrant, introduction de points, Ordre du jour, Pv,...)"
+
+#. Default: "<p>ANDANA body in HTML format.</p>"
+msgid "front_page_body"
+msgstr "Si vous n'êtes pas encore connecté, identifiez-vous avec la fenêtre d'identification à gauche, ensuite vous pourrez utiliser les onglets situés ci-dessus pour vous diriger dans l'application de votre choix"
+
 # CourrierFile
 #. Default: "Observations"
 msgid "CourrierFile_label_description"
