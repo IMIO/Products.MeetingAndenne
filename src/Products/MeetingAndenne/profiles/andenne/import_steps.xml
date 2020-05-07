@@ -2,7 +2,7 @@
 <import-steps>
  <import-step id="installMeetingAndenne" version="20080501-01"
               handler="Products.MeetingAndenne.setuphandlers.installMeetingAndenne"
-              title="Install MeetingAndenne.">
+              title="Install MeetingAndenne">
   Install MeetingAndenne.
  </import-step>
  <import-step id="initializetool-MeetingAndenne" version="20060707-01"
