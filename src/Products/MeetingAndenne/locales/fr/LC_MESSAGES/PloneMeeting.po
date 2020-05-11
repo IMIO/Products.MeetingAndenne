@@ -233,7 +233,7 @@ msgstr "Données budgétaires"
 
 #. Default: "Signed documents"
 msgid "AnnexesPVShort"
-msgstr Documents signés"
+msgstr "Documents signés"
 
 # Portlets
 #. Default: "create a mail"
