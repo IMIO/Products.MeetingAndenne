@@ -90,6 +90,10 @@ msgstr "Procès-verbal"
 msgid "late_presented_items"
 msgstr "Procès-verbal complémentaire"
 
+#. Default: "Meeting number since the beginning of this parliamentary term (sequence number automatically attributed)"
+msgid "MeetingAndenne_label_meetingNumberInParliamentaryTerm"
+msgstr "Numéro de séance depuis le début de cette législature (il s'agit d'un numéro de séquence attribué automatiquement)"
+
 #. Default: "Post observations"
 msgid "MeetingAndenne_label_postObservations"
 msgstr "Observations après séance"
@@ -116,6 +120,14 @@ msgstr "Réservé"
 msgid "init_item_decision_if_empty_on_decide"
 msgstr "Si cette case est cochée, lorsqu'une séance passera 'En rédaction du PV', pour tous les points dont le champ 'Décision' est vide, ce champ sera automatiquement rempli avec une concaténation de ce qui est défini dans le titre et la description du point."
 
+#. Default: "Within every meeting configuration, relating to a parliamentary term, meetings are numbered sequentially."
+msgid "last_meeting_number_in_parliamentary_term_descr"
+msgstr "Au sein de chaque configuration, relativement à une législature, les séances sont numérotées en séquence."
+
+#. Default: "Number of the last meeting in this config since the beginning of this parliamentary term"
+msgid "MeetingAndenne_label_lastMeetingNumberInParliamentaryTerm"
+msgstr "Numéro de la dernière séance de cette configuration depuis le début de cette législature"
+
 #. Default: "If you check this box, subcategories system will be activated. This system uses numbers higher than 100 to define categories"
 msgid "use_sub_categories_descr"
 msgstr "Si cette case est cochée, le système de sous-catégories sera activé. Ce système emploie des nombres supérieurs à 100 pour définir les catégories."
@@ -131,10 +143,6 @@ msgstr "Sélectionnez les groupes que le créateur d'un point pourra sélectionn
 #. Default: "Groups that can be associated for an item"
 msgid "MeetingAndenne_label_selectableAssociatedGroups"
 msgstr "Groupes qui pourront être associés"
-
-#. Default: "An annex was added to a closed item"
-msgid "event_add_pv_annex"
-msgstr "Une annexe a été ajoutée à un point clôturé"
 
 # MeetingFileType
 #. Default: "Item PV annex"
@@ -234,6 +242,10 @@ msgstr "Données budgétaires"
 #. Default: "Signed documents"
 msgid "AnnexesPVShort"
 msgstr "Documents signés"
+
+#. Default: "An annex was added to a closed item"
+msgid "event_add_pv_annex"
+msgstr "Une annexe a été ajoutée à un point clôturé"
 
 # Portlets
 #. Default: "create a mail"

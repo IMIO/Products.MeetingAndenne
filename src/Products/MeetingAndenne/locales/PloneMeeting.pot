@@ -85,6 +85,10 @@ msgstr ""
 msgid "late_presented_items"
 msgstr ""
 
+#. Default: "Meeting number since the beginning of this parliamentary term (sequence number automatically attributed)"
+msgid "MeetingAndenne_label_meetingNumberInParliamentaryTerm"
+msgstr ""
+
 #. Default: "Post observations"
 msgid "MeetingAndenne_label_postObservations"
 msgstr ""
@@ -111,6 +115,14 @@ msgstr ""
 msgid "init_item_decision_if_empty_on_decide"
 msgstr ""
 
+#. Default: "Within every meeting configuration, relating to a parliamentary term, meetings are numbered sequentially."
+msgid "last_meeting_number_in_parliamentary_term_descr"
+msgstr ""
+
+#. Default: "Number of the last meeting in this config since the beginning of this parliamentary term"
+msgid "MeetingAndenne_label_lastMeetingNumberInParliamentaryTerm"
+msgstr ""
+
 #. Default: "If you check this box, subcategories system will be activated. This system uses numbers higher than 100 to define categories"
 msgid "use_sub_categories_descr"
 msgstr ""
@@ -121,10 +133,6 @@ msgstr ""
 
 #. Default: "If you check this box, when a meeting will be decided, if an item does not have a decision defined, this decision will be automatically filled with title and description of the item"
 msgid "selectable_associated_groups_descr"
-msgstr ""
-
-#. Default: "An annex was added to a closed item"
-msgid "event_add_pv_annex"
 msgstr ""
 
 #. Default: "Select groups that the creator of an item will be able to choose"
@@ -228,6 +236,10 @@ msgstr ""
 
 #. Default: "Signed documents"
 msgid "AnnexesPVShort"
+msgstr ""
+
+#. Default: "An annex was added to a closed item"
+msgid "event_add_pv_annex"
 msgstr ""
 
 # Portlets

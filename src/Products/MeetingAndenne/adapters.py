@@ -2357,6 +2357,43 @@ class MeetingCollegeAndenneWorkflowActions(MeetingWorkflowActions):
     implements(IMeetingCollegeAndenneWorkflowActions)
     security = ClassSecurityInfo()
 
+    security.declarePrivate('initSequenceNumbers')
+    def initSequenceNumbers(self):
+        '''When a meeting is published (or frozen, depending on workflow
+           adaptations), we attribute him two sequence numbers.'''
+        cfg = self.context.portal_plonemeeting.getMeetingConfig(self.context)
+
+        if self.context.getMeetingNumberInParliamentaryTerm() == -1:
+            meetingNumberInParliamentaryTerm = cfg.getLastMeetingNumberInParliamentaryTerm() + 1
+            self.context.setMeetingNumberInParliamentaryTerm(meetingNumberInParliamentaryTerm)
+            cfg.setLastMeetingNumberInParliamentaryTerm(meetingNumberInParliamentaryTerm)
+
+        if self.context.getMeetingNumber() != -1:
+            return  # Already done.
+        if cfg.getYearlyInitMeetingNumber():
+            # I must reinit the meeting number to 0 if it is the first
+            # meeting of this year or the first meeting ever.
+            prev = self.context.getPreviousMeeting()
+            if prev == None or \
+               (prev.getDate().year() != self.context.getDate().year()):
+                self.context.setMeetingNumber(1)
+                cfg.setLastMeetingNumber(1)
+                return
+        # If we are here, we must simply increment the meeting number.
+        meetingNumber = cfg.getLastMeetingNumber()+1
+        self.context.setMeetingNumber(meetingNumber)
+        cfg.setLastMeetingNumber(meetingNumber)
+
+    security.declarePrivate('doPublish')
+    def doPublish(self, stateChange):
+        '''When publishing the meeting, initialize the sequence numbers.'''
+        self.initSequenceNumbers()
+
+    security.declarePrivate('doFreeze')
+    def doFreeze(self, stateChange):
+        '''When freezing the meeting, we initialize sequence numbers.'''
+        self.initSequenceNumbers()
+
 
 # ------------------------------------------------------------------------------
 class MeetingCollegeAndenneWorkflowConditions(MeetingWorkflowConditions):

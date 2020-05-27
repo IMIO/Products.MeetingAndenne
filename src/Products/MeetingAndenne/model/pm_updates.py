@@ -4,6 +4,8 @@ from Products.Archetypes.atapi import Schema
 from Products.Archetypes.atapi import BooleanField
 from Products.Archetypes.atapi import BooleanWidget
 from Products.Archetypes.atapi import DateTimeField
+from Products.Archetypes.atapi import IntegerField
+from Products.Archetypes.atapi import IntegerWidget
 from Products.Archetypes.atapi import LinesField
 from Products.Archetypes.atapi import MultiSelectionWidget
 from Products.Archetypes.atapi import RichWidget
@@ -183,21 +185,31 @@ MeetingItem.schema = update_item_schema(MeetingItem.schema)
 def update_meeting_schema(baseSchema):
     specificSchema = Schema((
 
-        TextField(
-            name='postObservations',
-            allowable_content_types=('text/html',),
-            widget=RichWidget(
-                condition="python: here.showObs('postObservations')",
-                rows=15,
-                label='Postobservations',
-                label_msgid='MeetingAndenne_label_postObservations',
-                i18n_domain='PloneMeeting',
+            IntegerField(
+                name='meetingNumberInParliamentaryTerm',
+                default=-1,
+                widget=IntegerField._properties['widget'](
+                    label='Meetingnumberinparliamentaryterm',
+                    label_msgid='MeetingAndenne_label_meetingNumberInParliamentaryTerm',
+                    i18n_domain='PloneMeeting',
+                ),
+                write_permission="Manage portal",
             ),
-            default_content_type="text/html",
-            default_output_type="text/x-html-safe",
-            optional=True,
+            TextField(
+                name='postObservations',
+                allowable_content_types=('text/html',),
+                widget=RichWidget(
+                    condition="python: here.showObs('postObservations')",
+                    rows=15,
+                    label='Postobservations',
+                    label_msgid='MeetingAndenne_label_postObservations',
+                    i18n_domain='PloneMeeting',
+                ),
+                default_content_type="text/html",
+                default_output_type="text/x-html-safe",
+                optional=True,
+            ),
         ),
-    ),
     )
 
     completeMeetingSchema = baseSchema + specificSchema.copy()
@@ -316,6 +328,18 @@ MeetingUser.schema = update_muser_schema(MeetingUser.schema)
 def update_config_schema(baseSchema):
     specificSchema = Schema((
 
+            IntegerField(
+                name='lastMeetingNumberInParliamentaryTerm',
+                default=0,
+                widget=IntegerField._properties['widget'](
+                    description="LastMeetingNumberInParliamentaryTerm",
+                    description_msgid="last_meeting_number_in_parliamentary_term_descr",
+                    label='Lastmeetingnumberinparliamentaryterm',
+                    label_msgid='MeetingAndenne_label_lastMeetingNumberInParliamentaryTerm',
+                    i18n_domain='PloneMeeting',
+                ),
+                write_permission=WriteRiskyConfig,
+            ),
             BooleanField(
                 name='useSubCategories',
                 default=False,

@@ -143,6 +143,29 @@ class Migrate_To_3_3_2(Migrator):
 
         logger.info('Done.')
 
+    def _addNewFieldsLastMeetingNumberInParliamentaryTerm(self):
+        '''Add a new field to MeetingConfig and Meeting objects used to number Meetings sequentially
+           relating to a parliamentary term'''
+        logger.info('Adding LastNumberInParliamentaryTerm field to every MeetingConfig and Meeting object...')
+
+        catalog = getToolByName(self.portal, 'portal_catalog')
+        for cfg in self.portal.portal_plonemeeting.objectValues('MeetingConfig'):
+            if cfg.id == 'courrierfake':
+                continue
+
+            if hasattr(cfg, 'lastMeetingNumberInParliamentaryTerm'):
+                continue
+
+            brains = catalog.searchResults(portal_type=cfg.getMeetingTypeName())
+            for brain in brains:
+                meeting = brain.getObject()
+                if not hasattr(meeting, 'meetingNumberInParliamentaryTerm'):
+                    item.meetingNumberInParliamentaryTerm = -1
+
+            cfg.lastMeetingNumberInParliamentaryTerm = 0
+
+        logger.info('Done.')
+
     def run(self):
         logger.info('Migrating to MeetingAndenne 3.3.2...')
         self._removeInitItemDecisionIfEmptyOnDecide()
@@ -151,6 +174,7 @@ class Migrate_To_3_3_2(Migrator):
         self._addPVAnnexesTypes()
         self._updateItemWorkflow()
         self._addPVAnnexEvent()
+        self._addNewFieldsLastMeetingNumberInParliamentaryTerm()
 
         self.finish()
 
@@ -165,6 +189,7 @@ def migrate(context):
        4)  Add MeetingItemTypes used with annexes on PVs
        5)  Reapply modified workflow on MeetingItems
        6)  Add a custom event to the list of item events that generates emails
+       7)  Add LastNumberInParliamentaryTerm field to every MeetingConfig and Meeting object
     '''
     Migrate_To_3_3_2(context).run()
 # ------------------------------------------------------------------------------
