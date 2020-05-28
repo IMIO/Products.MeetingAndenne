@@ -160,7 +160,7 @@ class Migrate_To_3_3_2(Migrator):
             for brain in brains:
                 meeting = brain.getObject()
                 if not hasattr(meeting, 'meetingNumberInParliamentaryTerm'):
-                    item.meetingNumberInParliamentaryTerm = -1
+                    meeting.meetingNumberInParliamentaryTerm = -1
 
             cfg.lastMeetingNumberInParliamentaryTerm = 0
 
