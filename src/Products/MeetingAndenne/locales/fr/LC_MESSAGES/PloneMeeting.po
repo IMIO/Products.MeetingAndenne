@@ -281,9 +281,9 @@ msgid "This portlet shows mails."
 msgstr "Ce portlet affiche les contrôles employés pour la gestion des courriers."
 
 # Mails (item-related)
-#. Default: "${meetingConfigTitle} - ${meetingTitle} - A {itemType} was just added to an item."
+#. Default: "${meetingConfigTitle} - ${meetingTitle} - A ${itemType} was just added to an item."
 msgid "event_add_pv_annex_mail_subject"
-msgstr "${meetingConfigTitle} - ${meetingTitle} - Une {itemType} vient d'être ajoutée à un point."
+msgstr "${meetingConfigTitle} - ${meetingTitle} - Une ${itemType} vient d'être ajoutée à un point."
 
 #. Default: "A ${itemType} has been added to the item '${itemTitle}' which you are in copy of.\n\r\n\rYou can access this item here: ${objectUrl}."
 msgid "event_add_pv_annex_mail_body"

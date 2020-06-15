@@ -65,6 +65,7 @@ from Products.MeetingAndenne.interfaces import \
 from Products.MeetingAndenne.config import MAIL_TYPES, PERSONNEL_CATEGORIES, SMALLEST_SUBCATEGORY
 from Products.MeetingAndenne.utils import *
 from Products.MeetingAndenne.SearcherAndenne import SearcherAndenne
+from Products.PloneMeeting import PMMessageFactory as _
 from Products.PloneMeeting.utils import checkPermission, getCustomAdapter, prepareSearchValue, \
                                         FakeMeetingUser
 from Products.PloneMeeting.model import adaptations

@@ -276,7 +276,7 @@ msgid "This portlet shows mails."
 msgstr ""
 
 # Mails (item-related)
-#. Default: "${meetingConfigTitle} - ${meetingTitle} - A {itemType} was just added to an item."
+#. Default: "${meetingConfigTitle} - ${meetingTitle} - A ${itemType} was just added to an item."
 msgid "event_add_pv_annex_mail_subject"
 msgstr ""
 
