@@ -2147,6 +2147,20 @@ class CustomMeetingFileAndenne(MeetingFile):
     MeetingFile.indexExtractedText = indexExtractedText
     # it'a a monkey patch because it's the only way to change the behaviour of the MeetingFile class
 
+    security.declarePublic('SearchableText')
+    def SearchableText(self):
+        ''' This method should extract text from the binary content of this object
+            and put it in the indexExtractedText index if tool.extractTextFromFiles is True.
+
+            However, as we use collective.documentviewer and SearchableText,
+            we have to monkey patch this function and always return an empty string.'''
+        if self.findRelatedTo() == 'item_pv':
+            return ''
+        super(MeetingFile, self).SearchableText()
+
+    MeetingFile.SearchableText = SearchableText
+    # it'a a monkey patch because it's the only way to change the behaviour of the MeetingFile class
+
 
 # ------------------------------------------------------------------------------
 class CustomMeetingFileTypeAndenne(MeetingFileType):
