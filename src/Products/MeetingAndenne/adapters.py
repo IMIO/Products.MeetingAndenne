@@ -2113,14 +2113,6 @@ class CustomMeetingFileAndenne(MeetingFile):
         # Call sub-product code if any
         self.adapted().onEdit(isCreated=True)
         # Add text-extraction-related attributes
-        # Should not do it and remove the object from the index if it's PV related.
-        if self.findRelatedTo() == 'item_pv':
-            catalog = getToolByName(self, 'portal_catalog')
-            catalog.uncatalog_object('/'.join(self.getPhysicalPath()))
-            annexType = self.getMeetingFileType(theRealObject=True).getName()
-            sendMailToCopyGroupsIfRelevant(self.getParent(), 'event_add_pv_annex',
-                mapping = { 'itemType': annexType, })
-            return
         rq = self.REQUEST
         self.needsOcr = rq.get('needs_ocr', None) is not None
         self.ocrLanguage = rq.get('ocr_language', None)

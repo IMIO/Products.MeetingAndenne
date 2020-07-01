@@ -104,6 +104,14 @@
         layer="Products.MeetingAndenne.interfaces.IMeetingAndenneLayer"
         permission="cmf.ManagePortal"/>
 
+    <!-- the cron job view that sends mails to groups in copy of PV annexes added today -->
+    <browser:view
+        for="Products.CMFPlone.interfaces.siteroot.IPloneSiteRoot"
+        name="send-annexespv-copygroups-mails"
+        class=".views.SendAnnexesPVCopyGroupsMails"
+        layer="Products.MeetingAndenne.interfaces.IMeetingAndenneLayer"
+        permission="cmf.ManagePortal"/>
+
     <!-- repair scripts to be sometimes run manually -->
     <browser:view
         for="Products.CMFPlone.interfaces.siteroot.IPloneSiteRoot"

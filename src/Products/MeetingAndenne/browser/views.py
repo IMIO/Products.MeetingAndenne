@@ -14,6 +14,7 @@ from collective.documentviewer.async import isConversion
 from zope.component import getUtility
 from collective.documentviewer.settings import GlobalSettings, Settings
 from Products.MeetingAndenne.config import CRON_BATCH_SIZE
+from Products.MeetingAndenne.utils import sendMailToCopyGroupsIfRelevant
 from os.path import join
 
 import os
@@ -275,6 +276,33 @@ class ParseConvertedFilesView(BrowserView):
                                 shutil.rmtree(uidpath)
                                 cpt += 1
         logger.info(str(cpt) + ' directories removed from the conversion results')
+
+class SendAnnexesPVCopyGroupsMails(BrowserView):
+    """
+      This is a view that is called as a task by Products.cron4plone.
+      It will be launched at 21:55 every day and will send mails to the groups in copy of
+      MeetingItems for which annexes PV have been added this day.
+    """
+    def __call__(self):
+        portal = api.portal.get()
+        catalog = portal.portal_catalog
+
+        logger.info('Sending mails linked to annexes on PV added today.')
+        now = DateTime()
+        start = DateTime(now.Date())
+        date_query = { 'query': start, 'range': 'min' }
+
+        annexCpt = 0
+        brains = catalog.searchResults(meta_type='MeetingFile', Date=date_query)
+        for brain in brains:
+            annex = brain.getObject()
+            if annex.findRelatedTo() == "item_pv":
+                annexCpt += 1
+                annexType = annex.getMeetingFileType(theRealObject=True).getName()
+                sendMailToCopyGroupsIfRelevant(annex.getParent(), 'event_add_pv_annex',
+                    mapping = { 'itemType': annexType, })
+
+        logger.info('mails sent about ' + str(annexCpt) + ' new annexes on PV')
 
 class RepairAnnexesView(BrowserView):
     """
