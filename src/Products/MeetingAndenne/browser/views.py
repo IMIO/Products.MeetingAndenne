@@ -4,6 +4,7 @@ from zope.annotation import IAnnotations
 from persistent.mapping import PersistentMapping
 from plone import api
 from plone.memoize.instance import memoize
+from Acquisition import aq_acquire
 from DateTime import DateTime
 from Products.Five import BrowserView
 from Products.CMFCore.utils import getToolByName
@@ -286,11 +287,16 @@ class SendAnnexesPVCopyGroupsMails(BrowserView):
     def __call__(self):
         portal = api.portal.get()
         catalog = portal.portal_catalog
+        tool = portal.portal_plonemeeting
 
         logger.info('Sending mails linked to annexes on PV added today.')
         now = DateTime()
         start = DateTime(now.Date())
         date_query = { 'query': start, 'range': 'min' }
+
+        # This is made to return links with correct URL as cron4plone tasks breaks the absolute_url machinery
+        request = aq_acquire(self, 'REQUEST')
+        request['SERVER_URL'] = tool.getPublicUrl()
 
         annexCpt = 0
         brains = catalog.searchResults(meta_type='MeetingFile', Date=date_query)
