@@ -662,22 +662,20 @@ class CustomMeetingAndenne(Meeting):
         return cfg.getCertifiedSignatures(computed=True)
 
     security.declarePublic('getStrikedAssembly')
-    def getStrikedAssembly(self, groupByDuty=True, strikefirst=True, strikemidle=True, strikelast=False, userepl=True):
+    def getStrikedAssembly(self, groupByDuty=True):
         '''
           Generates a HTML version of the assembly :
-          - strikes absents (represented using [[Member assembly name]])
+          - strikes absents (represented using [[Member assembly name]]) except the general director
           - add a 'mltAssembly' class to generated <p> so it can be used in the Pod Template
           If p_groupByDuty is True, the result will be generated with members having the same
           duty grouped, and the duty only displayed once at the end of the list of members
           having this duty...  This is only relevant if MeetingUsers are enabled.
         '''
         meeting = self.getSelf()
-        repl = meeting.getUserReplacements()
-        repl2 = []
-        repl3 = {}
-        for user in repl:
-            repl2.append (repl[user])
-            repl3[repl[user]] = user
+        userReplacements = meeting.getUserReplacements()
+        substitutes = {}
+        for user in userReplacements:
+            substitutes[userReplacements[user]] = user
         # either we use free textarea to define assembly...
         if meeting.getAssembly():
             tool = getToolByName(meeting, 'portal_plonemeeting')
@@ -685,76 +683,32 @@ class CustomMeetingAndenne(Meeting):
         # ... or we use MeetingUsers
         elif meeting.getAttendees():
             res = []
-            attendeeIds = meeting.getAttendees()
+            attendeesIds = meeting.getAttendees()
             groupedByDuty = OrderedDict()
-            m = 0
-            UsedMeetingUsers = [mUser for mUser in meeting.getAllUsedMeetingUsers(usages=['assemblyMember','signer', ])] # ADDED BY FABMAR : just added signer for rongos from original
-            UsedMeetingUsersMinusreplacedIds = [mUser.getId() for mUser in meeting.getAllUsedMeetingUsers(usages=['assemblyMember', 'signer', ]) if mUser.getId() not in repl2] # ADDED BY FABMAR
-            for mUser in UsedMeetingUsers:
-                ### ADDED BY FABMAR FROM ORIGINAL
+            usedMeetingUsers = [mUser for mUser in meeting.getAllUsedMeetingUsers(usages=['assemblyMember','signer', ])]
+            usedMeetingUsersMinusSubstitutesIds = [mUser.getId() for mUser in usedMeetingUsers if mUser.getId() not in substitutes]
+            for mUser in usedMeetingUsers:
                 userId = mUser.getId()
                 userTitle = mUser.Title()
                 userDuty = mUser.getDuty()
-                strikeme = True
-                deleteme = False
-                if userepl == True:
-                    # ce members est-il a remplacer?
-                    if userId in repl:
-                        # Oui, il est a remplacer
-                        # si on decide de barrer le membre, on ne va pas le faire remplacer, donc comportement par defaut, sinon, on essaye ou pas de trouver un remplaçant
-                        if not ( (strikefirst == True and UsedMeetingUsersMinusreplacedIds.index(userId) == 0) \
-                                 or (strikemidle == True and UsedMeetingUsersMinusreplacedIds.index(userId) > 0 and UsedMeetingUsersMinusreplacedIds.index(userId) < len(UsedMeetingUsersMinusreplacedIds) - 1) \
-                                 or (strikelast == True and UsedMeetingUsersMinusreplacedIds.index(userId) == len(UsedMeetingUsersMinusreplacedIds) - 1)):
-                            # on remplace le membre car on a pas décidé de le barrer, sinon comportement par defaut
-                            userDuty = mUser.getReplacementDuty()
-                            mUser = [mU for mU in UsedMeetingUsers if mU.getId() == repl[userId]][0]            
-                            strikeme = False
+                if userId not in attendeesIds and userId == usedMeetingUsersMinusSubstitutesIds[-1]:
+                    continue
+                if userId in substitutes:
+                    substitutedId = substitutes[userId]
+                    userDuty = [mUser.getReplacementDuty() for mUser in usedMeetingUsers if mUser.getId() == substitutedId][0]
 
-                            userId = mUser.getId()
-                            userTitle = mUser.Title()
+                if groupByDuty:
+                    if not userDuty in groupedByDuty:
+                        groupedByDuty[userDuty] = []
+                    if userId in attendeesIds:
+                        groupedByDuty[userDuty].append(userTitle)
                     else:
-                        # ce membre n'est pas à remplacer mais peut-être qu'il remplace quelqu'un qu'on n'a pas décidé de ne pas barrer (dans quel cas , il ne faut plus le faire apparaitre)
-                        if userId in repl2 and not ((strikefirst == True and UsedMeetingUsersMinusreplacedIds.index(repl3[userId]) == 0) \
-                                                    or (strikemidle == True and UsedMeetingUsersMinusreplacedIds.index(repl3[userId]) > 0 and UsedMeetingUsersMinusreplacedIds.index(repl3[userId]) < len(UsedMeetingUsersMinusreplacedIds)-1) \
-                                                    or (strikelast == True and UsedMeetingUsersMinusreplacedIds.index(repl3[userId]) == len(UsedMeetingUsersMinusreplacedIds)-1)):
-                            deleteme = True 
-                        else:
-                            # ce membre n'est pas à remplacer et il ne remplace personne, on va juste verifier si il doit être barré ou pas
-                            if not ((strikefirst == True and m == 0) or (strikemidle == True and m > 0 and m < len(UsedMeetingUsers)-1) or (strikelast == True and m == len(UsedMeetingUsers) - 1)):
-                                # on n'a pas décidé de barrer donc il faut uniquement supprimer la personne sinon on a décidé de barrer le membre, c'est le comportement par défaut, on ne fait rien
-                                if not userId in attendeeIds: # il faut juste verifier qu'il est bien absent avant de l'enlever
-                                    deleteme = True
+                        groupedByDuty[userDuty].append("<strike>%s</strike>" % userTitle)
                 else:
-                    # il n'y a pas de remplacement, on regarde juste si on barre ou pas
-                    if not ((strikefirst == True and m == 0) or (strikemidle == True and m > 0 and m < len(UsedMeetingUsers)-1) \
-                            or (strikelast == True and m == len(UsedMeetingUsers) - 1)):
-                        # on n'a pas décidé de barrer donc il faut uniquement supprimer la personne sinon on a décidé de barrer le membre, c'est le comportement par défaut, on ne fait rien
-                        if not userId in attendeeIds: # il faut juste verifier qu'il est bien absent avant de l'enlever
-                            deleteme = True
-                #### END ADDED BY FABMAR
-
-                # if we group by duty, create an OrderedDict where the key is the duty
-                # and the value is a list of meetingUsers having this duty
-                if not deleteme: ### ADDED BY FABMAR
-                    if groupByDuty:
-                        if not userDuty in groupedByDuty:
-                            groupedByDuty[userDuty] = []
-                        if userId in attendeeIds:
-                            groupedByDuty[userDuty].append(mUser.Title())
-                        else:
-                            if strikeme:  #### ADDED BY FABMAR
-                                groupedByDuty[userDuty].append("<strike>%s</strike>" % userTitle)
-                            else:
-                                groupedByDuty[userDuty].append(mUser.Title())
+                    if userId in attendeesIds:
+                        res.append("%s, %s" % (userTitle, userDuty))
                     else:
-                        if userId in attendeeIds:
-                            res.append("%s, %s" % (mUser.Title(), userDuty))
-                        else:
-                            if strikeme:  #### ADDED BY FABMAR
-                                res.append("<strike>%s, %s</strike>" % (mUser.Title(), userDuty))
-                            else:
-                                res.append("%s, %s" % (mUser.Title(), userDuty))
-                m = m + 1
+                        res.append("<strike>%s, %s</strike>" % (userTitle, userDuty))
             if groupByDuty:
                 for duty in groupedByDuty:
                     # check if every member of given duty are striked, we strike the duty also
@@ -1022,7 +976,82 @@ class CustomMeetingItemAndenne(MeetingItem):
         return res[pos].getDuty()
 
     security.declarePublic('getStrikedItemAssembly')
-    def getStrikedItemAssembly(self, groupByDuty=True, strikefirst=True, strikemidle=True, strikelast=False, userepl=True):
+    def getStrikedItemAssembly(self, groupByDuty=True):
+        '''
+          Generates a HTML version of the assembly :
+          - strikes absents (represented using [[Member assembly name]]) except the general director
+          - add a 'mltAssembly' class to generated <p> so it can be used in the Pod Template
+          If p_groupByDuty is True, the result will be generated with members having the same
+          duty grouped, and the duty only displayed once at the end of the list of members
+          having this duty...  This is only relevant if MeetingUsers are enabled.
+        '''
+        import pdb; pdb.set_trace()
+        item = self.getSelf()
+        # either we use free textarea to define assembly...
+        if item.getAssembly():
+            tool = getToolByName(item, 'portal_plonemeeting')
+            return tool.toHTMLStrikedContent(item.getItemAssembly())
+        # ... or we use MeetingUsers
+        elif item.getAttendees():
+            res = []
+            meeting = item.getMeeting()
+            userReplacements = meeting.getUserReplacements()
+            substitutes = {}
+            for user in userReplacements:
+                substitutes[userReplacements[user]] = user
+
+            # Still something bad here as attendee.isPresent doesn't take itemPresents into account...
+            attendees = meeting.getAttendees(True)
+            attendeesIds = []
+            for attendee in attendees:
+                if attendee.isPresent(self.context, meeting) or attendee.getId() in self.context.getItemPresents():
+                    attendeesIds.append(attendee.getId())
+
+            groupedByDuty = OrderedDict()
+            usedMeetingUsers = [mUser for mUser in meeting.getAllUsedMeetingUsers(usages=['assemblyMember','signer', ])]
+            usedMeetingUsersMinusSubstitutesIds = [mUser.getId() for mUser in usedMeetingUsers if mUser.getId() not in substitutes]
+            for mUser in usedMeetingUsers:
+                userId = mUser.getId()
+                userTitle = mUser.Title()
+                userDuty = mUser.getDuty()
+                if userId not in attendeesIds and userId == usedMeetingUsersMinusSubstitutesIds[-1]:
+                    continue
+                if userId in substitutes:
+                    substitutedId = substitutes[userId]
+                    userDuty = [mUser.getReplacementDuty() for mUser in usedMeetingUsers if mUser.getId() == substitutedId][0]
+
+                if groupByDuty:
+                    if not userDuty in groupedByDuty:
+                        groupedByDuty[userDuty] = []
+                    if userId in attendeesIds:
+                        groupedByDuty[userDuty].append(userTitle)
+                    else:
+                        groupedByDuty[userDuty].append("<strike>%s</strike>" % userTitle)
+                else:
+                    if userId in attendeesIds:
+                        res.append("%s, %s" % (userTitle, userDuty))
+                    else:
+                        res.append("<strike>%s, %s</strike>" % (userTitle, userDuty))
+            if groupByDuty:
+                for duty in groupedByDuty:
+                    # check if every member of given duty are striked, we strike the duty also
+                    everyStriked = True
+                    for elt in groupedByDuty[duty]:
+                        if not elt.startswith('<strike>'):
+                            everyStriked = False
+                            break
+                    res.append(', '.join(groupedByDuty[duty]) + ', ' + duty)
+                    if len(groupedByDuty[duty]) > 1:
+                        # add a trailing 's' to the duty if several members have the same duty...
+                        res[-1] = res[-1] + 's'
+                    if everyStriked:
+                        lastAdded = res[-1]
+                        # strike the entire line and remove existing <strike> tags
+                        lastAdded = "<strike>" + lastAdded.replace('<strike>', '').replace('</strike>', '') + \
+                                    "</strike>"
+                        res[-1] = lastAdded
+            return "<p class='mltAssembly'>" + '<br />'.join(res) + "</p>"
+
         '''
           Generates a HTML version of the assembly :
           - strikes absents (represented using [[Member assembly name]])
