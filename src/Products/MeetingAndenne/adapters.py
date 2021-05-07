@@ -775,6 +775,41 @@ class CustomMeetingAndenne(Meeting):
                         res[-1] = lastAdded
             return "<p class='mltAssembly'>" + '<br />'.join(res) + "</p>"
 
+    security.declarePublic('getAttendeesForPrinting')
+    def getAttendeesForPrinting(self, groupByDuty=True):
+        '''
+          Generates a HTML version of the attendees in a Meeting.
+        '''
+        meeting = self.getSelf()
+        # either we use free textarea to define assembly...
+        if meeting.getAssembly():
+            tool = getToolByName(meeting, 'portal_plonemeeting')
+            return tool.toHTMLStrikedContent(meeting.getAssembly())
+        # ... or we use MeetingUsers
+        elif meeting.getAttendees():
+            res = []
+            attendees = meeting.getAttendees(theObjects = True, includeReplacements = True)
+            groupedByDuty = OrderedDict()
+
+            for mUser in attendees:
+                userId = mUser.getId()
+                userTitle = mUser.Title()
+                userDuty = mUser.getDuty()
+                if groupByDuty:
+                    if not userDuty in groupedByDuty:
+                        groupedByDuty[userDuty] = []
+                    groupedByDuty[userDuty].append(mUser.Title())
+                else:
+                    res.append("%s, %s" % (mUser.Title(), userDuty))
+
+            if groupByDuty:
+                for duty in groupedByDuty:
+                    res.append(', '.join(groupedByDuty[duty]) + ', ' + duty)
+                    if len(groupedByDuty[duty]) > 1:
+                        # add a trailing 's' to the duty if several members have the same duty...
+                        res[-1] = res[-1] + 's'
+            return "<p class='mltAssembly'>" + '<br />'.join(res) + "</p>"
+
     security.declarePublic('getAbsentsForPrinting') 
     def getAbsentsForPrinting(self):
         '''Generates a HTML version of absents in a Meeting.'''
