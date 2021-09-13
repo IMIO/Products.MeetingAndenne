@@ -631,6 +631,21 @@ class CustomMeetingAndenne(Meeting):
     Meeting.getDisplayableName = getDisplayableName
     # it'a a monkey patch because it's the only way to add a behaviour to the Meeting class
 
+    security.declarePublic('getMeetingNumberForPrinting')
+    def getMeetingNumberForPrinting(self):
+        '''Formats the meeting number in the way it is printed in templates.'''
+        meeting = self.getSelf()
+        return "N° " + str(meeting.getDate().year()) + "/" + str(meeting.getMeetingNumber())
+
+    security.declarePublic('getMeetingNumberInParliamentaryTermForPrinting')
+    def getMeetingNumberInParliamentaryTermExponentForPrinting(self):
+        '''Formats the meeting number in parliamentary term in the way it is printed in templates.'''
+        meeting = self.getSelf()
+        number = meeting.getMeetingNumberInParliamentaryTerm()
+        if number == 1:
+            return "ère"
+        return "ème"
+
     security.declarePublic('getSignatoriesForPrinting')
     def getSignatoriesForPrinting (self, pos=0, level=0, useforpv=False, userepl=True):
         '''Gets the signatories to be printed in templates. Position is linked to the different signatories.
