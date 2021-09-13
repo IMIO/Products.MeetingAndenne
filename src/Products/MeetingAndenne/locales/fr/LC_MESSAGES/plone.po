@@ -25,8 +25,8 @@ msgstr "Courrier"
 msgid "MeetingCollege"
 msgstr "Séance du Collège communal"
 
-#. Default: "Meetingcons"
-msgid "Meetingcons"
+#. Default: "MeetingCouncil"
+msgid "MeetingCouncil"
 msgstr "Séance du Conseil communal"
 
 #. Default: "Meetingcd"
@@ -42,8 +42,8 @@ msgstr "Rapport du Collège au Conseil"
 msgid "MeetingItemCollege"
 msgstr "Point Collège communal"
 
-#. Default: "MeetingItemcons"
-msgid "MeetingItemcons"
+#. Default: "MeetingItemCouncil"
+msgid "MeetingItemCouncil"
 msgstr "Point Conseil communal"
 
 #. Default: "MeetingItemcd"

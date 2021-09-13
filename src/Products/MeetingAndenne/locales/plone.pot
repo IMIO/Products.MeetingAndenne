@@ -24,8 +24,8 @@ msgstr ""
 msgid "MeetingCollege"
 msgstr ""
 
-#. Default: "Meetingcons"
-msgid "Meetingcons"
+#. Default: "MeetingCouncil"
+msgid "MeetingCouncil"
 msgstr ""
 
 #. Default: "MeetingItemcd"
@@ -36,8 +36,8 @@ msgstr ""
 msgid "MeetingItemCollege"
 msgstr ""
 
-#. Default: "MeetingItemcons"
-msgid "MeetingItemcons"
+#. Default: "MeetingItemCouncil"
+msgid "MeetingItemCouncil"
 msgstr ""
 
 #. Default: "MeetingItemrcc"
