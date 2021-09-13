@@ -1564,6 +1564,33 @@ class CustomMeetingItemAndenne(MeetingItem):
     MeetingItem.onWelcomePerson = onWelcomePerson
     # it'a a monkey patch because it's the only way to change the behaviour of the MeetingItem class
 
+    security.declarePublic('mayAskEmergency')
+    def mayAskEmergency(self):
+        '''Returns True if current user may ask emergency for an item.'''
+        # in our case, only MeetingManagers may ask emergency
+        item = self.getSelf()
+        if item.isDefinedInTool():
+            return False
+
+        tool = getToolByName(item, 'portal_plonemeeting')
+        membershipTool = getToolByName(item, 'portal_membership')
+        member = membershipTool.getAuthenticatedMember()
+        if tool.isManager(item) and member.has_permission(ModifyPortalContent, item):
+            return True
+        return False
+
+    security.declarePublic('mayAcceptOrRefuseEmergency')
+    def mayAcceptOrRefuseEmergency(self):
+        '''Returns True if current user may accept or refuse emergency if asked for an item.'''
+        # in our case, only MeetingManagers can accept or refuse emergency
+        item = self.getSelf()
+        tool = getToolByName(item, 'portal_plonemeeting')
+        membershipTool = getToolByName(item, 'portal_membership')
+        member = membershipTool.getAuthenticatedMember()
+        if tool.isManager(item) and member.has_permission(ModifyPortalContent, item):
+            return True
+        return False
+
     security.declarePublic('getExtraFieldsToCopyWhenCloning')
     def getExtraFieldsToCopyWhenCloning(self, cloned_to_same_mc):
         '''Lists the fields to keep when cloning an item'''
