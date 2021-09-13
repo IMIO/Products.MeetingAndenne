@@ -152,6 +152,9 @@ def update_item_schema(baseSchema):
     completeItemSchema['budgetInfos'].widget.rows=12
     completeItemSchema['itemSignatories'].optional=True
     completeItemSchema['proposingGroup'].default_method="getDefaultProposingGroup"
+    completeItemSchema['notes'].read_permission="PloneMeeting: Read item observations"
+    completeItemSchema['notes'].write_permission="PloneMeeting: Write item observations"
+    completeItemSchema['votesAreSecret'].default=True
 
 
     completeItemSchema['category'].widget=DynatreeWidget(
