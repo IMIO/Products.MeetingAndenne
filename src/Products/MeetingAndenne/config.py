@@ -60,6 +60,8 @@ PMconfig.MEETING_GROUP_SUFFIXES = PMconfig.MEETINGROLES.keys()
 PMconfig.DEFAULT_COPIED_FIELDS = ['title', 'detailedDescription', 'motivation', 'decision', 'budgetInfos', \
                                   'budgetRelated', 'privacy', 'sendToAuthority', 'refdoc', 'yourrefdoc', \
                                   'projetpv', 'textpv', 'pv']
+PMconfig.ITEM_COMPLETENESS_EVALUATORS = ('MeetingManager', 'Manager')
+PMconfig.ITEM_COMPLETENESS_ASKERS = ('MeetingManager', 'Manager')
 
 # Mail types static define
 MAIL_TYPES = DisplayList((

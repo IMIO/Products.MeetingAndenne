@@ -910,6 +910,12 @@ class CustomMeetingItemAndenne(MeetingItem):
         item = self.getSelf()
         # Default PM item icons
         res = MeetingItem.getIcons(item, inMeeting, meeting)
+        # display an icon if completeness yes/no
+        itemCompleteness = item.getCompleteness()
+        if itemCompleteness == 'completeness_complete':
+            res.append(('completeness_complete.png', 'completeness_complete'))
+        elif itemCompleteness == 'completeness_incomplete':
+            res.append(('completeness_incomplete.png', 'completeness_incomplete'))
         # Add our icons for accepted_but_modified and pre_accepted
         itemState = item.queryState()
         if itemState == 'accepted_but_modified':
