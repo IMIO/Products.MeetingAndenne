@@ -1008,7 +1008,6 @@ class CustomMeetingItemAndenne(MeetingItem):
           duty grouped, and the duty only displayed once at the end of the list of members
           having this duty...  This is only relevant if MeetingUsers are enabled.
         '''
-        import pdb; pdb.set_trace()
         item = self.getSelf()
         # either we use free textarea to define assembly...
         if item.getAssembly():
