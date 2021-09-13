@@ -67,7 +67,7 @@ from Products.MeetingAndenne.utils import *
 from Products.MeetingAndenne.SearcherAndenne import SearcherAndenne
 from Products.PloneMeeting import PMMessageFactory as _
 from Products.PloneMeeting.utils import checkPermission, getCustomAdapter, prepareSearchValue, \
-                                        FakeMeetingUser
+                                        FakeMeetingUser, weekdaysIds
 from Products.PloneMeeting.model import adaptations
 from Products.PloneMeeting.model.adaptations import WF_DOES_NOT_EXIST_WARNING, WF_APPLIED
 from DateTime import DateTime
@@ -602,29 +602,28 @@ class CustomMeetingAndenne(Meeting):
         return res
 
     security.declarePublic('getDisplayableName')
-    def getDisplayableName(self, withHour=True, uppercase=False):
+    def getDisplayableName(self, withHour=True, uppercase=False, withDOW=False):
         '''Formats the name of a meeting in the way it is printed in templates.'''
         meeting = self.getSelf()
+        date = meeting.getDate()
+        res = ''
+
+        if withDOW:
+            dow = translate(weekdaysIds[date.dow()], domain='plonelocales',
+                            target_language=getToolByName(self.context, 'portal_languages').getPreferredLanguage())
+            res = dow.lower() + ' '
+
         if not withHour:
-            res = meeting.portal_plonemeeting.formatMeetingDate(meeting=meeting, withHour=withHour)
-            if uppercase:
-                return res.upper()
-            return res
-
-        if meeting.__class__.__name__ == 'mybrains':
-            # It is a meeting brain, take the 'date_attr' metadata
-            date = getattr(meeting, 'getDate')
+            res += meeting.portal_plonemeeting.formatMeetingDate(meeting=meeting, withHour=withHour)
         else:
-            # received meeting is a Meeting instance
-            date = getattr(meeting, 'getDate')()
+            # Get the format for the rendering of p_aDate
+            if date._hour or date._minute :
+                fmt = ' (%-H:%-M)'
+                h = date.strftime(fmt)
+            else:
+                h = ''
+            res += meeting.portal_plonemeeting.formatMeetingDate(meeting=meeting, withHour=False) + h
 
-        # Get the format for the rendering of p_aDate
-        if date._hour or date._minute :
-            fmt = ' (%Hh%M)'
-            h = date.strftime(fmt)
-        else:
-            h = ''
-        res = meeting.portal_plonemeeting.formatMeetingDate(meeting=meeting, withHour=False) + h
         if uppercase:
             return res.upper()
         return res
