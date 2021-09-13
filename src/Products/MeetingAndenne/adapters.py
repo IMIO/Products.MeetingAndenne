@@ -778,12 +778,21 @@ class CustomMeetingAndenne(Meeting):
                         res[-1] = res[-1] + 's'
             return "<p class='mltAssembly'>" + '<br />'.join(res) + "</p>"
 
-    security.declarePublic('getAbsentsForPrinting') 
-    def getAbsentsForPrinting(self):
+    security.declarePublic('getAbsentsForPrinting')
+    def getAbsentsForPrinting(self, absenceType='*'):
         '''Generates a HTML version of absents in a Meeting.'''
         meeting = self.getSelf()
         res = ''
-        absents = meeting.getAbsents(theObjects = True) + meeting.getExcused(theObjects = True)
+        if absenceType not in ('*', 'absents', 'excused'):
+            return res
+
+        if absenceType == '*':
+            absents = meeting.getAbsents(theObjects = True) + meeting.getExcused(theObjects = True)
+        elif absenceType == 'absents':
+            absents = meeting.getAbsents(theObjects = True)
+        else:
+            absents = meeting.getExcused(theObjects = True)
+
         if absents:
             res = "<p class='mltAssembly'>"
             for user in absents:
