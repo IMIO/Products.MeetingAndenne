@@ -60,6 +60,14 @@ class Migrate_To_3_3_2(Migrator):
 
                 for template in collegeTemplates:
                     cfg.addPodTemplate(template, mcProfilePath)
+            elif cfg.id == 'meeting-config-council':
+                templatesIds = cfg.podtemplates.keys()
+                if len(templatesIds) > 0:
+                    ids = list(templatesIds)
+                    cfg.podtemplates.manage_delObjects(ids)
+
+                for template in councilTemplates:
+                    cfg.addPodTemplate(template, mcProfilePath)
 
         logger.info('Done.')
 
@@ -122,7 +130,7 @@ class Migrate_To_3_3_2(Migrator):
         mcProfilePath = [profile for profile in self.context.listProfileInfo() if 'id' in profile
                          and profile['id'] == u'Products.MeetingAndenne:andenne'][0]['path']
         for cfg in self.portal.portal_plonemeeting.objectValues('MeetingConfig'):
-            if cfg.id != 'meeting-config-college':
+            if cfg.id not in ('meeting-config-college', 'meeting-config-council'):
                 continue
             for mft in mfts:
                 if not hasattr(aq_base(cfg.meetingfiletypes), mft.id):
@@ -152,7 +160,7 @@ class Migrate_To_3_3_2(Migrator):
         logger.info('Adding a custom event to the list of item events that generates emails...')
 
         for cfg in self.portal.portal_plonemeeting.objectValues('MeetingConfig'):
-            if cfg.id != 'meeting-config-college':
+            if cfg.id not in ('meeting-config-college', 'meeting-config-council'):
                 continue
             itemEvents = list(cfg.getMailItemEvents())
             if not 'event_add_pv_annex' in itemEvents:
