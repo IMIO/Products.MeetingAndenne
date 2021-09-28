@@ -618,7 +618,7 @@ class CustomMeetingAndenne(Meeting):
         else:
             # Get the format for the rendering of p_aDate
             if date._hour or date._minute :
-                fmt = ' (%-H:%-M)'
+                fmt = ' (%-Hh%-M)'
                 h = date.strftime(fmt)
             else:
                 h = ''
