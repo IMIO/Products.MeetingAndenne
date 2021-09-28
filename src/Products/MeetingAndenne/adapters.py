@@ -803,6 +803,170 @@ class CustomMeetingAndenne(Meeting):
 
     ##### Taken from MeetingCommunes CustomMeeting adapter ##################
 
+    security.declarePublic('getPrintableItemsByCategory')
+    def getPrintableItemsByCategory(self, itemUids=[], late=False, privacy='*',
+                                    categories=[], excludedCategories=[],
+                                    onlyEmergencies=False):
+        '''Returns a list of (late or normal or both) items (depending on p_late)
+           ordered by privacy and category.
+           p_privacy is a filter  Items being in a state whose name is in
+           p_ignore_review_state will not be included in the result.
+           If p_by_proposing_group is True, items are grouped by proposing group
+           within every category. In this case, specifying p_group_prefixes will
+           allow to consider all groups whose acronym starts with a prefix from
+           this param prefix as a unique group. p_group_prefixes is a dict whose
+           keys are prefixes and whose values are names of the logical big
+           groups. A privacy,A toDiscuss and oralQuestion can also be given, the item is a
+           toDiscuss (oralQuestion) or not (or both) item.
+           If p_forceCategOrderFromConfig is True, the categories order will be
+           the one in the config and not the one from the meeting.
+           If p_groupIds are given, we will only consider these proposingGroups.
+           If p_includeEmptyCategories is True, categories for which no
+           item is defined are included nevertheless. If p_includeEmptyGroups
+           is True, proposing groups for which no item is defined are included
+           nevertheless.Some specific categories can be given or some categories to exclude.
+           These 2 parameters are exclusive.  If renumber is True, a list of tuple
+           will be return with first element the number and second element, the item.
+           In this case, the firstNumber value can be used.'''
+        # The result is a list of lists, where every inner list contains:
+        # - at position 0: the category object (MeetingCategory or MeetingGroup)
+        # - at position 1 to n: the items in this category
+        # If by_proposing_group is True, the structure is more complex.
+        # late can be 'both' or False or True
+        # oralQuestion can be 'both' or False or True
+        # toDiscuss can be 'both' or 'False' or 'True'
+        # privacy can be '*' or 'public' or 'secret'
+        # Every inner list contains:
+        # - at position 0: the category object
+        # - at positions 1 to n: inner lists that contain:
+        #   * at position 0: the proposing group object
+        #   * at positions 1 to n: the items belonging to this group.
+        def _comp(v1, v2):
+            if v1[0].getOrder(onlySelectable=False) < v2[0].getOrder(onlySelectable=False):
+                return -1
+            elif v1[0].getOrder(onlySelectable=False) > v2[0].getOrder(onlySelectable=False):
+                return 1
+            else:
+                return 0
+
+        def _getPresentCategories(items):
+            cats = { 'public': set(),
+                     'secret': set()
+                   }
+
+            if items:
+                for item in items:
+                    itemPrivacy = item.getPrivacy()
+                    cats[itemPrivacy].add(item.getCategory(theObject=True))
+            return cats
+
+        def _insertViewableItems(items=[], res={}, highestItemNumberPerCat={},
+                                 itemUids=[], categories=[], excludedCategories=[],
+                                 addItems=True, onlyEmergencies=False):
+            if items:
+                for item in items:
+                    currentCat = item.getCategory(theObject=True)
+                    itemPrivacy = item.getPrivacy()
+                    if currentCat.id not in highestItemNumberPerCat[itemPrivacy]:
+                        highestItemNumberPerCat[itemPrivacy][currentCat.id] = 0
+                    highestItemNumberPerCat[itemPrivacy][currentCat.id] += 1
+
+                    # Add category if it doesn't already exists.
+                    catExists = False
+                    for catList in res[itemPrivacy]:
+                        if catList[0] == currentCat:
+                            catExists = True
+                            break
+                    if not catExists:
+                        res[itemPrivacy].append([currentCat, 0, []])
+                        catList = res[itemPrivacy][-1]
+
+                    if addItems:
+                        if itemUids and item.UID() not in itemUids:
+                            continue
+                        if not user.has_permission("View", item):
+                            continue
+                        if categories and not item.getCategory() in categories:
+                            continue
+                        if excludedCategories and item.getCategory() in excludedCategories:
+                            continue
+                        if onlyEmergencies and item.emergency != 'emergency_accepted':
+                            continue
+
+                        # Add the item to a category list if it has passed all filters.
+                        catList[2].append([item, highestItemNumberPerCat[itemPrivacy][currentCat.id]])
+
+        res = { 'public': [],
+                'secret': []
+              }
+        items = []
+        itemsLate = []
+        tool = getToolByName(self.context, 'portal_plonemeeting')
+        membershipTool = getToolByName(self.context, 'portal_membership')
+        user = membershipTool.getAuthenticatedMember()
+
+        # Retrieve the list of items
+        for elt in itemUids:
+            if elt == '':
+                itemUids.remove(elt)
+        items = self.context.getItemsInOrder(late=False)
+        itemsLate = self.context.getItemsInOrder(late=True)
+
+        # Compute sets of categories
+        catsNotLate = _getPresentCategories(items)
+        catsOnlyLate = _getPresentCategories(itemsLate)
+        catsOnlyLate['public'] -= catsNotLate['public']
+        catsOnlyLate['secret'] -= catsNotLate['secret']
+        highestItemNumberPerCat = { 'public': {},
+                                    'secret': {}
+                                  }
+
+        addItems = True
+        if late == True:
+            addItems = False
+        _insertViewableItems(items, res, highestItemNumberPerCat,
+                             itemUids, categories, excludedCategories, addItems, onlyEmergencies)
+
+        if late != False and itemsLate:
+            _insertViewableItems(itemsLate, res, highestItemNumberPerCat,
+                                 itemUids, categories, excludedCategories,
+                                 onlyEmergencies=onlyEmergencies)
+
+        res['public'].sort(cmp=_comp)
+        res['secret'].sort(cmp=_comp)
+
+        multiplyingAdverbs = ['bis', 'ter', 'quater', 'quinquies', 'sexies', 'septies',
+                              'octies', 'nonies', 'decies']
+        latestCatNum = 0
+        latestMultiple = 0
+        for catList in res['public']:
+            if catList[0] in catsOnlyLate['public']:
+                catList[1] = str(latestCatNum) + multiplyingAdverbs[latestMultiple]
+                latestMultiple += 1
+            else:
+                latestCatNum += 1
+                latestMultiple = 0
+                catList[1] = str(latestCatNum)
+        for catList in res['secret']:
+            if catList[0] in catsOnlyLate['secret']:
+                catList[1] = str(latestCatNum) + multiplyingAdverbs[latestMultiple]
+                latestMultiple += 1
+            else:
+                latestCatNum += 1
+                latestMultiple = 0
+                catList[1] = str(latestCatNum)
+
+        # Remove unpopulated categories
+        res['public'] = [catList for catList in res['public'] if len(catList[2]) > 0]
+        res['secret'] = [catList for catList in res['secret'] if len(catList[2]) > 0]
+
+        if privacy == 'public':
+            return res['public']
+        elif privacy == 'secret':
+            return res['secret']
+
+        return res
+
     security.declarePublic('getPrintableItemsByNumCategory')
     def getPrintableItemsByNumCategory(self, late=False, uids=[],
                                        catstoexclude=[], exclude=True, allItems=False):
