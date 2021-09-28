@@ -29,8 +29,25 @@ from Products.cron4plone.browser.configlets.cron_configuration import ICronConfi
 from Products.PloneMeeting.exportimport.content import ToolInitializer
 from Products.PloneMeeting.model.adaptations import performWorkflowAdaptations
 from Products.PloneMeeting.config import TOOL_FOLDER_POD_TEMPLATES
+from imio.helpers.catalog import addOrUpdateIndexes
+from imio.helpers.catalog import addOrUpdateColumns
 
 noSearchTypes = ('MeetingCfake', 'MeetingItemCfake', )
+# Indexes used by MeetingAndenne
+indexInfos = {
+                # CourrierFile-related indexes
+                'getDestGroups': ( 'KeywordIndex', {} ),
+                'getDestOrigin': ( 'ZCTextIndex', {} ),
+                'getDestUsers': ( 'KeywordIndex', {} ),
+                'getRefcourrier': ( 'FieldIndex', {} ),
+                'getTypecourrier': ( 'FieldIndex', {} ),
+                'sortable_sender': ( 'FieldIndex', {} ),
+                #MeetingItem-related indexes
+                'getTreatUser': ( 'FieldIndex', {} )
+             }
+# Metadata to create in portal_catalog, it has to correspond to an index in indexInfo
+columnInfos = ( 'getCategory', 'getDestOrigin', 'getDestUsers', 'getRefcourrier',
+                'getTreatUser' )
 ##/code-section HEAD
 
 def isNotMeetingAndenneProfile(context):
@@ -59,6 +76,10 @@ def postInstall(context):
 
     logStep("postInstall", context)
     site = context.getSite()
+
+    # Create or update indexes
+    addOrUpdateIndexes(site, indexInfos)
+    addOrUpdateColumns(site, columnInfos)
 
     # Need to reinstall PloneMeeting after reinstalling MA workflows to re-apply wfAdaptations
     reinstallPloneMeeting(context, site)
@@ -92,6 +113,9 @@ def postInstall(context):
 
     # configure safe_html portal transform
     configureSafeHtml(context, site)
+
+    # adapt gestion-courrier directory
+    configureMailDirectory(context, site)
 
     # configure Products.cron4plone
     # add a call to @@run-docsplit-on-blobs that will run docsplit on a batch of
@@ -271,6 +295,24 @@ def configureSafeHtml(context, site):
                                                 'th': '1', 'thead': '1', 'tr': '1', 'tt': '1', 'u': '1', 'ul': '1' } )
     pt.reloadTransforms()
 
+def configureMailDirectory(context, site):
+    """
+       We adapt the gestion-courrier Folder object at install time. See _adaptFrontPage in PloneMeeting setuphandlers.py file.
+    """
+    if isNotMeetingAndenneProfile(context):
+        return
+
+    logStep("configureMailDirectory", context)
+    directory = getattr(site, 'gestion-courrier', None)
+    if not directory:
+        return
+
+    if directory.modified() - directory.created() < 0.000005:
+        if not directory.hasProperty('layout'):
+            directory.manage_addProperty('layout', 'mailfolder_redirect_view', 'string')
+        if not directory.hasProperty('meeting_config'):
+            directory.manage_addProperty('meeting_config', 'courrierfake', 'string')
+
 def installMeetingAndenne(context):
     """ Run the default profile before being able to run the Andenne profile"""
     if not isMeetingAndenneConfigureProfile(context):
@@ -279,6 +321,21 @@ def installMeetingAndenne(context):
     logStep("installMeetingAndenne", context)
     portal = context.getSite()
     portal.portal_setup.runAllImportStepsFromProfile('profile-Products.MeetingAndenne:default')
+
+def addToDoListTopics(context, site):
+    """
+       Add topics linked to MeetingConfigs to populate the ToDoList portlet
+    """
+    if not isMeetingAndenneConfigureProfile(context):
+        return
+
+    logStep("addToDoListTopics", context)
+    mcCollege = getattr(site.portal_plonemeeting, 'meeting-config-college')
+    mcCollege.setToDoListTopics(
+        [ getattr(mcCollege.topics, 'searchallitemsincopy'),
+          getattr(mcCollege.topics, 'searchitemstovalidate'),
+          getattr(mcCollege.topics, 'searchallitemstoadvice'),
+        ] )
 
 def initializeTool(context):
     '''Initialises the PloneMeeting tool based on information from the current
@@ -298,9 +355,11 @@ def finalizeInstance(context):
     if not isMeetingAndenneConfigureProfile(context):
         return
 
-    reorderSkinsLayers(context, context.getSite())
+    site = context.getSite()
+    addToDoListTopics(context, site)
+    reorderSkinsLayers(context, site)
     reorderCss(context)
-    reorderPortalTabs(context, context.getSite())
+    reorderPortalTabs(context, site)
 
 
 ##/code-section FOOT
