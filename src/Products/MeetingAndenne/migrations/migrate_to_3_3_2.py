@@ -4,6 +4,7 @@ import logging
 logger = logging.getLogger('MeetingAndenne')
 
 from Acquisition import aq_base
+from zExceptions import BadRequest
 
 from Products.CMFCore.utils import getToolByName
 
@@ -11,11 +12,28 @@ from Products.PloneMeeting.migrations import Migrator
 from Products.PloneMeeting.model.adaptations import performWorkflowAdaptations
 from Products.PloneMeeting.profiles import MeetingFileTypeDescriptor
 
-from Products.MeetingAndenne.profiles.andenne.import_data import collegeTemplates
+from Products.MeetingAndenne.profiles.andenne.import_data import collegeTemplates, councilTemplates, \
+                                                                    councilMeeting, council_meetingUsersTitles
 
 
 # The migration class ----------------------------------------------------------
 class Migrate_To_3_3_2(Migrator):
+
+    def _configureMeetingCouncil(self):
+        '''Configure the Council MeetingConfig.'''
+        logger.info('Configuring the Council MeetingConfigRemoving useless attribute \'initItemDecisionIfEmptyOnDecide\' of every MeetingConfigs...')
+        if 'meeting-config-council' not in self.portal.portal_plonemeeting.objectIds('MeetingConfig'):
+            mcProfilePath = [profile for profile in self.context.listProfileInfo() if 'id' in profile
+                             and profile['id'] == u'Products.MeetingAndenne:andenne'][0]['path']
+            try:
+                self.portal.portal_plonemeeting.createMeetingConfig(councilMeeting, source=mcProfilePath)
+                for cfg in self.portal.portal_plonemeeting.objectValues('MeetingConfig'):
+                    if cfg.id == 'meeting-config-council':
+                        for user in cfg.getMeetingUsers():
+                            user.setTitle(council_meetingUsersTitles.get(user.Title(), user.Title()))
+            except BadRequest, e:
+                logger.error("Council config already present: %s" % str(e))
+        logger.info('Done.')
 
     def _removeInitItemDecisionIfEmptyOnDecide(self):
         '''Remove the useless initItemDecisionIfEmptyOnDecide attribute from every
@@ -168,6 +186,7 @@ class Migrate_To_3_3_2(Migrator):
 
     def run(self):
         logger.info('Migrating to MeetingAndenne 3.3.2...')
+        self._configureMeetingCouncil()
         self._removeInitItemDecisionIfEmptyOnDecide()
         self._createPODTemplates()
         self._addAnnexesPVActions()
@@ -183,13 +202,14 @@ class Migrate_To_3_3_2(Migrator):
 def migrate(context):
     '''This migration function:
 
-       1)  Remove useless attribute 'initItemDecisionIfEmptyOnDecide' field from every meetingConfigs
-       2)  Recreate the used POD templates
-       3)  Add actions on MeetingItems used to add annexes on PVs
-       4)  Add MeetingItemTypes used with annexes on PVs
-       5)  Reapply modified workflow on MeetingItems
-       6)  Add a custom event to the list of item events that generates emails
-       7)  Add LastNumberInParliamentaryTerm field to every MeetingConfig and Meeting object
+       1)  Configure the Council MeetingConfig
+       2)  Remove useless attribute 'initItemDecisionIfEmptyOnDecide' field from every meetingConfigs
+       3)  Recreate the used POD templates
+       4)  Add actions on MeetingItems used to add annexes on PVs
+       5)  Add MeetingItemTypes used with annexes on PVs
+       6)  Reapply modified workflow on MeetingItems
+       7)  Add a custom event to the list of item events that generates emails
+       8)  Add LastNumberInParliamentaryTerm field to every MeetingConfig and Meeting object
     '''
     Migrate_To_3_3_2(context).run()
 # ------------------------------------------------------------------------------
