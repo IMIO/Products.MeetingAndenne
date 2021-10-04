@@ -21,16 +21,24 @@ class Migrate_To_3_3_2(Migrator):
 
     def _configureMeetingCouncil(self):
         '''Configure the Council MeetingConfig.'''
-        logger.info('Configuring the Council MeetingConfigRemoving useless attribute \'initItemDecisionIfEmptyOnDecide\' of every MeetingConfigs...')
+        logger.info('Configuring the Council MeetingConfig...')
         if 'meeting-config-council' not in self.portal.portal_plonemeeting.objectIds('MeetingConfig'):
             mcProfilePath = [profile for profile in self.context.listProfileInfo() if 'id' in profile
                              and profile['id'] == u'Products.MeetingAndenne:andenne'][0]['path']
             try:
+                ps = self.portal.portal_setup
+                ps.runImportStepFromProfile(u'profile-Products.MeetingAndenne:default', 'plone.app.registry')
+
                 self.portal.portal_plonemeeting.createMeetingConfig(councilMeeting, source=mcProfilePath)
                 for cfg in self.portal.portal_plonemeeting.objectValues('MeetingConfig'):
                     if cfg.id == 'meeting-config-council':
                         for user in cfg.getMeetingUsers():
                             user.setTitle(council_meetingUsersTitles.get(user.Title(), user.Title()))
+                        cfg.setToDoListTopics(
+                            [ getattr(cfg.topics, 'searchallitemsincopy'),
+                              getattr(cfg.topics, 'searchitemstovalidate'),
+                              getattr(cfg.topics, 'searchallitemstoadvice'),
+                            ] )
             except BadRequest, e:
                 logger.error("Council config already present: %s" % str(e))
         logger.info('Done.')
