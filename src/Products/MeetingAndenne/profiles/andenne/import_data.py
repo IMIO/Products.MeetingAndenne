@@ -551,7 +551,7 @@ groups = [
     GroupDescriptor('cabinet-costantini', 'Cabinet de Benjamin COSTANTINI', 'cab_costantini'),
     GroupDescriptor('cabinet-cruspin', 'Cabinet de Sandrine CRUSPIN', 'cab_cruspin'),
     GroupDescriptor('cabinet-havelange', 'Cabinet de Guy HAVELANGE', 'cab_havelange'),
-    GroupDescriptor('cabinet-leonard', 'Cabinet de Françoise LEONARD', 'cab_leonard'),
+    GroupDescriptor('cabinet-leonard-1', 'Cabinet de Françoise LEONARD', 'cab_leonard'),
     GroupDescriptor('cabinet-malisoux', "Cabinet d'Elisabeth MALISOUX", 'cab_malisoux'),
     GroupDescriptor('cabinet-sampaoli', 'Cabinet de Vincent SAMPAOLI', 'cab_sampaoli'),
     GroupDescriptor('cabinet-soree', 'Service des Archives', 'cab_soree'),
@@ -735,7 +735,7 @@ collegeMeeting.itemAutoSentToOtherMCStates = []
 collegeMeeting.useCopies = True
 collegeMeeting.selectableCopyGroups = [ 'a-l-e_observers', 'accueil-extra-scolaire_reviewers', 'archeologie-andennaise_mailviewers',
                                         'bibliotheque_reviewers', 'cabinet-du-bourgmestre_reviewers', 'cabinet-costantini_reviewers',
-                                        'cabinet-cruspin_reviewers', 'cabinet-havelange_reviewers', 'cabinet-leonard_reviewers',
+                                        'cabinet-cruspin_reviewers', 'cabinet-havelange_reviewers', 'cabinet-leonard-1_reviewers',
                                         'cabinet-malisoux_reviewers', 'cabinet-sampaoli_reviewers', 'cabinet-soree_reviewers',
                                         'centre-culturel_mailviewers', 'complexe-sportif_observers', 'cpas_mailviewers',
                                         'dag-citoyennete-et-loisirs_reviewers', 'dag-solidarites-et-transition_reviewers',
@@ -994,7 +994,7 @@ councilMeeting.itemAutoSentToOtherMCStates = []
 councilMeeting.useCopies = True
 councilMeeting.selectableCopyGroups = [ 'a-l-e_observers', 'accueil-extra-scolaire_reviewers', 'archeologie-andennaise_observers',
                                         'bibliotheque_reviewers', 'cabinet-du-bourgmestre_reviewers', 'cabinet-costantini_reviewers',
-                                        'cabinet-cruspin_reviewers', 'cabinet-havelange_reviewers', 'cabinet-leonard_reviewers',
+                                        'cabinet-cruspin_reviewers', 'cabinet-havelange_reviewers', 'cabinet-leonard-1_reviewers',
                                         'cabinet-malisoux_reviewers', 'cabinet-sampaoli_reviewers', 'cabinet-soree_reviewers',
                                         'centre-culturel_reviewers', 'complexe-sportif_reviewers', 'cpas_observers', 'cpas_mailviewers',
                                         'dag-citoyennete-et-loisirs_reviewers', 'dag-solidarites-et-transition_reviewers',
@@ -1166,8 +1166,8 @@ Conseiller23 = MeetingUserDescriptor('eddsar',
                                      duty = 'Conseiller',
                                      usages = ['assemblyMember', 'signer', 'voter', 'asker', ])
 dgen_mu = MeetingUserDescriptor('dgen',
-                                duty = 'Directeur Général',
-                                replacementDuty = "Directeur Général f.f.",
+                                duty = 'Directeur général',
+                                replacementDuty = "Directeur général f.f.",
                                 usages = ['assemblyMember', 'signer', ],
                                 signatureIsDefault = True)
 dgenadj_mu = MeetingUserDescriptor('dgenadj',
@@ -1186,10 +1186,11 @@ council_meetingUsersTitles = { 'claeer': 'Claude EERDEKENS', 'vinsam': 'Vincent 
                                 'etiser': 'Etienne SERMON', 'roscas': 'Rose SIMON-CASTELLAN', 'phimat': 'Philippe MATTART',
                                 'phiras': 'Philippe RASQUIN', 'chrmat': 'Christian MATTART', 'fratar': 'Françoise TARPATAKI',
                                 'flohal': 'Florence HALLEUX', 'mardie': 'Martine DIEUDONNE-OLIVIER', 'casluo': 'Cassandra LUONGO',
-                                'jawtaf': 'Jawad TAFRATA', 'carlom': 'Caroline LOMBA', 'chrbod': 'Christine BODART',
-                                'mluser': 'Marie-Luce SERESSIA', 'natfra': 'Natacha FRANCOIS', 'gwawil': 'Gwendoline WILLIQUET',
-                                'damlou': 'Damien LOUIS', 'hugdou': 'Hugues DOUMONT', 'natels': 'Nathalie ELSEN',
-                                'eddsar': 'Eddy SARTORI', 'dgen': 'Directeur général', 'dgenadj': 'Directeur général adjoint'
+                                'jawtaf': 'Jawad TAFRATA', 'kevgoo': 'Kévin GOOSSENS', 'carlom': 'Caroline LOMBA',
+                                'chrbod': 'Christine BODART', 'mluser': 'Marie-Luce SERESSIA', 'natfra': 'Natacha FRANCOIS',
+                                'gwewil': 'Gwendoline WILLIQUET', 'damlou': 'Damien LOUIS', 'hugdou': 'Hugues DOUMONT',
+                                'natels': 'Nathalie ELSEN', 'eddsar': 'Eddy SARTORI',
+                                'dgen': 'Directeur général', 'dgenadj': 'Directeur général adjoint'
 }
 
 council_powerobservers = PloneGroupDescriptor( 'meeting-config-council_powerobservers',
